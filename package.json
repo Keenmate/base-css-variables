@@ -1,0 +1,28 @@
+{
+  "name": "@keenmate/base-css-variables",
+  "version": "1.0.0",
+  "description": "Shared base layer of CSS custom properties (--base-*) for KeenMate web components",
+  "license": "MIT",
+  "author": "KeenMate",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/keenmate/base-css-variables.git"
+  },
+  "keywords": [
+    "css-variables",
+    "custom-properties",
+    "theme",
+    "design-tokens",
+    "keenmate"
+  ],
+  "type": "module",
+  "style": "./base-variables.css",
+  "exports": {
+    ".": "./base-variables.css",
+    "./base-variables.css": "./base-variables.css"
+  },
+  "files": [
+    "base-variables.css",
+    "README.md"
+  ]
+}

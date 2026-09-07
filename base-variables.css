@@ -1,0 +1,146 @@
+/**
+ * KeenMate Base CSS Variables
+ * ---------------------------------------------------------------------------
+ * The shared "base layer" (`--base-*`) consumed by all KeenMate web components
+ * (web-multiselect, web-daterangepicker, web-grid, web-treeview, ...).
+ *
+ * Each component exposes its own prefixed variables (--ms-*, --drp-*, --wg-*, …)
+ * that cascade from these `--base-*` values. Override any `--base-*` variable to
+ * re-theme every component at once.
+ *
+ * Light and dark values are provided via CSS `light-dark()`. Activation:
+ *   - Automatic: follows the OS setting via `color-scheme: light dark` below.
+ *   - Manual:    set `color-scheme: light` or `color-scheme: dark` on any
+ *                ancestor, or use the `[data-theme]` rules at the bottom.
+ *
+ * Values below are the KeenMate default theme
+ * (background #ffffff/#1a1a1a, text #1a1a1a/#e5e5e5, accent #3b82f6).
+ */
+
+:root {
+  color-scheme: light dark;
+
+  /* ======================================================================
+   * ACCENT COLORS
+   * ==================================================================== */
+  --base-accent-color: #3b82f6;
+  --base-accent-color-hover: light-dark(#0b63f3, #6ca1f8);
+  --base-accent-color-active: light-dark(#0a59da, #84b1f9);
+  --base-accent-color-light: light-dark(rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.15));
+  --base-accent-color-light-hover: light-dark(rgba(59, 130, 246, 0.15), rgba(59, 130, 246, 0.2));
+
+  /* ======================================================================
+   * BACKGROUND / SURFACE COLORS
+   * ==================================================================== */
+  --base-main-bg: light-dark(#ffffff, #1a1a1a);          /* Main surface (inputs, dropdowns) */
+  --base-elevated-bg: light-dark(#f7f7f7, #272727);      /* Headers, toolbars, popovers */
+  --base-hover-bg: light-dark(#f2f2f2, #2e2e2e);         /* Hover state for any surface */
+  --base-active-bg: light-dark(#dfdfdf, #363636);        /* Active/pressed surface */
+  --base-inverse-bg: light-dark(#313131, #d1d1d1);       /* Inverse surface (tooltip fallback) */
+
+  /* ======================================================================
+   * TEXT COLORS (FluentUI-style hierarchy)
+   * ==================================================================== */
+  --base-text-color-1: light-dark(#1a1a1a, #e5e5e5);     /* Headers, titles, high-emphasis */
+  --base-text-color-2: light-dark(#3c3c3c, #c7c7c7);     /* Body text, labels */
+  --base-text-color-3: light-dark(#767676, #949494);     /* Secondary content, subtitles */
+  --base-text-color-4: light-dark(#a3a3a3, #6b6b6b);     /* Hints, placeholders, captions */
+  --base-text-color-on-accent: #000000;                  /* Text on accent backgrounds */
+  --base-text-inverted: light-dark(#ffffff, #000000);    /* Inverse of main text */
+
+  /* ======================================================================
+   * BORDERS
+   * ==================================================================== */
+  --base-border-color: light-dark(#e0e0e0, #404040);
+  --base-border: 1px solid light-dark(#e0e0e0, #404040);
+
+  /* ======================================================================
+   * INPUT FIELDS
+   * ==================================================================== */
+  --base-input-bg: light-dark(#ffffff, #1a1a1a);
+  --base-input-color: light-dark(#1a1a1a, #e5e5e5);
+  --base-input-border: 1px solid light-dark(#e0e0e0, #404040);
+  --base-input-border-hover: 1px solid light-dark(#c7c7c7, #5a5a5a);
+  --base-input-border-focus: 1px solid #3b82f6;
+  --base-input-placeholder-color: light-dark(#a3a3a3, #6b6b6b);
+  --base-input-bg-disabled: light-dark(rgba(26, 26, 26, 0.03), rgba(229, 229, 229, 0.05));
+  --base-disabled-bg: light-dark(rgba(26, 26, 26, 0.03), rgba(229, 229, 229, 0.05));
+
+  /* ======================================================================
+   * DROPDOWN / POPOVER
+   * ==================================================================== */
+  --base-dropdown-bg: light-dark(#ffffff, #1a1a1a);
+  --base-dropdown-border: 1px solid light-dark(#e0e0e0, #404040);
+  --base-dropdown-box-shadow: 0 8px 16px light-dark(rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.6));
+
+  /* ======================================================================
+   * TOOLTIP
+   * ==================================================================== */
+  --base-tooltip-bg: light-dark(#333333, #4d4d4d);
+  --base-tooltip-text-color: light-dark(#ffffff, #e5e5e5);
+  --base-tooltip-color: light-dark(#ffffff, #e5e5e5);    /* Alias used by web-grid */
+
+  /* ======================================================================
+   * STATUS COLORS (danger / success / warning)
+   * ==================================================================== */
+  --base-danger-color: #dc2626;
+  --base-danger-bg: #ef4444;
+  --base-danger-bg-light: light-dark(rgba(220, 38, 38, 0.1), rgba(220, 38, 38, 0.15));
+  --base-success-bg: #10b981;
+  --base-success-color: #ffffff;
+  --base-warning-bg: #f59e0b;
+  --base-warning-color: #1a1a1a;
+
+  /* Misc component color */
+  --base-checkbox-border-color: #8f8f8f;
+
+  /* ======================================================================
+   * TYPOGRAPHY
+   * ==================================================================== */
+  --base-font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  /* Font sizes — unitless multipliers, used as calc(var(--base-font-size-*) * <rem-base>) */
+  --base-font-size-2xs: 1;
+  --base-font-size-xs: 1.2;
+  --base-font-size-sm: 1.4;
+  --base-font-size-base: 1.6;
+  --base-font-size-lg: 1.8;
+  --base-font-size-xl: 2;
+  --base-font-size-2xl: 2.4;
+
+  /* Font weights */
+  --base-font-weight-normal: 400;
+  --base-font-weight-medium: 500;
+  --base-font-weight-semibold: 600;
+
+  /* Line heights */
+  --base-line-height-tight: 1.25;
+  --base-line-height-normal: 1.5;
+  --base-line-height-relaxed: 1.75;
+
+  /* ======================================================================
+   * SIZING — unitless multipliers (see font sizes note above)
+   * ==================================================================== */
+  --base-border-radius-sm: 0.4;
+  --base-border-radius-md: 0.6;
+  --base-border-radius-lg: 0.8;
+
+  --base-input-size-xs-height: 3.1;   /* 31px at 10px rem base */
+  --base-input-size-sm-height: 3.3;   /* 33px */
+  --base-input-size-md-height: 3.5;   /* 35px */
+  --base-input-size-lg-height: 3.8;   /* 38px */
+  --base-input-size-xl-height: 4.1;   /* 41px */
+}
+
+/* ---------------------------------------------------------------------------
+ * Manual theme control
+ * `light-dark()` follows `color-scheme`. These helpers let you force a theme
+ * on a subtree regardless of the OS setting.
+ * ------------------------------------------------------------------------- */
+[data-theme="light"] {
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+}
