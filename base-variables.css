@@ -32,7 +32,7 @@
   /* ======================================================================
    * BACKGROUND / SURFACE COLORS
    * ==================================================================== */
-  --base-main-bg: light-dark(#ffffff, #1a1a1a);          /* Main surface (inputs, dropdowns) */
+  --base-main-bg: light-dark(#ffffff, #1a1a1a);          /* Global/primary surface — app shell, grid, panels */
   --base-elevated-bg: light-dark(#f7f7f7, #272727);      /* Headers, toolbars, popovers */
   --base-hover-bg: light-dark(#f2f2f2, #2e2e2e);         /* Hover state for any surface */
   --base-active-bg: light-dark(#dfdfdf, #363636);        /* Active/pressed surface */

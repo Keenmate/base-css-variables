@@ -34,6 +34,54 @@ or in CSS / HTML:
 <link rel="stylesheet" href="node_modules/@keenmate/base-css-variables/base-variables.css">
 ```
 
+## How it works
+
+The base layer is a set of **semantic design tokens**, not raw colors. Several
+tokens may resolve to the *same default value* yet exist as separate variables so
+each **role** can be themed independently.
+
+### Semantic roles that overlap by default
+
+`--base-main-bg` and `--base-input-bg` both default to white (light) / near-black
+(dark), but they mean different things:
+
+| Token | Meaning | Example component consumers |
+|-------|---------|-----------------------------|
+| `--base-main-bg` | The **global / primary surface** — the canvas an app shell, grid, dropzone or panel paints itself on | `--wg-surface-1` (grid surface), `--drp-primary-bg` (calendar panel), `--ms-hint-bg`, `--ms-actions-bg` |
+| `--base-input-bg` | The background of **form fields** specifically | `--ms-input-bg`, `--drp-input-bg`, `--wg-input-bg` |
+
+Because they are separate variables, you can, for example, keep a grid or dropzone
+on a plain page background while giving input fields a subtly tinted fill:
+
+```css
+:root {
+  --base-main-bg: #ffffff;   /* page / grid / dropzone canvas */
+  --base-input-bg: #f7f9fc;  /* inputs stand out slightly      */
+}
+```
+
+If you only set `--base-main-bg`, inputs keep their own default — they don't
+inherit from it. Set both when you want them to match.
+
+### Surface hierarchy
+
+Background surfaces layer outward from the canvas; each step is a little more
+prominent:
+
+```
+--base-main-bg  →  --base-elevated-bg  →  --base-hover-bg  →  --base-active-bg
+```
+
+- **main** — base canvas (page, grid, panel, dropzone)
+- **elevated** — raised areas: headers, toolbars, dropdowns, popovers
+- **hover** — pointer hover on a surface (rows, options)
+- **active** — pressed / selected
+- **inverse** — high-contrast surface, used for tooltips
+
+Role-specific surfaces (`--base-input-bg`, `--base-dropdown-bg`, `--base-tooltip-bg`)
+default to values in this scale but can be retargeted on their own — that's the
+whole point of keeping them as distinct tokens.
+
 ## Theming
 
 Override any `--base-*` variable in your own `:root` (or any scope) — the value
