@@ -82,6 +82,55 @@ Role-specific surfaces (`--base-input-bg`, `--base-dropdown-bg`, `--base-tooltip
 default to values in this scale but can be retargeted on their own — that's the
 whole point of keeping them as distinct tokens.
 
+## The layer pipeline (pure-css → pure-admin)
+
+`--base-*` is the **single knob**. This package is the canonical contract; its
+consumers never define a parallel source of truth, they derive from it:
+
+- **[`@keenmate/pure-css`](https://www.npmjs.com/package/@keenmate/pure-css)** mirrors
+  this token list into SCSS (`$base-*`), adds theme derivation + its own `--pc-*`
+  foundation tokens, and ships the grid / utilities / app-shell.
+- **`@keenmate/pure-admin-core`** builds its component tokens (`--pc-*`) on top.
+- **KeenMate web components** read `--base-*` directly (with inline fallbacks).
+
+Every `--pc-*` is wired as `var(--base-*, <fallback>)`, so overriding **one**
+`--base-*` re-themes pure-admin components *and* the web components together.
+Traced end-to-end for the accent:
+
+```
+LAYER 0  contract (THIS file, CSS)       :root { --base-accent-color: #0ea5e9 }
+            │  pure-css mirrors the list into SCSS
+LAYER 1  pure-css source (SCSS)          $base-accent-color: #0ea5e9 !default;   ◀─ a THEME overrides here
+            │  derive
+LAYER 2  pure-css framework var (SCSS)   $accent-color: $base-accent-color;       (serves only as the build fallback)
+            │  emit (two mixins)
+LAYER 3  pure-css emit  ──▶ CSS          --base-accent-color: #0ea5e9;                   ◀─ RAIL A · the knob
+                                         --pc-accent: var(--base-accent-color, #0ea5e9)  ◀─ RAIL B · pure-admin's token
+            │
+LAYER 4  pure-admin-core (CSS)           --pc-accent-light, --pc-accent-hover,
+                                         --pc-link-color: var(--pc-accent), …
+            │
+LAYER 5  consumers
+            pure-admin components         background: var(--pc-accent-light);
+            web components                --ms-accent-color: var(--base-accent-color, #3b82f6);
+```
+
+- **RAIL A** (`--base-accent-color`) is the knob; **RAIL B** (`--pc-accent`) is
+  `var(--base-accent-color, …)`, so at runtime it simply *is* the base value — the
+  `<fallback>` only fires if RAIL A is ever missing (it isn't, once this file or a
+  theme is loaded).
+- There is **no `$pc-*` SCSS variable**. The `pc` layer is born at emission as a CSS
+  property pointing back at `--base-*`; nothing to author in SCSS.
+
+| Override… | Where | Effect |
+|---|---|---|
+| `--base-accent-color` | any `:root` / `.pc-mode-*` / `[data-*]` scope (runtime) | **everything** downstream, live — pure-admin **and** web components |
+| `$base-accent-color` | pure-css SCSS (build) | the default baked into `base.css` + every `--pc-*` fallback |
+| `--pc-accent` | a single `--pc-*` (runtime) | pure-admin only — use for a deliberate pure-admin-only divergence |
+
+That middle-less "one knob" row is the whole design: a theme (or a time-of-day
+`[data-daypart]` scope) re-sets `--base-*` and the entire `--pc-*` layer re-resolves.
+
 ## Theming
 
 Override any `--base-*` variable in your own `:root` (or any scope) — the value
@@ -179,13 +228,13 @@ For example `--ms-primary-bg` reads `--base-hover-bg`, and `--drp-primary-bg` re
 ### Status colors
 | Variable | Purpose |
 |----------|---------|
-| `--base-danger-color` | Danger / error color |
-| `--base-danger-bg` | Danger background |
-| `--base-danger-bg-light` | Subtle danger background |
-| `--base-success-bg` | Success background |
-| `--base-success-color` | Text on success background |
-| `--base-warning-bg` | Warning background |
-| `--base-warning-color` | Text on warning background |
+| `--base-<role>-color` | Role **fill identity** (vivid), role ∈ success/danger/warning/info |
+| `--base-<role>-bg` | Solid role fill (= `-color`) |
+| `--base-<role>-color-hover` | Role fill, hover |
+| `--base-<role>-bg-light` / `-bg-subtle` | Subtle role tints |
+| `--base-<role>-border` | Role border tint |
+| `--base-<role>-text` | Role as **foreground on a light surface** (text/links) |
+| `--base-text-on-<role>` | Readable text **on** the role fill |
 | `--base-checkbox-border-color` | Checkbox border |
 
 ### Typography

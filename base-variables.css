@@ -73,7 +73,7 @@
   --base-text-color-3: light-dark(#94a3b8, #64748b);     /* Secondary content, subtitles */
   --base-text-color-4: light-dark(#cbd5e1, #475569);     /* Hints, placeholders, captions */
   --base-text-color-on-accent: #ffffff;                  /* Text on accent backgrounds */
-  --base-text-inverted: #ffffff;                         /* Inverse of main text */
+  --base-text-inverted: light-dark(#ffffff, #1a1a1a);    /* Inverse of main text */
 
   /* "Foreground on a role" convention = --base-text-on-<role> */
   --base-text-on-primary: var(--base-text-color-on-accent);
@@ -198,12 +198,13 @@
   --base-border-radius-md: 0.6;
   --base-border-radius-lg: 0.8;
 
-  /* Corporate runs taller inputs/buttons to balance its wider default font */
-  --base-input-size-xs-height: 3.4;   /* 34px at 10px rem base */
-  --base-input-size-sm-height: 3.6;   /* 36px */
-  --base-input-size-md-height: 3.8;   /* 38px */
-  --base-input-size-lg-height: 4.1;   /* 41px */
-  --base-input-size-xl-height: 4.4;   /* 44px */
+  /* Neutral heights. (Corporate bumps these +0.3 for its wider font — a theme
+   * ergonomic tweak, not base identity, so the canonical default stays neutral.) */
+  --base-input-size-xs-height: 3.1;   /* 31px at 10px rem base */
+  --base-input-size-sm-height: 3.3;   /* 33px */
+  --base-input-size-md-height: 3.5;   /* 35px */
+  --base-input-size-lg-height: 3.8;   /* 38px */
+  --base-input-size-xl-height: 4.1;   /* 41px */
 
   /* Rem base for the unitless multipliers above: calc(<multiplier> * var(--base-rem)) */
   --base-rem: 1rem;
