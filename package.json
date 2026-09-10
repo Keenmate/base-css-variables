@@ -23,6 +23,11 @@
   },
   "files": [
     "base-variables.css",
-    "README.md"
-  ]
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
 }

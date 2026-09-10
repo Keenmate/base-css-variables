@@ -10,6 +10,11 @@ that **cascade from these `--base-*` values**. Define the base layer once and ev
 component picks up a consistent, coordinated theme. Override a single `--base-*`
 variable and the change propagates everywhere.
 
+## What's New in 1.0.0
+
+- **Contract — `base-variables.css` is the complete `--base-*` superset** — this file is now the single canonical source of truth (LAYER 0) that carries every token any KeenMate consumer reads: accent/primary + secondary roles, the surface elevation ladder (`--base-page-bg` < `--base-subtle-bg` < `--base-main-bg` < `--base-elevated-bg` plus the hover/active/disabled state axis), the `--base-text-color-1..4` hierarchy with `--base-text-on-*` / `--base-text-inverted`, inputs, dropdown/popover, tooltip, the four status roles in the `-color`/`-bg`/`-text`/`text-on-*` model, typography + sizing/spacing multipliers, the shadow/motion/z-index scales, mask-friendly Lucide icons, and the 1–9 brand palette slots. `@keenmate/pure-css` mirrors this exact list into SCSS (`$base-*`), so the two must stay in sync.
+- **Theme — default rebased onto pure-admin "Corporate"** — the out-of-the-box palette is now Corporate (sky-blue `#0ea5e9` accent, slate text/surfaces, cyan info), with light and dark values paired through CSS `light-dark()`. `:root` sets `color-scheme: light dark` so it follows the OS by default, and `[data-theme="light"|"dark"]` forces a mode on any subtree. Mode-invariant tokens (icons, the spacing/shadow/motion/z-index scales, sizing/typography multipliers, palette slots) stay single values.
+
 ## Install
 
 ```bash
