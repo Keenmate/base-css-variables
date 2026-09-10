@@ -8,10 +8,17 @@
  * that cascade from these `--base-*` values. Override any `--base-*` variable to
  * re-theme every component at once.
  *
+ * THIS FILE IS THE CANONICAL `--base-*` CONTRACT (the parent). `@keenmate/pure-css`
+ * mirrors this token list into SCSS (`$base-*`) — adding theme derivation and the
+ * `.pc-mode-*` class model — but must not add tokens this file lacks. Keep in sync.
+ *
  * Light and dark values are provided via CSS `light-dark()`. Activation:
  *   - Automatic: follows the OS setting via `color-scheme: light dark` below.
  *   - Manual:    set `color-scheme: light` or `color-scheme: dark` on any
  *                ancestor, or use the `[data-theme]` rules at the bottom.
+ *
+ * Mode-invariant tokens (icons, the spacing/shadow/motion/z-index scales, sizes,
+ * typography multipliers) are single values — no `light-dark()`.
  *
  * Values below are the KeenMate default theme
  * (background #ffffff/#1a1a1a, text #1a1a1a/#e5e5e5, accent #3b82f6).
@@ -21,7 +28,9 @@
   color-scheme: light dark;
 
   /* ======================================================================
-   * ACCENT COLORS
+   * ACCENT / PRIMARY COLORS
+   * `primary` is the canonical role name; `accent` is the legacy alias both
+   * are kept so older and newer consumers resolve. accent stays the source.
    * ==================================================================== */
   --base-accent-color: #3b82f6;
   --base-accent-color-hover: light-dark(#0b63f3, #6ca1f8);
@@ -29,14 +38,34 @@
   --base-accent-color-light: light-dark(rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.15));
   --base-accent-color-light-hover: light-dark(rgba(59, 130, 246, 0.15), rgba(59, 130, 246, 0.2));
 
+  --base-primary-color: var(--base-accent-color);
+  --base-primary-color-hover: var(--base-accent-color-hover);
+  --base-primary-color-active: var(--base-accent-color-active);
+  --base-primary-color-light: var(--base-accent-color-light);
+  --base-primary-color-light-hover: var(--base-accent-color-light-hover);
+
+  /* ======================================================================
+   * SECONDARY ROLE (neutral) — NEW (mirrors pure-css $base-secondary-*)
+   * ==================================================================== */
+  --base-secondary-color: light-dark(#6c757d, #9aa0a6);
+  --base-secondary-color-hover: light-dark(#545b62, #b0b6bd);
+
   /* ======================================================================
    * BACKGROUND / SURFACE COLORS
+   * Elevation ladder: page (canvas) < subtle (recessed) < main (content) <
+   * elevated (raised). hover/active/disabled are the interaction-state axis.
    * ==================================================================== */
-  --base-main-bg: light-dark(#ffffff, #1a1a1a);          /* Global/primary surface — app shell, grid, panels */
-  --base-elevated-bg: light-dark(#f7f7f7, #272727);      /* Headers, toolbars, popovers */
+  --base-page-bg: light-dark(#f5f5f5, #141414);          /* Canvas/backdrop below the content — NEW */
+  --base-main-bg: light-dark(#ffffff, #1a1a1a);          /* Content surface — app shell, grid, panels */
+  --base-subtle-bg: light-dark(#ebebeb, #242424);        /* Recessed/inset surface (code, wells) — NEW */
+  --base-elevated-bg: light-dark(#f7f7f7, #272727);      /* Raised surface — headers, toolbars, popovers */
+  --base-inverse-bg: light-dark(#313131, #d1d1d1);       /* Inverse surface (tooltip fallback) */
+  --base-overlay-bg: rgba(0, 0, 0, 0.5);                 /* Modal/overlay scrim — NEW */
+  --base-shadow-color: light-dark(rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.6));  /* NEW */
+
   --base-hover-bg: light-dark(#f2f2f2, #2e2e2e);         /* Hover state for any surface */
   --base-active-bg: light-dark(#dfdfdf, #363636);        /* Active/pressed surface */
-  --base-inverse-bg: light-dark(#313131, #d1d1d1);       /* Inverse surface (tooltip fallback) */
+  --base-disabled-bg: light-dark(#f1f3f5, #202020);      /* Disabled surface (own low-contrast tone) */
 
   /* ======================================================================
    * TEXT COLORS (FluentUI-style hierarchy)
@@ -45,26 +74,34 @@
   --base-text-color-2: light-dark(#3c3c3c, #c7c7c7);     /* Body text, labels */
   --base-text-color-3: light-dark(#767676, #949494);     /* Secondary content, subtitles */
   --base-text-color-4: light-dark(#a3a3a3, #6b6b6b);     /* Hints, placeholders, captions */
-  --base-text-color-on-accent: #000000;                  /* Text on accent backgrounds */
+  --base-text-color-on-accent: #000000;                  /* Text on accent backgrounds (black wins contrast on #3b82f6) */
   --base-text-inverted: light-dark(#ffffff, #000000);    /* Inverse of main text */
+
+  /* "Foreground on a role" convention = --base-text-on-<role> — NEW */
+  --base-text-on-primary: var(--base-text-color-on-accent);
+  --base-text-on-secondary: #ffffff;
 
   /* ======================================================================
    * BORDERS
    * ==================================================================== */
+  --base-border-width: 1px;                              /* Shared stroke width the shorthands compose from — NEW */
   --base-border-color: light-dark(#e0e0e0, #404040);
-  --base-border: 1px solid light-dark(#e0e0e0, #404040);
+  --base-border: var(--base-border-width) solid light-dark(#e0e0e0, #404040);
+  --base-checkbox-border-color: #8f8f8f;
 
   /* ======================================================================
    * INPUT FIELDS
    * ==================================================================== */
   --base-input-bg: light-dark(#ffffff, #1a1a1a);
   --base-input-color: light-dark(#1a1a1a, #e5e5e5);
+  --base-input-border-color: light-dark(#e0e0e0, #404040);  /* colour alone — NEW */
   --base-input-border: 1px solid light-dark(#e0e0e0, #404040);
   --base-input-border-hover: 1px solid light-dark(#c7c7c7, #5a5a5a);
   --base-input-border-focus: 1px solid #3b82f6;
   --base-input-placeholder-color: light-dark(#a3a3a3, #6b6b6b);
   --base-input-bg-disabled: light-dark(rgba(26, 26, 26, 0.03), rgba(229, 229, 229, 0.05));
-  --base-disabled-bg: light-dark(rgba(26, 26, 26, 0.03), rgba(229, 229, 229, 0.05));
+  --base-input-clear-color: light-dark(#767676, #949494);   /* NEW (= text-3) */
+  --base-input-clear-bg-hover: var(--base-hover-bg);        /* NEW */
 
   /* ======================================================================
    * DROPDOWN / POPOVER
@@ -81,23 +118,62 @@
   --base-tooltip-color: light-dark(#ffffff, #e5e5e5);    /* Alias used by web-grid */
 
   /* ======================================================================
-   * STATUS COLORS (danger / success / warning)
+   * CONTEXTUAL / ROLE COLORS — success / danger / warning / info
+   * Model: `-color` = vivid FILL identity; `-bg` = solid fill (= color); `-text`
+   * = foreground on a light surface; `text-on-*` = text ON the fill. Tints
+   * (-bg-light/-bg-subtle/-border) derive from the identity hue.
+   * NEW: full token sets + info role + the fill/text split (previously
+   * `success-color`/`warning-color` held TEXT values — corrected to the fill).
    * ==================================================================== */
-  --base-danger-color: #dc2626;
-  --base-danger-bg: #ef4444;
-  --base-danger-bg-light: light-dark(rgba(220, 38, 38, 0.1), rgba(220, 38, 38, 0.15));
+  /* success (#10b981) */
+  --base-success-color: #10b981;
   --base-success-bg: #10b981;
-  --base-success-color: #ffffff;
-  --base-warning-bg: #f59e0b;
-  --base-warning-color: #1a1a1a;
+  --base-success-color-hover: #0e9f70;
+  --base-success-bg-light: light-dark(rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.15));
+  --base-success-bg-subtle: light-dark(rgba(16, 185, 129, 0.08), rgba(16, 185, 129, 0.12));
+  --base-success-border: rgba(16, 185, 129, 0.2);
+  --base-success-text: light-dark(#0f7a52, #34d399);
+  --base-success-text-light: light-dark(#d4edda, #0e9f70);
+  --base-text-on-success: #ffffff;
 
-  /* Misc component color */
-  --base-checkbox-border-color: #8f8f8f;
+  /* danger (#ef4444 fill / #dc2626 strong) */
+  --base-danger-color: #ef4444;
+  --base-danger-bg: #ef4444;
+  --base-danger-color-hover: #dc2626;
+  --base-danger-bg-light: light-dark(rgba(220, 38, 38, 0.1), rgba(220, 38, 38, 0.15));
+  --base-danger-bg-subtle: light-dark(rgba(220, 38, 38, 0.08), rgba(220, 38, 38, 0.12));
+  --base-danger-border: rgba(220, 38, 38, 0.2);
+  --base-danger-text: light-dark(#b91c1c, #f87171);
+  --base-danger-text-light: light-dark(#f8d7da, #dc2626);
+  --base-text-on-danger: #ffffff;
+
+  /* warning (#f59e0b) */
+  --base-warning-color: #f59e0b;
+  --base-warning-bg: #f59e0b;
+  --base-warning-color-hover: #d98906;
+  --base-warning-bg-light: light-dark(rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.15));
+  --base-warning-bg-subtle: light-dark(rgba(245, 158, 11, 0.08), rgba(245, 158, 11, 0.12));
+  --base-warning-border: rgba(245, 158, 11, 0.2);
+  --base-warning-text: light-dark(#92610a, #fbbf24);
+  --base-warning-text-light: light-dark(#fff3cd, #d98906);
+  --base-text-on-warning: #1a1a1a;                       /* dark text on amber */
+
+  /* info (#17a2b8) — NEW role */
+  --base-info-color: #17a2b8;
+  --base-info-bg: #17a2b8;
+  --base-info-color-hover: #138496;
+  --base-info-bg-light: light-dark(rgba(23, 162, 184, 0.1), rgba(23, 162, 184, 0.15));
+  --base-info-bg-subtle: light-dark(rgba(23, 162, 184, 0.08), rgba(23, 162, 184, 0.12));
+  --base-info-border: rgba(23, 162, 184, 0.2);
+  --base-info-text: light-dark(#0e7490, #22d3ee);
+  --base-info-text-light: light-dark(#d1ecf1, #138496);
+  --base-text-on-info: #ffffff;
 
   /* ======================================================================
    * TYPOGRAPHY
    * ==================================================================== */
   --base-font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --base-font-family-mono: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 
   /* Font sizes — unitless multipliers, used as calc(var(--base-font-size-*) * <rem-base>) */
   --base-font-size-2xs: 1;
@@ -112,6 +188,7 @@
   --base-font-weight-normal: 400;
   --base-font-weight-medium: 500;
   --base-font-weight-semibold: 600;
+  --base-font-weight-bold: 700;
 
   /* Line heights */
   --base-line-height-tight: 1.25;
@@ -130,6 +207,92 @@
   --base-input-size-md-height: 3.5;   /* 35px */
   --base-input-size-lg-height: 3.8;   /* 38px */
   --base-input-size-xl-height: 4.1;   /* 41px */
+
+  /* Rem base for the unitless multipliers above: calc(<multiplier> * var(--base-rem)) */
+  --base-rem: 1rem;
+
+  /* ======================================================================
+   * SPACING SCALE — unitless multipliers, calc(var(--base-space-*) * var(--base-rem)) — NEW
+   * ==================================================================== */
+  --base-space-xs: 0.4;
+  --base-space-sm: 0.8;
+  --base-space-md: 1.2;
+  --base-space-base: 1.6;
+  --base-space-lg: 2.4;
+  --base-space-xl: 3.2;
+  --base-space-2xl: 4.8;
+
+  /* ======================================================================
+   * ELEVATION / SHADOW SCALE — colour from --base-shadow-color so it themes — NEW
+   * ==================================================================== */
+  --base-shadow-sm: 0 1px 3px var(--base-shadow-color);
+  --base-shadow-md: 0 2px 8px var(--base-shadow-color);
+  --base-shadow-lg: 0 4px 12px var(--base-shadow-color);
+
+  /* ======================================================================
+   * MOTION — durations + easings — NEW
+   * ==================================================================== */
+  --base-duration-fast: 0.1s;
+  --base-duration-normal: 0.15s;
+  --base-duration-medium: 0.25s;
+  --base-duration-slow: 0.3s;
+  --base-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --base-ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --base-ease-in: cubic-bezier(0.4, 0, 1, 1);
+
+  /* ======================================================================
+   * Z-INDEX SCALE — generic stacking tiers for overlay coordination — NEW
+   * ==================================================================== */
+  --base-z-dropdown: 7500;
+  --base-z-modal-backdrop: 6000;
+  --base-z-modal: 7000;
+  --base-z-popover: 7600;
+  --base-z-toast: 8000;
+  --base-z-tooltip: 9000;
+
+  /* ======================================================================
+   * ICONS — mask-friendly SVG glyphs (Lucide defaults), rendered via
+   * `mask: var(--base-icon-*); background: currentColor`. Mode-invariant. — NEW
+   * Two disclosure models: chevron ROTATES one glyph (points right, rotate 90°
+   * when open); expand/collapse SWAP two glyphs (+ collapsed, − open). carets
+   * are STATIC (swap up/down, never rotate). close/clear/remove share the ✕
+   * (clear & remove follow close); delete is a DESTRUCTIVE trash, not an ✕.
+   * ==================================================================== */
+  --base-icon-chevron: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22m9 18 6-6-6-6%22/%3E%3C/svg%3E");
+  --base-icon-caret-down: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22%3E%3Cpath fill=%22%23000%22 d=%22M12 15 6 9h12z%22/%3E%3C/svg%3E");
+  --base-icon-caret-up: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22%3E%3Cpath fill=%22%23000%22 d=%22M12 9 6 15h12z%22/%3E%3C/svg%3E");
+  --base-icon-close: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M18 6 6 18%22/%3E%3Cpath d=%22m6 6 12 12%22/%3E%3C/svg%3E");
+  --base-icon-clear: var(--base-icon-close);             /* field-clear — follows close */
+  --base-icon-remove: var(--base-icon-close);            /* item take-out (non-destructive) — follows close */
+  --base-icon-expand: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M5 12h14%22/%3E%3Cpath d=%22M12 5v14%22/%3E%3C/svg%3E");
+  --base-icon-collapse: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M5 12h14%22/%3E%3C/svg%3E");
+  --base-icon-add: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M5 12h14%22/%3E%3Cpath d=%22M12 5v14%22/%3E%3C/svg%3E");
+  --base-icon-edit: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z%22/%3E%3C/svg%3E");
+  --base-icon-delete: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M3 6h18%22/%3E%3Cpath d=%22M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2%22/%3E%3Cpath d=%22M10 11v6%22/%3E%3Cpath d=%22M14 11v6%22/%3E%3C/svg%3E");
+  --base-icon-search: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Ccircle cx=%2211%22 cy=%2211%22 r=%228%22/%3E%3Cpath d=%22m21 21-4.3-4.3%22/%3E%3C/svg%3E");
+
+  /* ======================================================================
+   * THEME PALETTE SLOTS (1–9) + paired contrast text — NEW
+   * Arbitrary branded / data-viz slots. Empty by default; a theme fills them.
+   * ==================================================================== */
+  --base-color-1: transparent;
+  --base-color-2: transparent;
+  --base-color-3: transparent;
+  --base-color-4: transparent;
+  --base-color-5: transparent;
+  --base-color-6: transparent;
+  --base-color-7: transparent;
+  --base-color-8: transparent;
+  --base-color-9: transparent;
+  --base-color-1-text: #ffffff;
+  --base-color-2-text: #ffffff;
+  --base-color-3-text: #ffffff;
+  --base-color-4-text: #ffffff;
+  --base-color-5-text: #ffffff;
+  --base-color-6-text: #ffffff;
+  --base-color-7-text: #ffffff;
+  --base-color-8-text: #ffffff;
+  --base-color-9-text: #ffffff;
 }
 
 /* ---------------------------------------------------------------------------
