@@ -6,7 +6,7 @@
   "author": "KeenMate",
   "repository": {
     "type": "git",
-    "url": "https://github.com/keenmate/base-css-variables.git"
+    "url": "git+https://github.com/keenmate/base-css-variables.git"
   },
   "keywords": [
     "css-variables",
