@@ -3,6 +3,17 @@
 All notable changes to `@keenmate/base-css-variables` are documented here. Format based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.0.1] — 2026-09-12 [PUBLISHED]
+
+### Added
+
+- **Three new mask-friendly Lucide icon tokens.** `--base-icon-filter` (funnel) for filter
+  affordances, plus the checkbox/tree-node selection state pair `--base-icon-check` (SELECTED —
+  a tick) and `--base-icon-indeterminate` (PARTIALLY selected — the tri-state parent state).
+  Selection stays a distinct knob from disclosure (`--base-icon-expand`/`--base-icon-collapse`),
+  so one can be retargeted without moving the other. `@keenmate/pure-css` already mirrors all
+  three as `$base-icon-*`.
+
 ## [1.0.0] — 2026-09-10
 
 The **canonical `--base-*` contract** release. `base-variables.css` is LAYER 0 — the single
