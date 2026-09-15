@@ -3,6 +3,20 @@
 All notable changes to `@keenmate/base-css-variables` are documented here. Format based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.0.2] — 2026-09-15 [PUBLISHED]
+
+### Added
+
+- **Four new mask-friendly Lucide icon tokens: `--base-icon-refresh`,
+  `--base-icon-copy`, `--base-icon-ellipsis`, `--base-icon-save`.** `refresh`
+  (two curved arrows, refresh-cw) for reload / re-fetch — consumers spin it with a
+  CSS animation while a refresh is in flight; `copy` (two overlapping sheets) for
+  copy-to-clipboard; `ellipsis` (three dots) for the "more / overflow" affordance —
+  the vertical `⋮` variant is the same glyph rotated 90°, so no separate token — and
+  `save` (floppy disk) for persist/commit. Completes the affordance set
+  `@keenmate/pure-admin` migrated off Font Awesome; `pure-css` mirrors all four as
+  `$base-icon-*` and re-emits them (parity guard green).
+
 ## [1.0.1] — 2026-09-12 [PUBLISHED]
 
 ### Added

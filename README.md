@@ -10,14 +10,13 @@ that **cascade from these `--base-*` values**. Define the base layer once and ev
 component picks up a consistent, coordinated theme. Override a single `--base-*`
 variable and the change propagates everywhere.
 
+## What's New in 1.0.2
+
+- **Icons — four new affordance glyph tokens** — added `--base-icon-refresh` (refresh-cw, two curved arrows) for reload / re-fetch (consumers spin it with a CSS animation while a refresh is in flight), `--base-icon-copy` (two overlapping sheets) for copy-to-clipboard, `--base-icon-ellipsis` (three dots) for the "more / overflow" affordance — the vertical `⋮` is the same glyph rotated 90°, so no separate token — and `--base-icon-save` (floppy disk) for persist/commit. All four are mask-rendered Lucide glyphs and complete the affordance set `@keenmate/pure-admin` migrated off Font Awesome; `@keenmate/pure-css` mirrors all four as `$base-icon-*`.
+
 ## What's New in 1.0.1
 
 - **Icons — three new glyph tokens** — added `--base-icon-filter` (funnel) for filter affordances, and the checkbox/tree-node selection pair `--base-icon-check` (SELECTED — a tick) and `--base-icon-indeterminate` (PARTIALLY selected — the tri-state parent state). All three are mask-rendered Lucide glyphs like the rest of the icon set, and selection stays a distinct knob from disclosure (`--base-icon-expand`/`--base-icon-collapse`) so you can retarget one without moving the other.
-
-## What's New in 1.0.0
-
-- **Contract — `base-variables.css` is the complete `--base-*` superset** — this file is now the single canonical source of truth (LAYER 0) that carries every token any KeenMate consumer reads: accent/primary + secondary roles, the surface elevation ladder (`--base-page-bg` < `--base-subtle-bg` < `--base-main-bg` < `--base-elevated-bg` plus the hover/active/disabled state axis), the `--base-text-color-1..4` hierarchy with `--base-text-on-*` / `--base-text-inverted`, inputs, dropdown/popover, tooltip, the four status roles in the `-color`/`-bg`/`-text`/`text-on-*` model, typography + sizing/spacing multipliers, the shadow/motion/z-index scales, mask-friendly Lucide icons, and the 1–9 brand palette slots. `@keenmate/pure-css` mirrors this exact list into SCSS (`$base-*`), so the two must stay in sync.
-- **Theme — default rebased onto pure-admin "Corporate"** — the out-of-the-box palette is now Corporate (sky-blue `#0ea5e9` accent, slate text/surfaces, cyan info), with light and dark values paired through CSS `light-dark()`. `:root` sets `color-scheme: light dark` so it follows the OS by default, and `[data-theme="light"|"dark"]` forces a mode on any subtree. Mode-invariant tokens (icons, the spacing/shadow/motion/z-index scales, sizing/typography multipliers, palette slots) stay single values.
 
 ## Install
 
