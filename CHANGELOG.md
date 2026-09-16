@@ -3,6 +3,25 @@
 All notable changes to `@keenmate/base-css-variables` are documented here. Format based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.0.3] — 2026-09-16 [PUBLISHED]
+
+### Added
+
+- **Three affordance icon tokens: `--base-icon-settings`, `--base-icon-bell`,
+  `--base-icon-user`.** Mask-friendly Lucide glyphs — `settings` (cog / gear) for
+  preferences / config, `bell` for the notification bell, `user` (person) for the
+  profile trigger / avatar placeholder. Consumed by pure-admin's
+  `--pa-icon-settings` (settings-panel toggle), `--pa-icon-bell` (navbar
+  notification bell), and `--pa-icon-user` (navbar profile button). `pure-css`
+  mirrors all three as `$base-icon-*` and re-emits them (parity green).
+- **Four status / severity icon tokens: `--base-icon-info`,
+  `--base-icon-success`, `--base-icon-warning`, `--base-icon-danger`.**
+  Mask-friendly Lucide glyphs — `info` = circle-i, `success` = circle-check,
+  `warning` = triangle-alert, `danger` = circle-x. One shared family so every
+  severity surface (toasts, alerts, callouts, notifications) shows the SAME mark;
+  consumed by pure-admin's `--pa-icon-info` / `-success` / `-warning` / `-danger`.
+  `pure-css` mirrors all four as `$base-icon-*` and re-emits them (parity green).
+
 ## [1.0.2] — 2026-09-15 [PUBLISHED]
 
 ### Added
