@@ -3,6 +3,19 @@
 All notable changes to `@keenmate/base-css-variables` are documented here. Format based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.0.4] — 2026-09-17
+
+### Added
+
+- **Three action / navigation icon tokens: `--base-icon-download`,
+  `--base-icon-link`, `--base-icon-external-link`.** Mask-friendly Lucide glyphs —
+  `download` (tray + down arrow) for save-to-disk / export, `link` (chain) for
+  hyperlink / attach-URL, `external-link` (diagonal arrow-out-of-box) for links
+  that open in a new tab / leave the app. Consumed by pure-admin's
+  `--pa-icon-download`, `--pa-icon-link`, and `--pa-icon-external-link` (which fell
+  back to inline glyphs until these landed). `pure-css` mirrors all three as
+  `$base-icon-*` and re-emits them (parity green).
+
 ## [1.0.3] — 2026-09-16 [PUBLISHED]
 
 ### Added
