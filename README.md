@@ -12,6 +12,7 @@ variable and the change propagates everywhere.
 
 ## What's New in 1.0.4
 
+- **Typography — `--base-list-bullet-type` themes the default list marker** — a new mode-invariant token sets the marker for every `ul` / `ol` (`disc` / `circle` / `square` / `none` / `decimal` / …), so one override re-marks all default lists at once. It sits in the TYPOGRAPHY block alongside the font/line-height tokens; consumers read it on their base list reboot with an inline `disc` fallback. `@keenmate/pure-css` mirrors it as `$base-list-bullet-type`, re-emits it (parity green), and layers its per-instance `--pc-list-bullet-type` knob on top (`var(--pc-list-bullet-type, var(--base-list-bullet-type, disc))`).
 - **Icons — three action / navigation affordance tokens** — added `--base-icon-download` (tray + down arrow) for save-to-disk / export, `--base-icon-link` (chain) for hyperlink / attach-URL, and `--base-icon-external-link` (diagonal arrow-out-of-box) for links that open in a new tab / leave the app. All three are mask-rendered Lucide glyphs consumed by pure-admin's `--pa-icon-download`, `--pa-icon-link`, and `--pa-icon-external-link`; `@keenmate/pure-css` mirrors them as `$base-icon-*`.
 
 ## What's New in 1.0.3
@@ -253,6 +254,7 @@ For example `--ms-primary-bg` reads `--base-hover-bg`, and `--drp-primary-bg` re
 | `--base-font-size-2xs … 2xl` | Font sizes (unitless multipliers) |
 | `--base-font-weight-normal / medium / semibold` | Font weights |
 | `--base-line-height-tight / normal / relaxed` | Line heights |
+| `--base-list-bullet-type` | Default `ul, ol` marker (`disc` / `circle` / `square` / `none` / `decimal` / …) |
 
 ### Sizing
 | Variable | Purpose |

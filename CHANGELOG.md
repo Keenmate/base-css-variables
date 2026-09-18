@@ -3,10 +3,17 @@
 All notable changes to `@keenmate/base-css-variables` are documented here. Format based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [1.0.4] — 2026-09-17
+## [1.0.4] — 2026-09-18
 
 ### Added
 
+- **A `--base-list-bullet-type` token — the default marker for `ul, ol`.**
+  Mode-invariant single value (default `disc`; also `circle` / `square` / `none` /
+  `decimal` / …), added to the TYPOGRAPHY block. Consumers read it on their base
+  list reboot with an inline `disc` fallback, so overriding it re-marks every
+  default list at once. `pure-css` mirrors it as `$base-list-bullet-type`,
+  re-emits it (parity green), and layers its per-instance `--pc-list-bullet-type`
+  knob over it (`var(--pc-list-bullet-type, var(--base-list-bullet-type, disc))`).
 - **Three action / navigation icon tokens: `--base-icon-download`,
   `--base-icon-link`, `--base-icon-external-link`.** Mask-friendly Lucide glyphs —
   `download` (tray + down arrow) for save-to-disk / export, `link` (chain) for

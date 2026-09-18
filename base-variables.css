@@ -191,6 +191,12 @@
   --base-line-height-normal: 1.5;
   --base-line-height-relaxed: 1.75;
 
+  /* List marker — default bullet / number style for `ul, ol`
+   * (disc | circle | square | none | decimal | …). Mode-invariant. Consumers
+   * read it on their base list reboot with an inline `disc` fallback, so a
+   * single override re-marks every default list at once. */
+  --base-list-bullet-type: disc;
+
   /* ======================================================================
    * SIZING — unitless multipliers (see font sizes note above)
    * ==================================================================== */
