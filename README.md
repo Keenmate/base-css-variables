@@ -10,15 +10,14 @@ that **cascade from these `--base-*` values**. Define the base layer once and ev
 component picks up a consistent, coordinated theme. Override a single `--base-*`
 variable and the change propagates everywhere.
 
+## What's New in 1.0.5
+
+- **Icons — `--base-icon-check-size` scales the selection glyph** — a new token sets the mask-size of the check / indeterminate mark inside its box (checkbox / tree-node), defaulting to `68%` so it sits with breathing room. Override it once to re-scale the selection mark everywhere in lockstep — handy when swapping `--base-icon-check` for a glyph that fills its viewBox edge-to-edge. `@keenmate/pure-css` mirrors it as `$base-icon-check-size`.
+
 ## What's New in 1.0.4
 
 - **Typography — `--base-list-bullet-type` themes the default list marker** — a new mode-invariant token sets the marker for every `ul` / `ol` (`disc` / `circle` / `square` / `none` / `decimal` / …), so one override re-marks all default lists at once. It sits in the TYPOGRAPHY block alongside the font/line-height tokens; consumers read it on their base list reboot with an inline `disc` fallback. `@keenmate/pure-css` mirrors it as `$base-list-bullet-type`, re-emits it (parity green), and layers its per-instance `--pc-list-bullet-type` knob on top (`var(--pc-list-bullet-type, var(--base-list-bullet-type, disc))`).
 - **Icons — three action / navigation affordance tokens** — added `--base-icon-download` (tray + down arrow) for save-to-disk / export, `--base-icon-link` (chain) for hyperlink / attach-URL, and `--base-icon-external-link` (diagonal arrow-out-of-box) for links that open in a new tab / leave the app. All three are mask-rendered Lucide glyphs consumed by pure-admin's `--pa-icon-download`, `--pa-icon-link`, and `--pa-icon-external-link`; `@keenmate/pure-css` mirrors them as `$base-icon-*`.
-
-## What's New in 1.0.3
-
-- **Icons — three navbar affordance tokens** — added `--base-icon-settings` (cog / gear) for preferences & config, `--base-icon-bell` (notification bell) for the navbar bell button, and `--base-icon-user` (person) for the profile trigger / avatar placeholder. All three are mask-rendered Lucide glyphs consumed by pure-admin's `--pa-icon-settings`, `--pa-icon-bell`, and `--pa-icon-user`; `@keenmate/pure-css` mirrors them as `$base-icon-*`.
-- **Icons — one shared status / severity family** — added `--base-icon-info` (circle-i), `--base-icon-success` (circle-check), `--base-icon-warning` (triangle-alert), and `--base-icon-danger` (circle-x). One family so every severity surface (toasts, alerts, callouts, notifications) shows the SAME mark instead of per-component emoji; consumed by pure-admin's `--pa-icon-info` / `-success` / `-warning` / `-danger` and mirrored in `@keenmate/pure-css` as `$base-icon-*`.
 
 ## Install
 

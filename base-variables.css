@@ -283,6 +283,12 @@
    * children are a mix). Shares the minus shape with `collapse` by default but is
    * its own knob — selection ≠ disclosure, override one without moving the other. */
   --base-icon-check: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M20 6 9 17l-5-5%22/%3E%3C/svg%3E");
+  /* mask-size for the selection glyph inside its box (checkbox / tree-node). One
+   * knob every consumer reads, so overriding the glyph AND its scale re-sizes the
+   * mark everywhere in lockstep. Default 68% leaves breathing room; a glyph that
+   * fills its viewBox edge-to-edge (e.g. a star) can be shrunk from here without
+   * touching each component. Also sizes indeterminate (it shares the mask box). */
+  --base-icon-check-size: 68%;
   --base-icon-indeterminate: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M5 12h14%22/%3E%3C/svg%3E");
 
   /* Action / affordance icons. copy = two overlapping sheets (copy-to-clipboard);

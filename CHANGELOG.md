@@ -3,6 +3,19 @@
 All notable changes to `@keenmate/base-css-variables` are documented here. Format based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.0.5] — 2026-09-20 [PUBLISHED]
+
+### Added
+
+- **A `--base-icon-check-size` token — the mask-size for the selection glyph
+  inside its box (checkbox / tree-node).** One knob every consumer reads, so
+  overriding the glyph *and* its scale re-sizes the selection mark everywhere in
+  lockstep. Default `68%` leaves breathing room around the tick; a glyph that
+  fills its viewBox edge-to-edge (e.g. a star) can be shrunk from here without
+  touching each component. Also sizes the indeterminate mark, since it shares the
+  same mask box. `pure-css` mirrors it as `$base-icon-check-size` and re-emits it
+  (parity green).
+
 ## [1.0.4] — 2026-09-18 [PUBLISHED]
 
 ### Added
