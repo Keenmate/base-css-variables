@@ -74,17 +74,21 @@ inherit from it. Set both when you want them to match.
 
 ### Surface hierarchy
 
-Background surfaces layer outward from the canvas; each step is a little more
-prominent:
+Background surfaces climb an **elevation ladder** — each step a little more
+prominent than the last — with a separate **interaction-state** axis on top:
 
 ```
---base-main-bg  →  --base-elevated-bg  →  --base-hover-bg  →  --base-active-bg
+--base-page-bg  →  --base-subtle-bg  →  --base-main-bg  →  --base-elevated-bg
+                                        └─ hover / active / disabled ─┘
 ```
 
-- **main** — base canvas (page, grid, panel, dropzone)
+- **page** — canvas / backdrop below the content
+- **subtle** — recessed / inset surface (code, wells)
+- **main** — content surface (cards, panels, grid, dropzone)
 - **elevated** — raised areas: headers, toolbars, dropdowns, popovers
 - **hover** — pointer hover on a surface (rows, options)
 - **active** — pressed / selected
+- **disabled** — inert / readonly surface
 - **inverse** — high-contrast surface, used for tooltips
 
 Role-specific surfaces (`--base-input-bg`, `--base-dropdown-bg`, `--base-tooltip-bg`)
@@ -174,7 +178,14 @@ Naming is intentionally **not 1:1** between the base layer and component variabl
 For example `--ms-primary-bg` reads `--base-hover-bg`, and `--drp-primary-bg` reads
 `--base-main-bg`. Always theme via the `--base-*` variables listed here.
 
-### Accent colors
+These tables are the complete `--base-*` contract, mirrored token-for-token by
+`@keenmate/pure-css` (`$base-*`). Light values are Corporate light mode, dark are
+Corporate dark mode.
+
+### Accent / primary colors
+`primary` is the canonical role name; `accent` is the legacy alias each `--base-primary-*`
+points back to via `var()`. Brand blue, kept across light / dark.
+
 | Variable | Purpose |
 |----------|---------|
 | `--base-accent-color` | Primary brand / action color |
@@ -182,15 +193,34 @@ For example `--ms-primary-bg` reads `--base-hover-bg`, and `--drp-primary-bg` re
 | `--base-accent-color-active` | Accent active / pressed state |
 | `--base-accent-color-light` | Subtle accent tint for backgrounds |
 | `--base-accent-color-light-hover` | Subtle accent tint, hover |
+| `--base-primary-color` | Canonical alias → `--base-accent-color` |
+| `--base-primary-color-hover` | Alias → `--base-accent-color-hover` |
+| `--base-primary-color-active` | Alias → `--base-accent-color-active` |
+| `--base-primary-color-light` | Alias → `--base-accent-color-light` |
+| `--base-primary-color-light-hover` | Alias → `--base-accent-color-light-hover` |
 
-### Background / surface
+### Secondary role
 | Variable | Purpose |
 |----------|---------|
-| `--base-main-bg` | Main surface (inputs, dropdowns) |
-| `--base-elevated-bg` | Elevated surfaces: headers, toolbars, popovers |
-| `--base-hover-bg` | Hover state for any surface (option/row hover) |
-| `--base-active-bg` | Active / pressed surface |
+| `--base-secondary-color` | Neutral grey secondary action color |
+| `--base-secondary-color-hover` | Secondary hover state |
+
+### Background / surface
+Elevation ladder: `page` (canvas) < `subtle` (recessed) < `main` (content) <
+`elevated` (raised). `hover` / `active` / `disabled` are the interaction-state axis.
+
+| Variable | Purpose |
+|----------|---------|
+| `--base-page-bg` | Canvas / backdrop below the content |
+| `--base-main-bg` | Content surface — cards, panels, grid |
+| `--base-subtle-bg` | Recessed / inset surface (code, wells) |
+| `--base-elevated-bg` | Raised surface — headers, toolbars, popovers |
 | `--base-inverse-bg` | Inverse surface (fallback for tooltip background) |
+| `--base-overlay-bg` | Modal / overlay scrim |
+| `--base-shadow-color` | Shadow tint for elevation (used by the shadow scale) |
+| `--base-hover-bg` | Hover state for any surface (option / row hover) |
+| `--base-active-bg` | Active / pressed surface |
+| `--base-disabled-bg` | Disabled / readonly surface |
 
 ### Text
 | Variable | Purpose |
@@ -201,24 +231,30 @@ For example `--ms-primary-bg` reads `--base-hover-bg`, and `--drp-primary-bg` re
 | `--base-text-color-4` | Hints, placeholders, captions |
 | `--base-text-color-on-accent` | Text on accent backgrounds |
 | `--base-text-inverted` | Inverse of main text (on inverse / accent surfaces) |
+| `--base-text-on-primary` | Readable text on the primary fill (→ `--base-text-color-on-accent`) |
+| `--base-text-on-secondary` | Readable text on the secondary fill |
 
 ### Borders
 | Variable | Purpose |
 |----------|---------|
+| `--base-border-width` | Shared stroke width the shorthands compose from |
 | `--base-border-color` | Standard border color |
 | `--base-border` | Full border shorthand (`1px solid …`) |
+| `--base-checkbox-border-color` | Checkbox border |
 
 ### Input fields
 | Variable | Purpose |
 |----------|---------|
 | `--base-input-bg` | Input background |
 | `--base-input-color` | Input text color |
+| `--base-input-border-color` | Input border color |
 | `--base-input-border` | Input border (normal) |
 | `--base-input-border-hover` | Input border on hover |
 | `--base-input-border-focus` | Input border on focus |
 | `--base-input-placeholder-color` | Placeholder text |
 | `--base-input-bg-disabled` | Disabled input background |
-| `--base-disabled-bg` | Disabled / readonly surface |
+| `--base-input-clear-color` | Clear (✕) button color |
+| `--base-input-clear-bg-hover` | Clear button background on hover |
 
 ### Dropdown / popover
 | Variable | Purpose |
@@ -235,23 +271,27 @@ For example `--ms-primary-bg` reads `--base-hover-bg`, and `--drp-primary-bg` re
 | `--base-tooltip-color` | Tooltip text alias (web-grid) |
 
 ### Status colors
+Role ∈ `success` / `danger` / `warning` / `info`. Each role defines the full set below.
+
 | Variable | Purpose |
 |----------|---------|
-| `--base-<role>-color` | Role **fill identity** (vivid), role ∈ success/danger/warning/info |
+| `--base-<role>-color` | Role **fill identity** (vivid) |
 | `--base-<role>-bg` | Solid role fill (= `-color`) |
 | `--base-<role>-color-hover` | Role fill, hover |
-| `--base-<role>-bg-light` / `-bg-subtle` | Subtle role tints |
+| `--base-<role>-bg-light` | Subtle role tint (light fill) |
+| `--base-<role>-bg-subtle` | Even fainter role tint |
 | `--base-<role>-border` | Role border tint |
-| `--base-<role>-text` | Role as **foreground on a light surface** (text/links) |
+| `--base-<role>-text` | Role as **foreground on a light surface** (text / links) |
+| `--base-<role>-text-light` | Lighter role foreground variant |
 | `--base-text-on-<role>` | Readable text **on** the role fill |
-| `--base-checkbox-border-color` | Checkbox border |
 
 ### Typography
 | Variable | Purpose |
 |----------|---------|
-| `--base-font-family` | Font stack |
-| `--base-font-size-2xs … 2xl` | Font sizes (unitless multipliers) |
-| `--base-font-weight-normal / medium / semibold` | Font weights |
+| `--base-font-family` | Font stack (sans) |
+| `--base-font-family-mono` | Monospace font stack |
+| `--base-font-size-2xs … 2xl` | Font sizes (unitless multipliers): `2xs` `xs` `sm` `base` `lg` `xl` `2xl` |
+| `--base-font-weight-normal / medium / semibold / bold` | Font weights (400 / 500 / 600 / 700) |
 | `--base-line-height-tight / normal / relaxed` | Line heights |
 | `--base-list-bullet-type` | Default `ul, ol` marker (`disc` / `circle` / `square` / `none` / `decimal` / …) |
 
@@ -260,10 +300,94 @@ For example `--ms-primary-bg` reads `--base-hover-bg`, and `--drp-primary-bg` re
 |----------|---------|
 | `--base-border-radius-sm / md / lg` | Corner radii (unitless multipliers) |
 | `--base-input-size-xs…xl-height` | Standard input heights (unitless multipliers) |
+| `--base-rem` | Rem base (`1rem`) the unitless multipliers combine against |
 
-> **Unitless multipliers:** font sizes, radii and input heights are stored as
-> plain numbers and combined by components with their rem scale — e.g.
-> `calc(var(--base-font-size-base) * 0.1rem)`. This keeps sizing consistent
+### Spacing scale
+Unitless multipliers, combined as `calc(var(--base-space-*) * var(--base-rem))`.
+
+| Variable | Purpose |
+|----------|---------|
+| `--base-space-xs / sm / md / base / lg / xl / 2xl` | Spacing scale steps (0.4 → 4.8) |
+
+### Elevation / shadow scale
+Colored from `--base-shadow-color` so shadows theme with the surface.
+
+| Variable | Purpose |
+|----------|---------|
+| `--base-shadow-sm` | Small elevation shadow |
+| `--base-shadow-md` | Medium elevation shadow |
+| `--base-shadow-lg` | Large elevation shadow |
+
+### Motion
+| Variable | Purpose |
+|----------|---------|
+| `--base-duration-fast / normal / medium / slow` | Transition durations (0.1s → 0.3s) |
+| `--base-ease-standard` | Standard easing `cubic-bezier(0.4, 0, 0.2, 1)` |
+| `--base-ease-out` | Ease-out `cubic-bezier(0, 0, 0.2, 1)` |
+| `--base-ease-in` | Ease-in `cubic-bezier(0.4, 0, 1, 1)` |
+
+### Z-index scale
+Generic stacking tiers for overlay coordination.
+
+| Variable | Purpose |
+|----------|---------|
+| `--base-z-dropdown` | Dropdown (7500) |
+| `--base-z-modal-backdrop` | Modal backdrop (6000) |
+| `--base-z-modal` | Modal (7000) |
+| `--base-z-popover` | Popover (7600) |
+| `--base-z-toast` | Toast (8000) |
+| `--base-z-tooltip` | Tooltip (9000) |
+
+### Icons
+Inline `data:image/svg+xml` Lucide glyphs, rendered by consumers via
+`mask: var(--base-icon-*); background: currentColor`. Mode-invariant — override any
+one to re-glyph every consumer at once.
+
+| Variable | Glyph / purpose |
+|----------|-----------------|
+| `--base-icon-chevron` | Chevron (points right; rotate 90° when open) |
+| `--base-icon-caret-down` | Static down caret (sort / select) |
+| `--base-icon-caret-up` | Static up caret |
+| `--base-icon-close` | ✕ close |
+| `--base-icon-clear` | Field-clear — alias → `--base-icon-close` |
+| `--base-icon-remove` | Item take-out (non-destructive) — alias → `--base-icon-close` |
+| `--base-icon-expand` | Expand (+ / plus) |
+| `--base-icon-collapse` | Collapse (− / minus) |
+| `--base-icon-add` | Add (plus) |
+| `--base-icon-edit` | Edit (pencil) |
+| `--base-icon-delete` | Delete (destructive trash) |
+| `--base-icon-search` | Search (magnifier) |
+| `--base-icon-filter` | Filter (funnel) |
+| `--base-icon-refresh` | Refresh (two curved arrows; consumers spin it) |
+| `--base-icon-check` | Selected (tick) |
+| `--base-icon-check-size` | Mask-size of the selection glyph in its box (`68%`) |
+| `--base-icon-indeterminate` | Partially selected (tri-state minus) |
+| `--base-icon-copy` | Copy to clipboard (two sheets) |
+| `--base-icon-ellipsis` | More / overflow (three dots; vertical = same glyph rotated 90°) |
+| `--base-icon-save` | Save (floppy disk) |
+| `--base-icon-settings` | Settings (cog / gear) |
+| `--base-icon-bell` | Notification bell |
+| `--base-icon-user` | User / profile (person) |
+| `--base-icon-download` | Download / export (tray + down arrow) |
+| `--base-icon-link` | Hyperlink / attach-URL (chain) |
+| `--base-icon-external-link` | Opens in a new tab (diagonal arrow out of box) |
+| `--base-icon-info` | Status: info (circle-i) |
+| `--base-icon-success` | Status: success (circle-check) |
+| `--base-icon-warning` | Status: warning (triangle-alert) |
+| `--base-icon-danger` | Status: danger (circle-x) |
+
+### Theme palette slots
+Nine brand palette slots (mode-invariant) with paired contrast text, used for
+categorical color (charts, tags, avatars).
+
+| Variable | Purpose |
+|----------|---------|
+| `--base-color-1 … 9` | Palette slots 1–9 (amber, pink, emerald, sky, violet, indigo, slate, corporate-blue, dark-slate) |
+| `--base-color-1-text … 9-text` | Readable text paired with each slot |
+
+> **Unitless multipliers:** font sizes, radii, input heights and the spacing scale
+> are stored as plain numbers and combined by components against `--base-rem` — e.g.
+> `calc(var(--base-font-size-base) * var(--base-rem))`. This keeps sizing consistent
 > across all KeenMate components while remaining scalable.
 
 ## Related
