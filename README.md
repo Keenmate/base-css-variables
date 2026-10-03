@@ -10,14 +10,13 @@ that **cascade from these `--base-*` values**. Define the base layer once and ev
 component picks up a consistent, coordinated theme. Override a single `--base-*`
 variable and the change propagates everywhere.
 
+## What's New in 1.0.6
+
+- **Checkboxes — `--base-checkbox-scale` + a canonical render method.** A new token scales the checkbox *box* (multiplying its width/height), so one override resizes every KeenMate checkbox in lockstep. It pairs with a documented [render method](#checkbox-render-method): size the box with `calc(<base-size> * var(--base-checkbox-scale))` and the glyph with `--base-icon-check-size`, and apply **no CSS transform**. A `transform: scale()` promotes the box to its own compositing layer, which pixel-snaps the fractionally-positioned mask glyph and shifts the tick/dash off-centre — inconsistently from row to row. Scaling the box directly keeps the mark crisp at every scale.
+
 ## What's New in 1.0.5
 
 - **Icons — `--base-icon-check-size` scales the selection glyph** — a new token sets the mask-size of the check / indeterminate mark inside its box (checkbox / tree-node), defaulting to `68%` so it sits with breathing room. Override it once to re-scale the selection mark everywhere in lockstep — handy when swapping `--base-icon-check` for a glyph that fills its viewBox edge-to-edge. `@keenmate/pure-css` mirrors it as `$base-icon-check-size`.
-
-## What's New in 1.0.4
-
-- **Typography — `--base-list-bullet-type` themes the default list marker** — a new mode-invariant token sets the marker for every `ul` / `ol` (`disc` / `circle` / `square` / `none` / `decimal` / …), so one override re-marks all default lists at once. It sits in the TYPOGRAPHY block alongside the font/line-height tokens; consumers read it on their base list reboot with an inline `disc` fallback. `@keenmate/pure-css` mirrors it as `$base-list-bullet-type`, re-emits it (parity green), and layers its per-instance `--pc-list-bullet-type` knob on top (`var(--pc-list-bullet-type, var(--base-list-bullet-type, disc))`).
-- **Icons — three action / navigation affordance tokens** — added `--base-icon-download` (tray + down arrow) for save-to-disk / export, `--base-icon-link` (chain) for hyperlink / attach-URL, and `--base-icon-external-link` (diagonal arrow-out-of-box) for links that open in a new tab / leave the app. All three are mask-rendered Lucide glyphs consumed by pure-admin's `--pa-icon-download`, `--pa-icon-link`, and `--pa-icon-external-link`; `@keenmate/pure-css` mirrors them as `$base-icon-*`.
 
 ## Install
 
@@ -172,6 +171,53 @@ so they follow the active `color-scheme`.
 
   or set `color-scheme: light | dark` on any element.
 
+## Checkbox render method
+
+Every KeenMate component that draws a checkbox (multiselect options, tree nodes,
+grid selection, …) should render it the **same way**, so the tick/dash lands
+identically everywhere. The contract has two knobs — `--base-checkbox-scale` (box
+size) and `--base-icon-check-size` (glyph size) — and one hard rule: **scale the
+box, never the glyph via `transform`.**
+
+**Canonical method (recommended — crisp at every scale):**
+
+```css
+.x__checkbox {
+  /* size the BOX via calc — no transform, no compositing layer */
+  inline-size: calc(var(--x-checkbox-size) * var(--base-checkbox-scale, 1));
+  block-size:  calc(var(--x-checkbox-size) * var(--base-checkbox-scale, 1));
+  border: var(--base-border-width) solid var(--base-checkbox-border-color);
+  border-radius: /* component radius */;
+  position: relative;
+}
+.x__checkbox::after {               /* the tick / dash */
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: /* checkmark color */;
+  mask: var(--base-icon-check) no-repeat center / var(--base-icon-check-size, 68%);
+}
+.x__checkbox--indeterminate::after { mask-image: var(--base-icon-indeterminate); }
+```
+
+Because the glyph is masked at `center` over the full box with no `transform`,
+the browser renders it in normal layout space with sub-pixel anti-aliasing — it
+stays optically centred on every row regardless of fractional row heights.
+
+**Why not `transform: scale()`?** It promotes the element to its own compositing
+layer; the layer rasterizes and **pixel-snaps** the mask. The glyph sits at a
+fractional offset (`--base-icon-check-size: 68%` of a 16px box ≈ 2.56px), so the
+snap rounds left on some rows and right on others → the tick drifts, visibly and
+inconsistently. Sizing the box with `calc()` avoids the layer entirely.
+
+**Choosing a method for the situation** — the same contract, best tool per case:
+
+| need | method |
+|------|--------|
+| default / any `--base-checkbox-scale` | `calc()` box sizing above — **no transform** (crisp) |
+| the 1px border must thicken *proportionally* when scaled up | `transform: scale(var(--base-checkbox-scale))` — accept the snapping, or pair with integer sizes |
+| avoid fractional glyph offsets entirely | give the glyph an integer `--base-icon-check-size` (e.g. `11px`) and an integer box size |
+
 ## Variable reference
 
 Naming is intentionally **not 1:1** between the base layer and component variables.
@@ -299,6 +345,7 @@ Role ∈ `success` / `danger` / `warning` / `info`. Each role defines the full s
 | Variable | Purpose |
 |----------|---------|
 | `--base-border-radius-sm / md / lg` | Corner radii (unitless multipliers) |
+| `--base-checkbox-scale` | Checkbox box scale (multiplies the box size; `1` = base). See [Checkbox render method](#checkbox-render-method) |
 | `--base-input-size-xs…xl-height` | Standard input heights (unitless multipliers) |
 | `--base-rem` | Rem base (`1rem`) the unitless multipliers combine against |
 

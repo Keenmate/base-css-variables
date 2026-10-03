@@ -3,6 +3,22 @@
 All notable changes to `@keenmate/base-css-variables` are documented here. Format based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.0.6] — 2026-10-03 [PUBLISHED]
+
+### Added
+
+- **A `--base-checkbox-scale` token — the scale of the checkbox BOX (default
+  `1`), plus a documented canonical render method.** One knob every component with
+  a checkbox reads, so a theme resizes all of them in lockstep. The method sizes
+  the box with `calc(<base-size> * var(--base-checkbox-scale))` and the tick/dash
+  glyph with `--base-icon-check-size`, and applies **no CSS transform**: a
+  `transform: scale()` promotes the box to its own compositing layer, which
+  pixel-snaps the fractionally-positioned mask glyph and shifts the mark
+  off-centre — inconsistently from row to row. Scaling the box directly keeps the
+  mark crisp at every scale. See README → "Checkbox render method" for the
+  reference snippet and the per-situation method table. `pure-css` to mirror it as
+  `$base-checkbox-scale`.
+
 ## [1.0.5] — 2026-09-20 [PUBLISHED]
 
 ### Added

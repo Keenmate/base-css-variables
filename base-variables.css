@@ -204,6 +204,18 @@
   --base-border-radius-md: 0.6;
   --base-border-radius-lg: 0.8;
 
+  /* Checkbox BOX scale — multiplies the box's OWN size (width/height), NOT a CSS
+   * transform. 1 = the component's base checkbox size. The canonical render method
+   * (see README → "Checkbox render method") sizes the box with
+   * `calc(<base-size> * var(--base-checkbox-scale))` and the tick/dash glyph with
+   * --base-icon-check-size, and applies NO transform. A `transform: scale()`
+   * promotes the box to its own compositing layer, which pixel-snaps the
+   * fractionally-positioned mask glyph and shifts it off-centre — inconsistently,
+   * row to row. Scale the box here instead; the glyph stays crisp at every scale.
+   * One knob every component with a checkbox reads, so a theme resizes all of them
+   * in lockstep. */
+  --base-checkbox-scale: 1;
+
   /* Neutral heights. (Corporate bumps these +0.3 for its wider font — a theme
    * ergonomic tweak, not base identity, so the canonical default stays neutral.) */
   --base-input-size-xs-height: 3.1;   /* 31px at 10px rem base */
