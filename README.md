@@ -10,13 +10,15 @@ that **cascade from these `--base-*` values**. Define the base layer once and ev
 component picks up a consistent, coordinated theme. Override a single `--base-*`
 variable and the change propagates everywhere.
 
+## What's New in 1.0.7
+
+- **Item states — one shared look for focused and highlighted rows** — new `--base-highlighted-bg` / `-bg-hover` / `-text` / `-ring` and `--base-focused-bg` / `-text` / `-ring` tokens give list options, tree rows and grid rows a single look across components, so a picked web-multiselect option and a highlighted web-/svelte-treeview row on the same page match, and one override re-themes all of them. It follows the Windows Explorer model: *focused* is the one cursor item (an inset accent ring), *highlighted* is the Ctrl/Shift-click set (an accent tint), and *selected* means checkbox-checked, shown by the checkbox alone, so it has no row tokens. See [Item states](#item-states).
+- **Item states — `--base-ring-width` keeps rings inset** — the `*-ring` tokens are `outline` shorthands that consumers draw inset with `outline-offset: calc(-1 * var(--base-ring-width))`, so states never shift layout or bleed onto neighbouring rows. Thicken the ring via `--base-ring-width` (default `1px`, composed into `--base-focused-ring`) rather than a px inside the shorthand, and the offset stays in step.
+- **Checkboxes — one `calc`-only render method** — the [render method](#checkbox-render-method) now scales the box, its `border-width` and its `border-radius` all with `calc(… * var(--base-checkbox-scale))` and pins `box-sizing: border-box`, so a native `<input type=checkbox>` and a custom `<span>` box render at the same size. `transform: scale()` is demoted to a legacy-only last resort. Docs only, no token change.
+
 ## What's New in 1.0.6
 
 - **Checkboxes — `--base-checkbox-scale` + a canonical render method.** A new token scales the checkbox *box* (multiplying its width/height), so one override resizes every KeenMate checkbox in lockstep. It pairs with a documented [render method](#checkbox-render-method): size the box with `calc(<base-size> * var(--base-checkbox-scale))` and the glyph with `--base-icon-check-size`, and apply **no CSS transform**. A `transform: scale()` promotes the box to its own compositing layer, which pixel-snaps the fractionally-positioned mask glyph and shifts the tick/dash off-centre — inconsistently from row to row. Scaling the box directly keeps the mark crisp at every scale.
-
-## What's New in 1.0.5
-
-- **Icons — `--base-icon-check-size` scales the selection glyph** — a new token sets the mask-size of the check / indeterminate mark inside its box (checkbox / tree-node), defaulting to `68%` so it sits with breathing room. Override it once to re-scale the selection mark everywhere in lockstep — handy when swapping `--base-icon-check` for a glyph that fills its viewBox edge-to-edge. `@keenmate/pure-css` mirrors it as `$base-icon-check-size`.
 
 ## Install
 
@@ -179,15 +181,24 @@ identically everywhere. The contract has two knobs — `--base-checkbox-scale` (
 size) and `--base-icon-check-size` (glyph size) — and one hard rule: **scale the
 box, never the glyph via `transform`.**
 
-**Canonical method (recommended — crisp at every scale):**
+**Canonical method (the one every component ships — crisp at every scale):**
 
 ```css
 .x__checkbox {
-  /* size the BOX via calc — no transform, no compositing layer */
-  inline-size: calc(var(--x-checkbox-size) * var(--base-checkbox-scale, 1));
-  block-size:  calc(var(--x-checkbox-size) * var(--base-checkbox-scale, 1));
-  border: var(--base-border-width) solid var(--base-checkbox-border-color);
-  border-radius: /* component radius */;
+  /* border-box so the declared size IS the rendered outer size — a native
+     <input type=checkbox> defaults to this, so a custom <span> box must match it
+     or the two render at different totals (span content-box = size + 2×border).
+     It also keeps the scaled border growing INWARD instead of enlarging the box. */
+  box-sizing: border-box;
+  /* scale the BOX, its BORDER and its RADIUS all via calc — one layer-free path.
+     calc keeps border + corners proportional to the box without a compositing
+     layer, so there is no case left where you'd reach for transform. */
+  inline-size:  calc(var(--x-checkbox-size)  * var(--base-checkbox-scale, 1));
+  block-size:   calc(var(--x-checkbox-size)  * var(--base-checkbox-scale, 1));
+  border-width: calc(var(--base-border-width) * var(--base-checkbox-scale, 1));
+  border-style: solid;
+  border-color: var(--base-checkbox-border-color);
+  border-radius: calc(var(--x-checkbox-radius) * var(--base-checkbox-scale, 1));
   position: relative;
 }
 .x__checkbox::after {               /* the tick / dash */
@@ -200,23 +211,20 @@ box, never the glyph via `transform`.**
 .x__checkbox--indeterminate::after { mask-image: var(--base-icon-indeterminate); }
 ```
 
-Because the glyph is masked at `center` over the full box with no `transform`,
-the browser renders it in normal layout space with sub-pixel anti-aliasing — it
-stays optically centred on every row regardless of fractional row heights.
+The glyph is masked at `center / --base-icon-check-size` over the full box —
+a percentage, so it already tracks the box as it scales. With no `transform`,
+the browser renders it in normal layout space with sub-pixel anti-aliasing, so
+it stays optically centred on every row regardless of fractional row heights.
 
 **Why not `transform: scale()`?** It promotes the element to its own compositing
 layer; the layer rasterizes and **pixel-snaps** the mask. The glyph sits at a
 fractional offset (`--base-icon-check-size: 68%` of a 16px box ≈ 2.56px), so the
 snap rounds left on some rows and right on others → the tick drifts, visibly and
-inconsistently. Sizing the box with `calc()` avoids the layer entirely.
-
-**Choosing a method for the situation** — the same contract, best tool per case:
-
-| need | method |
-|------|--------|
-| default / any `--base-checkbox-scale` | `calc()` box sizing above — **no transform** (crisp) |
-| the 1px border must thicken *proportionally* when scaled up | `transform: scale(var(--base-checkbox-scale))` — accept the snapping, or pair with integer sizes |
-| avoid fractional glyph offsets entirely | give the glyph an integer `--base-icon-check-size` (e.g. `11px`) and an integer box size |
+inconsistently. The one thing transform used to be "needed" for — thickening the
+border and corners with the box — is covered above by `calc`-ing `border-width`
+and `border-radius` directly. So there is no situation where transform is the
+right tool; it is a **last resort only** (e.g. a legacy box you cannot restyle),
+and then only paired with integer box + glyph sizes to minimise the snap.
 
 ## Variable reference
 
@@ -267,6 +275,33 @@ Elevation ladder: `page` (canvas) < `subtle` (recessed) < `main` (content) <
 | `--base-hover-bg` | Hover state for any surface (option / row hover) |
 | `--base-active-bg` | Active / pressed surface |
 | `--base-disabled-bg` | Disabled / readonly surface |
+
+### Item states
+Shared look for list options, tree rows and grid rows, so a selected multiselect option
+and a highlighted tree row on the same page are identical. The model is Windows Explorer's,
+with three states:
+
+- **focused** — the *one* item the keyboard / mouse cursor is on;
+- **highlighted** — the Ctrl/Shift-click (Shift+arrow) set, 0..n items;
+- **selected** — the checkbox-*checked* items. Shown by the checkbox only, so there are no
+  `--base-selected-*` row tokens. With no checkboxes, highlighted *is* the selection
+  (svelte-treeview keeps the two arrays identical in that mode).
+
+`*-ring` is an `outline` (not `border`) shorthand that consumers draw **inset** (`outline-offset: calc(-1 * var(--base-ring-width))`):
+no layout shift, no bleed onto neighbouring rows, and a separate paint channel from
+background / box-shadow. To thicken the ring, change `--base-ring-width` — a px
+written directly into `*-ring` won't move the inset offset, so the ring spills out of the row.
+
+| Variable | Purpose |
+|----------|---------|
+| `--base-ring-width` | Ring thickness for `*-ring`; consumers inset the outline by −this (default: `1px`) |
+| `--base-highlighted-bg` | Highlighted item tint (default: accent at 10%) |
+| `--base-highlighted-bg-hover` | Highlighted item on hover (default: same as `--base-highlighted-bg`) |
+| `--base-highlighted-text` | Text on a highlighted item (default: `currentColor` = unchanged) |
+| `--base-highlighted-ring` | Highlighted item ring, outline shorthand (default: `none`) |
+| `--base-focused-bg` | Focused item background (default: `transparent`, the ring alone marks focus) |
+| `--base-focused-text` | Text on the focused item (default: `currentColor`) |
+| `--base-focused-ring` | Keyboard-focus ring, outline shorthand (default: `--base-ring-width solid` accent) |
 
 ### Text
 | Variable | Purpose |

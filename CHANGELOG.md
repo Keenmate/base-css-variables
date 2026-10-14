@@ -3,6 +3,48 @@
 All notable changes to `@keenmate/base-css-variables` are documented here. Format based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.0.7] — 2026-10-14 [PUBLISHED]
+
+### Added
+
+- **Item-state tokens: `--base-highlighted-bg` / `-bg-hover` / `-text` / `-ring` and
+  `--base-focused-bg` / `-text` / `-ring`, plus `--base-ring-width`.** One shared look
+  for list options, tree rows and grid rows, so a selected web-multiselect option and a
+  highlighted svelte-/web-treeview row on the same page match, and one override
+  re-themes all of them. Follows the Explorer model: *focused* = the one cursor item,
+  *highlighted* = the Ctrl/Shift-click set, *selected* = checkbox-checked (shown by the
+  checkbox only — no row tokens; with no checkboxes, highlighted is the selection).
+  Defaults: highlighted = accent at 10% (no ring); focused = transparent bg + a
+  `1px solid` accent ring. The `*-ring` tokens are outline shorthands drawn inset by
+  consumers via `outline-offset: calc(-1 * var(--base-ring-width))`; the ring
+  width is its own token (default `1px`, composed into `--base-focused-ring`) so a
+  thicker ring keeps the inset offset in step instead of spilling outside the row.
+  Mirrored in `@keenmate/pure-css`.
+
+- **Item-states demo + e2e suite (repo-only, not shipped).** `npm run demo` serves
+  `demo/item-states.html` — the Explorer model (focused / highlighted / selected), live
+  token controls, a reference list implementing the contract, and the local
+  web-treeview + web-multiselect builds reading the same tokens. `npm run test:e2e`
+  (Playwright) locks the defaults, the interaction model, the inset-ring-tracks-width
+  rule, and that both components render the same look as the reference.
+
+### Changed
+
+- **Checkbox render method is now a SINGLE `calc`-all path; `transform` demoted to
+  a documented last resort (doc-only — no token change).** The 1.0.6 README still
+  listed `transform: scale()` as the right tool when the border must thicken
+  proportionally with a scaled box. It isn't: scaling `border-width` and
+  `border-radius` with `calc(... * var(--base-checkbox-scale))` — exactly as the box
+  itself is scaled — keeps them proportional *and* layer-free, so the mask glyph
+  never pixel-snaps. There is therefore no situation where transform is correct; the
+  README now documents one canonical method (box + border + radius all via `calc`)
+  and flags transform as a legacy-only fallback. The canonical snippet also pins
+  `box-sizing: border-box` so the declared size is the rendered outer size — a
+  native `<input type=checkbox>` already defaults to it, so a component using a
+  custom `<span>` box (content-box) would otherwise render ~2×border larger than a
+  component using the native input. Adopters (svelte-treeview, web-multiselect)
+  updated to scale border-width + radius via `calc` and to pin `border-box`.
+
 ## [1.0.6] — 2026-10-03 [PUBLISHED]
 
 ### Added

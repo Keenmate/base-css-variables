@@ -66,6 +66,32 @@
   --base-disabled-bg: light-dark(#f1f3f5, #334155);      /* Disabled surface (inert tone) */
 
   /* ======================================================================
+   * ITEM STATES — list options, tree rows, grid rows. One look for every
+   * component on the page: web-multiselect options, svelte-/web-treeview rows.
+   * The Explorer model has THREE states — only two are row looks here:
+   *   • focused     = the ONE keyboard / mouse cursor item
+   *   • highlighted = the Ctrl/Shift-click (Shift+arrow) set, 0..n items
+   *   • selected    = checkbox-CHECKED — shown by the checkbox only, no row
+   *                   tokens (when there are no checkboxes, highlighted IS the
+   *                   selection, e.g. svelte-treeview mirrors the two arrays).
+   * Each state is a bg / text / ring trio; `*-ring` is an OUTLINE shorthand
+   * (not a border) that consumers draw INSET with
+   * `outline-offset: calc(-1 * var(--base-ring-width))`, so it never shifts
+   * layout or bleeds onto neighbouring rows. Change the ring thickness via
+   * --base-ring-width (not a px inside *-ring), or the inset offset no longer
+   * matches and the ring spills outside the row. Accent-derived tints are
+   * mode-invariant (color-mix with transparent works on any surface).
+   * ==================================================================== */
+  --base-ring-width: 1px;                                /* Ring width for *-ring; consumers inset by −this */
+  --base-highlighted-bg: color-mix(in srgb, var(--base-accent-color) 10%, transparent);
+  --base-highlighted-bg-hover: var(--base-highlighted-bg); /* Highlighted row keeps its tint on hover */
+  --base-highlighted-text: currentColor;                 /* Text on a highlighted item (currentColor = unchanged) */
+  --base-highlighted-ring: none;                         /* Outline shorthand, e.g. var(--base-ring-width) solid … */
+  --base-focused-bg: transparent;                        /* The ring alone marks focus */
+  --base-focused-text: currentColor;
+  --base-focused-ring: var(--base-ring-width) solid var(--base-accent-color); /* Keyboard-focus ring (drawn inset) */
+
+  /* ======================================================================
    * TEXT COLORS (hierarchy)
    * ==================================================================== */
   --base-text-color-1: light-dark(#334155, #f1f5f9);     /* Headers, titles, high-emphasis */
