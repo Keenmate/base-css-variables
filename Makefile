@@ -3,9 +3,17 @@
 #
 # This package has NO build step: base-variables.css is authored by hand and IS
 # the published artifact (no SCSS, no compile, no dist/). The targets below wrap
-# npm's pack/publish so releases match pure-css's ergonomics.
+# npm's pack/publish so releases match pure-css's ergonomics, plus the repo-only
+# demo + e2e suite (demo/, e2e/ — never shipped).
 #
 # Usage:
+#   make setup          Install dev deps + Playwright chromium, build the demo's components
+#   make install        Install dev dependencies (Playwright)
+#   make build          Build the SIBLING components the demo loads (../web-treeview,
+#                       ../web-multiselect) — this package itself has nothing to build
+#   make dev            Serve the demo on http://localhost:12510
+#   make test           Run the e2e suite (headless)
+#   make test-headed    Run the e2e suite in a visible browser
 #   make sizes          Show the size of base-variables.css
 #   make package        Create npm tarball
 #   make verify         Create tarball and confirm contents
@@ -27,16 +35,32 @@ ifeq ($(OS),Windows_NT)
 endif
 # -----------------------------------------------------------------------------
 
+# Sibling component repos the demo + e2e load from (override if checked out elsewhere,
+# e.g. `make build WEB_TREEVIEW_DIR=/src/web-treeview`). The demo server reads the same
+# locations via WEB_TREEVIEW_DIST / WEB_MULTISELECT_DIST, exported below.
+WEB_TREEVIEW_DIR ?= ../web-treeview
+WEB_MULTISELECT_DIR ?= ../web-multiselect
+export WEB_TREEVIEW_DIST = $(WEB_TREEVIEW_DIR)/dist
+export WEB_MULTISELECT_DIST = $(WEB_MULTISELECT_DIR)/dist
+
 # NPM publish tag (empty for latest, use TAG=rc for pre-releases)
 TAG ?=
 NPM_TAG = $(if $(TAG),--tag $(TAG),)
 
-.PHONY: help sizes package verify publish-dry publish-dry-rc publish publish-rc
+.PHONY: help setup install build dev test test-headed sizes package verify publish-dry publish-dry-rc publish publish-rc
 
 help:
 	@echo "@keenmate/base-css-variables - Available Commands:"
 	@echo ""
 	@echo "  (no build — base-variables.css is authored directly and shipped as-is)"
+	@echo ""
+	@echo "  Demo / e2e (repo-only, never shipped):"
+	@echo "    make setup          - Install dev deps + chromium, build the demo's components"
+	@echo "    make install        - Install dev dependencies (Playwright)"
+	@echo "    make build          - Build ../web-treeview + ../web-multiselect for the demo"
+	@echo "    make dev            - Serve the demo on http://localhost:12510"
+	@echo "    make test           - Run the e2e suite (headless)"
+	@echo "    make test-headed    - Run the e2e suite in a visible browser"
 	@echo ""
 	@echo "  Package:"
 	@echo "    make sizes          - Show base-variables.css size"
@@ -48,6 +72,27 @@ help:
 	@echo "    make publish-rc     - Publish under --tag rc (canonical for X.Y.Z-rcN)"
 	@echo "    make publish TAG=x  - Publish under arbitrary dist-tag"
 	@echo ""
+
+setup: install build
+	npm run test:e2e:install
+
+install:
+	npm install
+
+# The demo loads the LOCAL builds of the sibling components, so they must be
+# rebuilt to pick up token renames on their side. dist/ is gitignored in both.
+build:
+	cd "$(WEB_TREEVIEW_DIR)" && npm run build
+	cd "$(WEB_MULTISELECT_DIR)" && npm run build
+
+dev:
+	npm run demo
+
+test:
+	npm run test:e2e
+
+test-headed:
+	npm run test:e2e:headed
 
 sizes:
 	@ls -l base-variables.css | awk '{printf "  %8d  %s\n", $$5, $$9}'

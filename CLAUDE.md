@@ -9,9 +9,19 @@ defines the shared `--base-*` CSS custom-property contract consumed by all KeenM
 components (web-multiselect `--ms-*`, web-daterangepicker `--drp-*`, web-grid `--wg-*`,
 web-treeview, …) and by `@keenmate/pure-css` / `@keenmate/pure-admin-core`.
 
-There is no build, test, lint, or bundle step. `package.json` has no `scripts`. Editing
-the CSS *is* the work; publishing is `npm publish`. The package ships only
-`base-variables.css` + `README.md` (see the `files` field).
+There is no build, lint, or bundle step. Editing the CSS *is* the work; publishing is
+`npm publish`. The package ships only `base-variables.css` + `README.md` + `CHANGELOG.md`
++ `LICENSE` (see the `files` field) — the demo and tests below are repo-only.
+
+**Demo + e2e (repo-only, dev-time):** `npm run demo` serves `demo/item-states.html` via the
+zero-dependency `demo/serve.mjs` on :12510. The server also mounts the *local* builds of the
+sibling repos (`../web-treeview/dist`, `../web-multiselect/dist` → `/vendor/*`) so the page
+shows real components reading this checkout's tokens. `npm run test:e2e` (Playwright,
+`e2e/`) locks the item-state contract against the reference list *and* both components;
+component specs skip when a sibling build is missing — run `npm run build` in those repos
+first. One-time: `npm run test:e2e:install`. Makefile wrappers: `make setup` (deps + chromium +
+sibling builds), `make build` (rebuilds the two sibling components — *not* this package),
+`make dev`, `make test`, `make test-headed`.
 
 ## The core architecture: this file is the canonical contract
 
