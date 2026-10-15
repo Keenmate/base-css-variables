@@ -7,6 +7,8 @@
 //
 //   /vendor/web-multiselect/*  → ../web-multiselect/dist/*   (override: WEB_MULTISELECT_DIST)
 //   /vendor/web-treeview/*     → ../web-treeview/dist/*      (override: WEB_TREEVIEW_DIST)
+//   /vendor/pure-admin-themes/* → ../pure-admin-themes/*      (override: PURE_ADMIN_THEMES_DIR)
+//                                 (compiled theme CSS, read by demo/derived.html)
 //
 // Build those repos first (`npm run build` in each). If a dist is missing the
 // demo still loads — it just shows a notice in that component's panel.
@@ -22,6 +24,7 @@ const PORT = Number(process.env.PORT) || 12510;
 const MOUNTS = {
   '/vendor/web-multiselect/': resolve(process.env.WEB_MULTISELECT_DIST || join(ROOT, '..', 'web-multiselect', 'dist')),
   '/vendor/web-treeview/': resolve(process.env.WEB_TREEVIEW_DIST || join(ROOT, '..', 'web-treeview', 'dist')),
+  '/vendor/pure-admin-themes/': resolve(process.env.PURE_ADMIN_THEMES_DIR || join(ROOT, '..', 'pure-admin-themes')),
 };
 
 const TYPES = {

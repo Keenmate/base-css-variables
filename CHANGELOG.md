@@ -12,6 +12,21 @@ and its consumers.
 
 ### Changed
 
+- **The contract is derived: a few inputs, everything else calculated.** Hand-set inputs are
+  `--base-main-bg`, `--base-page-bg`, `--base-text-color-1`, the role colors, role text colors,
+  "text on a fill" colors, overlay, shadow color and palette. The rest are formulas: text levels
+  2–4 mix text-color-1 into main-bg (75 / 55 / 40%); `subtle` / `elevated` / `disabled` /
+  `border-color` shift the background's own hue in lightness (OKLCH relative colors — darker in
+  light mode, 2× lighter in dark mode); `hover` / `active` are translucent overlays of that hue
+  (visible on any surface); role `-hover` / `-active` mix the role color with black (light) /
+  white (dark); tooltip is always dark. Fixes the dark-mode collisions where hover, elevated,
+  disabled and input shared one hex and faint text equalled the border color. Values move slightly
+  from the hand-tuned Corporate slate; any derived token can still be hand-set (a plain value
+  replaces the formula) — pure-admin themes keep their own values. Requires relative color syntax
+  (Chrome/Edge 119+, Safari 16.4+, Firefox 128+).
+- **Derived tokens recalculate in re-themed scopes:** the derived block is declared on
+  `:root, [data-theme], .base-scope`, so setting inputs on such an element re-derives everything
+  inside it.
 - **BREAKING: `accent` → `primary` — one brand role.** Accent and primary were the same color
   everywhere (primary button, focus, selection, checked state, links); `primary` matches the role
   set (secondary, success, danger, warning, info). The `--base-primary-*` aliases are gone — the

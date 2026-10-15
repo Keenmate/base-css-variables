@@ -157,6 +157,47 @@ flows into every component:
 }
 ```
 
+### Inputs and derived tokens
+
+The colors come in two kinds:
+
+- **Inputs** — set by hand: `--base-main-bg`, `--base-page-bg`, `--base-text-color-1`,
+  the role colors (`--base-primary-color`, `--base-secondary-color`,
+  `--base-success/-danger/-warning/-info-color`), the role text colors
+  (`--base-<role>-text-color`), the "text on a fill" colors (`--base-on-*-text-color`),
+  `--base-overlay-bg`, `--base-shadow-color` and the palette.
+- **Derived** — calculated from the inputs, so changing an input moves them all:
+  - text levels 2–4 = `--base-text-color-1` mixed into `--base-main-bg` (75 / 55 / 40%);
+  - surfaces (`subtle`, `elevated`, `disabled`, `border-color`) = the background's own hue
+    shifted in lightness (OKLCH) — darker in light mode, lighter in dark mode, with
+    twice the step in dark mode;
+  - `hover` / `active` = translucent overlays of that hue, so they show on any surface;
+  - role `-hover` / `-active` = the role color mixed with black (light) / white (dark);
+  - tints (`-bg-subtle`, `--base-highlighted-bg`) = the role color at 10% (light) / 20% (dark);
+  - input, dropdown, tooltip, border shorthands and shadows reuse the tokens above.
+
+**Any derived token can still be hand-set** — a plain value simply replaces its formula:
+
+```css
+:root {
+  --base-main-bg: #fff8e7;          /* input: text levels, surfaces, borders all follow */
+  --base-elevated-bg: #f2e5c4;      /* hand-set: this one keeps your exact color */
+}
+```
+
+**Re-theming part of a page.** A `var()` inside a custom property is resolved on the element
+that *declares* it, so derived tokens declared on `:root` don't recalculate when you change an
+input on a descendant. The derived block is therefore also declared on `[data-theme]` and
+`.base-scope` — set the inputs on such an element and everything inside it follows:
+
+```html
+<aside class="base-scope" style="--base-main-bg: #0b1220; --base-text-color-1: #e2e8f0">
+  … borders, hover, text levels and tints inside are recalculated from these inputs …
+</aside>
+```
+
+(Without the hook, a subtree override behaves like a plain value: only the tokens you set change.)
+
 ### Light / dark mode
 
 Colors are defined with CSS [`light-dark()`](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value/light-dark),
@@ -242,8 +283,8 @@ Brand blue, kept across light / dark. (Before 2.0.0 this was `--base-accent-*`.)
 | Variable | Purpose |
 |----------|---------|
 | `--base-primary-color` | Primary brand / action color |
-| `--base-primary-color-hover` | Darker hover step |
-| `--base-primary-color-active` | Active / pressed step |
+| `--base-primary-color-hover` | Hover step. *Derived:* 15% black (light) / white (dark) |
+| `--base-primary-color-active` | Active / pressed step. *Derived:* 30% black / white |
 | `--base-primary-bg-subtle` | Primary tint for badges, chips, soft fills: `-color` mixed 10% (light) / 20% (dark) into transparent — same pattern as the role tints |
 | `--base-primary-bg-subtle-hover` | The primary tint on hover: 15% (light) / 30% (dark) |
 
@@ -251,7 +292,7 @@ Brand blue, kept across light / dark. (Before 2.0.0 this was `--base-accent-*`.)
 | Variable | Purpose |
 |----------|---------|
 | `--base-secondary-color` | Neutral grey secondary action color |
-| `--base-secondary-color-hover` | Secondary hover state |
+| `--base-secondary-color-hover` | Secondary hover state. *Derived:* like primary |
 
 ### Background / surface
 Elevation ladder: `page` (canvas) < `subtle` (recessed) < `main` (content) <
@@ -259,15 +300,15 @@ Elevation ladder: `page` (canvas) < `subtle` (recessed) < `main` (content) <
 
 | Variable | Purpose |
 |----------|---------|
-| `--base-page-bg` | Canvas / backdrop below the content |
-| `--base-main-bg` | Content surface — cards, panels, grid |
-| `--base-subtle-bg` | Recessed / inset surface (code, wells) |
-| `--base-elevated-bg` | Raised surface — headers, toolbars, popovers |
+| `--base-page-bg` | **Input.** Canvas / backdrop below the content |
+| `--base-main-bg` | **Input.** Content surface — cards, panels, grid |
+| `--base-subtle-bg` | Recessed / inset surface (code, wells). *Derived:* page-bg shifted in lightness |
+| `--base-elevated-bg` | Raised surface — headers, toolbars, popovers. *Derived:* main-bg shifted in lightness |
 | `--base-overlay-bg` | Modal / overlay scrim |
 | `--base-shadow-color` | Shadow tint for elevation: 15% black (light) / 40% (dark); used by the shadow scale and the dropdown shadow |
-| `--base-hover-bg` | Hover state for any surface (option / row hover) |
-| `--base-active-bg` | Active / pressed surface |
-| `--base-disabled-bg` | Disabled / readonly surface |
+| `--base-hover-bg` | Hover state for any surface (option / row hover). *Derived:* translucent overlay of the background hue |
+| `--base-active-bg` | Active / pressed surface. *Derived:* stronger overlay |
+| `--base-disabled-bg` | Disabled / readonly surface. *Derived:* main-bg shifted in lightness |
 
 ### Item states
 Shared look for list options, tree rows and grid rows, so a selected multiselect option
@@ -299,10 +340,10 @@ written directly into `*-outline` won't move the inset offset, so the outline sp
 ### Text
 | Variable | Purpose |
 |----------|---------|
-| `--base-text-color-1` | Primary — default body text, titles |
-| `--base-text-color-2` | Secondary — muted labels, supporting text |
-| `--base-text-color-3` | Tertiary — icons, metadata, paths |
-| `--base-text-color-4` | Faint — hints, placeholders, disabled |
+| `--base-text-color-1` | **Input.** Primary — default body text, titles |
+| `--base-text-color-2` | Secondary — muted labels, supporting text. *Derived:* text-color-1 75% into main-bg |
+| `--base-text-color-3` | Tertiary — icons, metadata, paths. *Derived:* 55% |
+| `--base-text-color-4` | Faint — hints, placeholders, disabled. *Derived:* 40% |
 | `--base-on-primary-text-color` | Text on the primary fill |
 | `--base-on-secondary-text-color` | Readable text on the secondary fill |
 
@@ -310,7 +351,7 @@ written directly into `*-outline` won't move the inset offset, so the outline sp
 | Variable | Purpose |
 |----------|---------|
 | `--base-border-width` | Shared stroke width the shorthands compose from |
-| `--base-border-color` | Standard border color |
+| `--base-border-color` | Standard border color. *Derived:* main-bg shifted in lightness |
 | `--base-border` | Full border shorthand (`1px solid …`) |
 | `--base-checkbox-border-color` | Checkbox border |
 
@@ -338,8 +379,8 @@ written directly into `*-outline` won't move the inset offset, so the outline sp
 ### Tooltip
 | Variable | Purpose |
 |----------|---------|
-| `--base-tooltip-bg` | Tooltip background |
-| `--base-tooltip-text-color` | Tooltip text |
+| `--base-tooltip-bg` | Tooltip background — always dark. *Derived:* text-color-1 85% into main-bg (light) / main-bg lifted (dark) |
+| `--base-tooltip-text-color` | Tooltip text. *Derived:* main-bg (light) / text-color-1 (dark) |
 
 ### Status colors
 Role ∈ `success` / `danger` / `warning` / `info`. Each role defines the full set below.
@@ -347,7 +388,7 @@ Role ∈ `success` / `danger` / `warning` / `info`. Each role defines the full s
 | Variable | Purpose |
 |----------|---------|
 | `--base-<role>-color` | Role **fill identity** (vivid) |
-| `--base-<role>-color-hover` | Role fill, hover |
+| `--base-<role>-color-hover` | Role fill, hover. *Derived:* 15% black (light) / white (dark) |
 | `--base-<role>-bg-subtle` | Role tint for backgrounds (labels, toasts, invalid cells): `-color` mixed 10% (light) / 20% (dark) into transparent |
 | `--base-<role>-text-color` | Role as **foreground on a light surface** (text / links) |
 | `--base-on-<role>-text-color` | Readable text **on** the role fill |

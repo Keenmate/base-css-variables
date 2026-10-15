@@ -17,7 +17,8 @@ There is no build, lint, or bundle step. Editing the CSS *is* the work; publishi
 zero-dependency `demo/serve.mjs` on :12510. The server also mounts the *local* builds of the
 sibling repos (`../web-treeview/dist`, `../web-multiselect/dist` → `/vendor/*`) so the page
 shows real components reading this checkout's tokens. `npm run test:e2e` (Playwright,
-`e2e/`) locks the item-state contract against the reference list *and* both components;
+`e2e/`) locks the item-state contract against the reference list *and* both components, and
+the derivation contract (inputs → derived, `.base-scope`, removed names);
 component specs skip when a sibling build is missing — run `npm run build` in those repos
 first. One-time: `npm run test:e2e:install`. Makefile wrappers: `make setup` (deps + chromium +
 sibling builds), `make build` (rebuilds the two sibling components — *not* this package),
@@ -50,6 +51,12 @@ traces this end-to-end for the primary color — read it before touching token s
 
 - **Default theme is pure-admin "Corporate"** (sky-blue `#0ea5e9` primary, slate surfaces, cyan info).
   Light values = Corporate light mode, dark = Corporate dark mode.
+- **Inputs vs derived (2.0.0):** `:root` holds the hand-set INPUTS (main/page bg, text-color-1,
+  role colors, role text colors, on-fill text colors, overlay, shadow color, palette) plus the
+  non-color tokens. Every token calculated from another lives in the second block,
+  `:root, [data-theme], .base-scope { … }` — formulas (`color-mix`, OKLCH relative colors), so a
+  re-themed scope recalculates. A new derived token goes there, never as a pasted literal.
+  `demo/derived.html` compares the formulas against the compiled pure-admin themes.
 - **Light/dark** is done with CSS `light-dark()`, driven by `color-scheme`. `:root` sets
   `color-scheme: light dark` (auto/OS). `[data-theme="light"|"dark"]` blocks force a mode on a
   subtree. Mode-invariant tokens (icons, spacing/shadow/motion/z-index scales, typography

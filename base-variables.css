@@ -12,9 +12,10 @@
  * mirrors this token list into SCSS (`$base-*`) — adding theme derivation and the
  * `.pc-mode-*` class model — but must not add tokens this file lacks. Keep in sync.
  *
- * DEFAULT THEME = pure-admin "Corporate" (professional blue/slate): accent sky-blue
- * #0ea5e9, slate text/surfaces, cyan info. Light values = Corporate light mode,
- * dark values = Corporate dark mode, paired via CSS `light-dark()`. Activation:
+ * DEFAULT THEME = pure-admin "Corporate" (professional blue/slate): primary sky-blue
+ * #0ea5e9, slate text/surfaces, cyan info. The INPUTS (:root) are Corporate's light /
+ * dark values paired via CSS `light-dark()`; everything else is DERIVED from them in
+ * the second block (formulas — see its header). Activation:
  *   - Automatic: follows the OS setting via `color-scheme: light dark` below.
  *   - Manual:    set `color-scheme: light` / `dark` on an ancestor, or the
  *                `[data-theme]` rules at the bottom.
@@ -31,16 +32,11 @@
    * interactive color: primary buttons, focus, selection, checked state, links.
    * ==================================================================== */
   --base-primary-color: #0ea5e9;
-  --base-primary-color-hover: #0284c7;
-  --base-primary-color-active: #0369a1;
-  --base-primary-bg-subtle: light-dark(color-mix(in srgb, var(--base-primary-color) 10%, transparent), color-mix(in srgb, var(--base-primary-color) 20%, transparent));        /* Primary tint: badges, chips, soft fills */
-  --base-primary-bg-subtle-hover: light-dark(color-mix(in srgb, var(--base-primary-color) 15%, transparent), color-mix(in srgb, var(--base-primary-color) 30%, transparent));  /* …on hover */
 
   /* ======================================================================
    * SECONDARY ROLE (neutral grey)
    * ==================================================================== */
   --base-secondary-color: #6c757d;
-  --base-secondary-color-hover: #545b62;
 
   /* ======================================================================
    * BACKGROUND / SURFACE COLORS
@@ -49,14 +45,8 @@
    * ==================================================================== */
   --base-page-bg: light-dark(#f8f9fa, #0f172a);          /* Canvas/backdrop below the content */
   --base-main-bg: light-dark(#ffffff, #1e293b);          /* Content surface — cards, panels, grid */
-  --base-subtle-bg: light-dark(#e9ecef, #0f172a);        /* Recessed/inset surface (code, wells) */
-  --base-elevated-bg: light-dark(#f1f5f9, #334155);      /* Raised surface — headers, toolbars, popovers */
   --base-overlay-bg: rgba(30, 41, 59, 0.5);              /* Modal/overlay scrim */
   --base-shadow-color: light-dark(rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.4)); /* Shadow tint for elevation */
-
-  --base-hover-bg: light-dark(#e9ecef, #334155);         /* Hover state for any surface */
-  --base-active-bg: light-dark(#dadfe4, #475569);        /* Active/pressed surface */
-  --base-disabled-bg: light-dark(#f1f3f5, #334155);      /* Disabled surface (inert tone) */
 
   /* ======================================================================
    * ITEM STATES — list options, tree rows, grid rows. One look for every
@@ -76,21 +66,15 @@
    * tints are mode-invariant (color-mix with transparent works on any surface).
    * ==================================================================== */
   --base-outline-width: 1px;                             /* Width for *-outline; consumers inset by −this */
-  --base-highlighted-bg: color-mix(in srgb, var(--base-primary-color) 10%, transparent);
-  --base-highlighted-bg-hover: var(--base-highlighted-bg); /* Highlighted row keeps its tint on hover */
   --base-highlighted-text-color: currentColor;           /* Text on a highlighted item (currentColor = unchanged) */
   --base-highlighted-outline: none;                      /* Outline shorthand, e.g. var(--base-outline-width) solid … */
   --base-focused-bg: transparent;                        /* The outline alone marks focus */
   --base-focused-text-color: currentColor;
-  --base-focused-outline: var(--base-outline-width) solid var(--base-primary-color); /* Keyboard-focus outline (drawn inset) */
 
   /* ======================================================================
    * TEXT COLORS (hierarchy)
    * ==================================================================== */
   --base-text-color-1: light-dark(#334155, #f1f5f9);     /* Primary — default body text, titles */
-  --base-text-color-2: light-dark(#64748b, #94a3b8);     /* Secondary — muted labels, supporting text */
-  --base-text-color-3: light-dark(#94a3b8, #64748b);     /* Tertiary — icons, metadata, paths */
-  --base-text-color-4: light-dark(#cbd5e1, #475569);     /* Faint — hints, placeholders, disabled */
   --base-on-primary-text-color: #ffffff;                       /* Text on the primary fill */
 
   /* "Foreground on a role" convention = --base-on-<role>-text-color */
@@ -100,36 +84,18 @@
    * BORDERS
    * ==================================================================== */
   --base-border-width: 1px;                              /* Shared stroke width the shorthands compose from */
-  --base-border-color: light-dark(#e2e8f0, #475569);
-  --base-border: var(--base-border-width) solid var(--base-border-color);
-  --base-checkbox-border-color: var(--base-border-color);
 
   /* ======================================================================
    * INPUT FIELDS
    * ==================================================================== */
-  --base-input-bg: light-dark(#ffffff, #334155);
-  --base-input-text-color: var(--base-text-color-1);
-  --base-input-border-color: var(--base-border-color);
-  --base-input-border: var(--base-border-width) solid var(--base-input-border-color);
-  --base-input-border-hover: var(--base-border-width) solid var(--base-primary-color);
-  --base-input-border-focus: var(--base-border-width) solid var(--base-primary-color);
-  --base-input-placeholder-color: light-dark(#cbd5e1, #64748b);
-  --base-input-bg-disabled: light-dark(rgba(26, 26, 26, 0.03), rgba(229, 229, 229, 0.05));
-  --base-input-icon-color: var(--base-text-color-3);
-  --base-input-icon-bg-hover: var(--base-hover-bg);
 
   /* ======================================================================
    * DROPDOWN / POPOVER
    * ==================================================================== */
-  --base-dropdown-bg: var(--base-main-bg);
-  --base-dropdown-border: var(--base-border-width) solid var(--base-border-color);
-  --base-dropdown-box-shadow: 0 8px 16px var(--base-shadow-color);
 
   /* ======================================================================
    * TOOLTIP
    * ==================================================================== */
-  --base-tooltip-bg: light-dark(#2c3e50, #475569);
-  --base-tooltip-text-color: light-dark(#ffffff, #f1f5f9);
 
   /* ======================================================================
    * CONTEXTUAL / ROLE COLORS — success / danger / warning / info
@@ -139,29 +105,21 @@
    * ==================================================================== */
   /* success (#10b981) */
   --base-success-color: #10b981;
-  --base-success-color-hover: #059669;
-  --base-success-bg-subtle: light-dark(color-mix(in srgb, var(--base-success-color) 10%, transparent), color-mix(in srgb, var(--base-success-color) 20%, transparent));
   --base-success-text-color: light-dark(#155724, #34d399);
   --base-on-success-text-color: #ffffff;
 
   /* danger (#ef4444 fill / #dc2626 strong) */
   --base-danger-color: #ef4444;
-  --base-danger-color-hover: #dc2626;
-  --base-danger-bg-subtle: light-dark(color-mix(in srgb, var(--base-danger-color) 10%, transparent), color-mix(in srgb, var(--base-danger-color) 20%, transparent));
   --base-danger-text-color: light-dark(#721c24, #f87171);
   --base-on-danger-text-color: #ffffff;
 
   /* warning (#f59e0b) */
   --base-warning-color: #f59e0b;
-  --base-warning-color-hover: #d97706;
-  --base-warning-bg-subtle: light-dark(color-mix(in srgb, var(--base-warning-color) 10%, transparent), color-mix(in srgb, var(--base-warning-color) 20%, transparent));
   --base-warning-text-color: light-dark(#856404, #fbbf24);
   --base-on-warning-text-color: #ffffff;
 
   /* info (#06b6d4 — Corporate cyan) */
   --base-info-color: #06b6d4;
-  --base-info-color-hover: #0891b2;
-  --base-info-bg-subtle: light-dark(color-mix(in srgb, var(--base-info-color) 10%, transparent), color-mix(in srgb, var(--base-info-color) 20%, transparent));
   --base-info-text-color: light-dark(#0c5460, #22d3ee);
   --base-on-info-text-color: #ffffff;
 
@@ -241,9 +199,6 @@
   /* ======================================================================
    * ELEVATION / SHADOW SCALE — colour from --base-shadow-color so it themes
    * ==================================================================== */
-  --base-shadow-sm: 0 1px 3px var(--base-shadow-color);
-  --base-shadow-md: 0 2px 8px var(--base-shadow-color);
-  --base-shadow-lg: 0 4px 12px var(--base-shadow-color);
 
   /* ======================================================================
    * MOTION — durations + easings
@@ -278,8 +233,6 @@
   --base-icon-caret-down: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22%3E%3Cpath fill=%22%23000%22 d=%22M12 15 6 9h12z%22/%3E%3C/svg%3E");
   --base-icon-caret-up: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22%3E%3Cpath fill=%22%23000%22 d=%22M12 9 6 15h12z%22/%3E%3C/svg%3E");
   --base-icon-close: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M18 6 6 18%22/%3E%3Cpath d=%22m6 6 12 12%22/%3E%3C/svg%3E");
-  --base-icon-clear: var(--base-icon-close);             /* field-clear — follows close */
-  --base-icon-remove: var(--base-icon-close);            /* item take-out (non-destructive) — follows close */
   --base-icon-expand: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M5 12h14%22/%3E%3Cpath d=%22M12 5v14%22/%3E%3C/svg%3E");
   --base-icon-collapse: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M5 12h14%22/%3E%3C/svg%3E");
   --base-icon-add: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M5 12h14%22/%3E%3Cpath d=%22M12 5v14%22/%3E%3C/svg%3E");
@@ -355,6 +308,91 @@
   --base-on-palette-7-text-color: #ffffff;
   --base-on-palette-8-text-color: #ffffff;
   --base-on-palette-9-text-color: #ffffff;
+}
+
+/* ===========================================================================
+ * DERIVED TOKENS — calculated from the inputs in :root.
+ * Each value is a formula over --base-main-bg, --base-page-bg,
+ * --base-text-color-1 and the role colors. Override any of them with a plain
+ * value to hand-set it (a theme with a deliberate look does exactly that);
+ * override an INPUT and every token below that uses it follows.
+ *
+ * Declared on `:root, [data-theme], .base-scope`: a var() inside a custom
+ * property resolves on the element that DECLARES it, so the formulas must be
+ * re-declared wherever inputs are re-set. To re-theme part of a page, set the
+ * inputs on an element with `data-theme` or `class="base-scope"` and this block
+ * recalculates there. (Inside such a scope the formulas replace values hand-set
+ * on :root.)
+ * ========================================================================= */
+:root,
+[data-theme],
+.base-scope {
+  /* TEXT LEVELS — text-color-1 mixed into main-bg */
+  --base-text-color-2: color-mix(in srgb, var(--base-text-color-1) 75%, var(--base-main-bg));  /* Secondary — muted labels, supporting text */
+  --base-text-color-3: color-mix(in srgb, var(--base-text-color-1) 55%, var(--base-main-bg));  /* Tertiary — icons, metadata, paths */
+  --base-text-color-4: color-mix(in srgb, var(--base-text-color-1) 40%, var(--base-main-bg));  /* Faint — hints, placeholders, disabled */
+
+  /* SURFACES — the background's own hue, shifted in lightness (OKLCH): darker in light
+   * mode, lighter in dark mode (dark steps are 2x — the eye separates dark tones less).
+   * hover / active are translucent overlays of that hue, so they show on ANY surface. */
+  --base-subtle-bg: light-dark(oklch(from var(--base-page-bg) calc(l - 0.024) c h), oklch(from var(--base-page-bg) calc(l + 0.048) c h));  /* Recessed/inset surface (code, wells) — from page-bg */
+  --base-elevated-bg: light-dark(oklch(from var(--base-main-bg) calc(l - 0.03) c h), oklch(from var(--base-main-bg) calc(l + 0.06) c h));  /* Raised surface — headers, toolbars, popovers */
+  --base-hover-bg: light-dark(color-mix(in oklch, oklch(from var(--base-main-bg) calc(l - 0.45) c h) 14%, transparent), color-mix(in oklch, oklch(from var(--base-main-bg) calc(l + 0.45) c h) 28%, transparent));  /* Hover state for any surface (overlay) */
+  --base-active-bg: light-dark(color-mix(in oklch, oklch(from var(--base-main-bg) calc(l - 0.45) c h) 24%, transparent), color-mix(in oklch, oklch(from var(--base-main-bg) calc(l + 0.45) c h) 48%, transparent));  /* Active/pressed state (overlay) */
+  --base-disabled-bg: light-dark(oklch(from var(--base-main-bg) calc(l - 0.024) c h), oklch(from var(--base-main-bg) calc(l + 0.048) c h));  /* Disabled surface (inert tone) */
+
+  /* PRIMARY / SECONDARY — hover/active steps (darker in light mode, lighter in dark) + tints */
+  --base-primary-color-hover: light-dark(color-mix(in srgb, black 15%, var(--base-primary-color)), color-mix(in srgb, white 15%, var(--base-primary-color)));
+  --base-primary-color-active: light-dark(color-mix(in srgb, black 30%, var(--base-primary-color)), color-mix(in srgb, white 30%, var(--base-primary-color)));
+  --base-primary-bg-subtle: light-dark(color-mix(in srgb, var(--base-primary-color) 10%, transparent), color-mix(in srgb, var(--base-primary-color) 20%, transparent));  /* Primary tint: badges, chips, soft fills */
+  --base-primary-bg-subtle-hover: light-dark(color-mix(in srgb, var(--base-primary-color) 15%, transparent), color-mix(in srgb, var(--base-primary-color) 30%, transparent));  /* …on hover */
+  --base-secondary-color-hover: light-dark(color-mix(in srgb, black 15%, var(--base-secondary-color)), color-mix(in srgb, white 15%, var(--base-secondary-color)));
+
+  /* ITEM STATES (see the item-state comment in :root) */
+  --base-highlighted-bg: var(--base-primary-bg-subtle);  /* Highlighted item = the primary tint */
+  --base-highlighted-bg-hover: var(--base-highlighted-bg);  /* Highlighted row keeps its tint on hover */
+  --base-focused-outline: var(--base-outline-width) solid var(--base-primary-color);  /* Keyboard-focus outline (drawn inset) */
+
+  /* BORDERS */
+  --base-border-color: light-dark(oklch(from var(--base-main-bg) calc(l - 0.096) c h), oklch(from var(--base-main-bg) calc(l + 0.192) c h));
+  --base-border: var(--base-border-width) solid var(--base-border-color);
+  --base-checkbox-border-color: var(--base-border-color);
+
+  /* INPUT FIELDS */
+  --base-input-bg: var(--base-main-bg);
+  --base-input-text-color: var(--base-text-color-1);
+  --base-input-border-color: var(--base-border-color);
+  --base-input-border: var(--base-border-width) solid var(--base-input-border-color);
+  --base-input-border-hover: var(--base-border-width) solid var(--base-primary-color);
+  --base-input-border-focus: var(--base-border-width) solid var(--base-primary-color);
+  --base-input-placeholder-color: var(--base-text-color-4);
+  --base-input-bg-disabled: var(--base-disabled-bg);
+  --base-input-icon-color: var(--base-text-color-3);  /* Icons inside inputs (clear ✕, chevron, calendar) */
+  --base-input-icon-bg-hover: var(--base-hover-bg);
+
+  /* DROPDOWN / TOOLTIP / SHADOWS */
+  --base-dropdown-bg: var(--base-main-bg);
+  --base-dropdown-border: var(--base-border-width) solid var(--base-border-color);
+  --base-dropdown-box-shadow: 0 8px 16px var(--base-shadow-color);
+  --base-tooltip-bg: light-dark(color-mix(in srgb, var(--base-text-color-1) 85%, var(--base-main-bg)), oklch(from var(--base-main-bg) calc(l + 0.15) c h));  /* Always dark: near-text in light mode, a lifted surface in dark */
+  --base-tooltip-text-color: light-dark(var(--base-main-bg), var(--base-text-color-1));
+  --base-shadow-sm: 0 1px 3px var(--base-shadow-color);
+  --base-shadow-md: 0 2px 8px var(--base-shadow-color);
+  --base-shadow-lg: 0 4px 12px var(--base-shadow-color);
+
+  /* STATUS ROLES — hover steps + tints (10% light / 20% dark) */
+  --base-success-color-hover: light-dark(color-mix(in srgb, black 15%, var(--base-success-color)), color-mix(in srgb, white 15%, var(--base-success-color)));
+  --base-success-bg-subtle: light-dark(color-mix(in srgb, var(--base-success-color) 10%, transparent), color-mix(in srgb, var(--base-success-color) 20%, transparent));
+  --base-danger-color-hover: light-dark(color-mix(in srgb, black 15%, var(--base-danger-color)), color-mix(in srgb, white 15%, var(--base-danger-color)));
+  --base-danger-bg-subtle: light-dark(color-mix(in srgb, var(--base-danger-color) 10%, transparent), color-mix(in srgb, var(--base-danger-color) 20%, transparent));
+  --base-warning-color-hover: light-dark(color-mix(in srgb, black 15%, var(--base-warning-color)), color-mix(in srgb, white 15%, var(--base-warning-color)));
+  --base-warning-bg-subtle: light-dark(color-mix(in srgb, var(--base-warning-color) 10%, transparent), color-mix(in srgb, var(--base-warning-color) 20%, transparent));
+  --base-info-color-hover: light-dark(color-mix(in srgb, black 15%, var(--base-info-color)), color-mix(in srgb, white 15%, var(--base-info-color)));
+  --base-info-bg-subtle: light-dark(color-mix(in srgb, var(--base-info-color) 10%, transparent), color-mix(in srgb, var(--base-info-color) 20%, transparent));
+
+  /* ICON ALIASES */
+  --base-icon-clear: var(--base-icon-close);  /* field-clear — follows close */
+  --base-icon-remove: var(--base-icon-close);  /* item take-out (non-destructive) — follows close */
 }
 
 /* ---------------------------------------------------------------------------

@@ -120,3 +120,53 @@ test('2.0.0 removed / renamed names are not defined', async ({ page }) => {
   }, gone);
   expect(defined).toEqual([]);
 });
+
+test('text levels and surfaces follow the inputs (main-bg, text-color-1)', async ({ page }) => {
+  await open(page);
+  const before = {
+    t2: await color(page, 'var(--base-text-color-2)'),
+    elev: await bg(page, 'var(--base-elevated-bg)'),
+    border: await borderColor(page, '1px solid var(--base-border-color)'),
+  };
+  await setRoot(page, { '--base-main-bg': 'rgb(255, 250, 230)', '--base-text-color-1': 'rgb(80, 20, 20)' });
+  expect(await color(page, 'var(--base-text-color-2)')).toBe(await color(page, 'color-mix(in srgb, rgb(80, 20, 20) 75%, rgb(255, 250, 230))'));
+  expect(await bg(page, 'var(--base-elevated-bg)')).not.toBe(before.elev);
+  expect(await borderColor(page, '1px solid var(--base-border-color)')).not.toBe(before.border);
+  expect(before.t2).not.toBe(await color(page, 'var(--base-text-color-2)'));
+});
+
+test('role hover steps follow the role color (darker in light, lighter in dark)', async ({ page }) => {
+  await open(page);
+  await setRoot(page, { '--base-danger-color': RED });
+  expect(await bg(page, 'var(--base-danger-color-hover)')).toBe(await bg(page, `color-mix(in srgb, black 15%, ${RED})`));
+  await open(page, 'dark');
+  await setRoot(page, { '--base-danger-color': RED });
+  expect(await bg(page, 'var(--base-danger-color-hover)')).toBe(await bg(page, `color-mix(in srgb, white 15%, ${RED})`));
+});
+
+test('dark mode: hover differs from the elevated surface, faint text from the border', async ({ page }) => {
+  await open(page, 'dark');
+  expect(await bg(page, 'var(--base-hover-bg)')).not.toBe(await bg(page, 'var(--base-elevated-bg)'));
+  expect(await color(page, 'var(--base-text-color-4)')).not.toBe(await borderColor(page, '1px solid var(--base-border-color)'));
+});
+
+test('.base-scope recalculates derived tokens for a re-themed subtree; a plain element does not', async ({ page }) => {
+  await open(page);
+  const tintIn = (cls: string) =>
+    page.evaluate((c) => {
+      const scope = document.createElement('div');
+      scope.className = c;
+      scope.style.setProperty('--base-primary-color', 'rgb(255, 0, 0)');
+      const probe = document.createElement('div');
+      probe.style.background = 'var(--base-primary-bg-subtle)';
+      scope.append(probe);
+      document.body.append(scope);
+      const v = getComputedStyle(probe).backgroundColor;
+      scope.remove();
+      return v;
+    }, cls);
+  const red10 = await bg(page, 'color-mix(in srgb, rgb(255, 0, 0) 10%, transparent)');
+  expect(await tintIn('base-scope')).toBe(red10);
+  // Without the scope hook the tint was resolved on :root (primary blue) — the documented limitation.
+  expect(await tintIn('')).not.toBe(red10);
+});
