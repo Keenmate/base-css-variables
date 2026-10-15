@@ -27,20 +27,14 @@
   color-scheme: light dark;
 
   /* ======================================================================
-   * ACCENT / PRIMARY COLORS — Corporate brand blue (kept across modes).
-   * `primary` is the canonical role name; `accent` the legacy alias.
+   * PRIMARY ROLE — Corporate brand blue (kept across modes). The brand /
+   * interactive color: primary buttons, focus, selection, checked state, links.
    * ==================================================================== */
-  --base-accent-color: #0ea5e9;
-  --base-accent-color-hover: #0284c7;
-  --base-accent-color-active: #0369a1;
-  --base-accent-color-light: rgba(14, 165, 233, 0.05);
-  --base-accent-color-light-hover: rgba(14, 165, 233, 0.08);
-
-  --base-primary-color: var(--base-accent-color);
-  --base-primary-color-hover: var(--base-accent-color-hover);
-  --base-primary-color-active: var(--base-accent-color-active);
-  --base-primary-color-light: var(--base-accent-color-light);
-  --base-primary-color-light-hover: var(--base-accent-color-light-hover);
+  --base-primary-color: #0ea5e9;
+  --base-primary-color-hover: #0284c7;
+  --base-primary-color-active: #0369a1;
+  --base-primary-bg-subtle: light-dark(color-mix(in srgb, var(--base-primary-color) 10%, transparent), color-mix(in srgb, var(--base-primary-color) 20%, transparent));        /* Primary tint: badges, chips, soft fills */
+  --base-primary-bg-subtle-hover: light-dark(color-mix(in srgb, var(--base-primary-color) 15%, transparent), color-mix(in srgb, var(--base-primary-color) 30%, transparent));  /* …on hover */
 
   /* ======================================================================
    * SECONDARY ROLE (neutral grey)
@@ -57,9 +51,8 @@
   --base-main-bg: light-dark(#ffffff, #1e293b);          /* Content surface — cards, panels, grid */
   --base-subtle-bg: light-dark(#e9ecef, #0f172a);        /* Recessed/inset surface (code, wells) */
   --base-elevated-bg: light-dark(#f1f5f9, #334155);      /* Raised surface — headers, toolbars, popovers */
-  --base-inverse-bg: light-dark(#2c3e50, #f1f5f9);       /* Inverse surface */
   --base-overlay-bg: rgba(30, 41, 59, 0.5);              /* Modal/overlay scrim */
-  --base-shadow-color: rgba(0, 0, 0, 0.15);             /* Shadow tint for elevation */
+  --base-shadow-color: light-dark(rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.4)); /* Shadow tint for elevation */
 
   --base-hover-bg: light-dark(#e9ecef, #334155);         /* Hover state for any surface */
   --base-active-bg: light-dark(#dadfe4, #475569);        /* Active/pressed surface */
@@ -74,72 +67,69 @@
    *   • selected    = checkbox-CHECKED — shown by the checkbox only, no row
    *                   tokens (when there are no checkboxes, highlighted IS the
    *                   selection, e.g. svelte-treeview mirrors the two arrays).
-   * Each state is a bg / text / ring trio; `*-ring` is an OUTLINE shorthand
-   * (not a border) that consumers draw INSET with
-   * `outline-offset: calc(-1 * var(--base-ring-width))`, so it never shifts
-   * layout or bleeds onto neighbouring rows. Change the ring thickness via
-   * --base-ring-width (not a px inside *-ring), or the inset offset no longer
-   * matches and the ring spills outside the row. Accent-derived tints are
-   * mode-invariant (color-mix with transparent works on any surface).
+   * Each state is a bg / text-color / outline trio; `*-outline` is an
+   * `outline` shorthand (not a border) that consumers draw INSET with
+   * `outline-offset: calc(-1 * var(--base-outline-width))`, so it never shifts
+   * layout or bleeds onto neighbouring rows. Change the thickness via
+   * --base-outline-width (not a px inside *-outline), or the inset offset no
+   * longer matches and the outline spills outside the row. Primary-derived
+   * tints are mode-invariant (color-mix with transparent works on any surface).
    * ==================================================================== */
-  --base-ring-width: 1px;                                /* Ring width for *-ring; consumers inset by −this */
-  --base-highlighted-bg: color-mix(in srgb, var(--base-accent-color) 10%, transparent);
+  --base-outline-width: 1px;                             /* Width for *-outline; consumers inset by −this */
+  --base-highlighted-bg: color-mix(in srgb, var(--base-primary-color) 10%, transparent);
   --base-highlighted-bg-hover: var(--base-highlighted-bg); /* Highlighted row keeps its tint on hover */
-  --base-highlighted-text: currentColor;                 /* Text on a highlighted item (currentColor = unchanged) */
-  --base-highlighted-ring: none;                         /* Outline shorthand, e.g. var(--base-ring-width) solid … */
-  --base-focused-bg: transparent;                        /* The ring alone marks focus */
-  --base-focused-text: currentColor;
-  --base-focused-ring: var(--base-ring-width) solid var(--base-accent-color); /* Keyboard-focus ring (drawn inset) */
+  --base-highlighted-text-color: currentColor;           /* Text on a highlighted item (currentColor = unchanged) */
+  --base-highlighted-outline: none;                      /* Outline shorthand, e.g. var(--base-outline-width) solid … */
+  --base-focused-bg: transparent;                        /* The outline alone marks focus */
+  --base-focused-text-color: currentColor;
+  --base-focused-outline: var(--base-outline-width) solid var(--base-primary-color); /* Keyboard-focus outline (drawn inset) */
 
   /* ======================================================================
    * TEXT COLORS (hierarchy)
    * ==================================================================== */
-  --base-text-color-1: light-dark(#334155, #f1f5f9);     /* Headers, titles, high-emphasis */
-  --base-text-color-2: light-dark(#64748b, #94a3b8);     /* Body text, labels */
-  --base-text-color-3: light-dark(#94a3b8, #64748b);     /* Secondary content, subtitles */
-  --base-text-color-4: light-dark(#cbd5e1, #475569);     /* Hints, placeholders, captions */
-  --base-text-color-on-accent: #ffffff;                  /* Text on accent backgrounds */
-  --base-text-inverted: light-dark(#ffffff, #1a1a1a);    /* Inverse of main text */
+  --base-text-color-1: light-dark(#334155, #f1f5f9);     /* Primary — default body text, titles */
+  --base-text-color-2: light-dark(#64748b, #94a3b8);     /* Secondary — muted labels, supporting text */
+  --base-text-color-3: light-dark(#94a3b8, #64748b);     /* Tertiary — icons, metadata, paths */
+  --base-text-color-4: light-dark(#cbd5e1, #475569);     /* Faint — hints, placeholders, disabled */
+  --base-on-primary-text-color: #ffffff;                       /* Text on the primary fill */
 
-  /* "Foreground on a role" convention = --base-text-on-<role> */
-  --base-text-on-primary: var(--base-text-color-on-accent);
-  --base-text-on-secondary: #ffffff;
+  /* "Foreground on a role" convention = --base-on-<role>-text-color */
+  --base-on-secondary-text-color: #ffffff;
 
   /* ======================================================================
    * BORDERS
    * ==================================================================== */
   --base-border-width: 1px;                              /* Shared stroke width the shorthands compose from */
   --base-border-color: light-dark(#e2e8f0, #475569);
-  --base-border: var(--base-border-width) solid light-dark(#e2e8f0, #475569);
-  --base-checkbox-border-color: light-dark(#e2e8f0, #475569);
+  --base-border: var(--base-border-width) solid var(--base-border-color);
+  --base-checkbox-border-color: var(--base-border-color);
 
   /* ======================================================================
    * INPUT FIELDS
    * ==================================================================== */
   --base-input-bg: light-dark(#ffffff, #334155);
-  --base-input-color: light-dark(#334155, #f1f5f9);
-  --base-input-border-color: light-dark(#e2e8f0, #475569);
-  --base-input-border: var(--base-border-width) solid light-dark(#e2e8f0, #475569);
-  --base-input-border-hover: var(--base-border-width) solid #0ea5e9;
-  --base-input-border-focus: var(--base-border-width) solid #0ea5e9;
+  --base-input-text-color: var(--base-text-color-1);
+  --base-input-border-color: var(--base-border-color);
+  --base-input-border: var(--base-border-width) solid var(--base-input-border-color);
+  --base-input-border-hover: var(--base-border-width) solid var(--base-primary-color);
+  --base-input-border-focus: var(--base-border-width) solid var(--base-primary-color);
   --base-input-placeholder-color: light-dark(#cbd5e1, #64748b);
   --base-input-bg-disabled: light-dark(rgba(26, 26, 26, 0.03), rgba(229, 229, 229, 0.05));
-  --base-input-clear-color: light-dark(#94a3b8, #64748b);
-  --base-input-clear-bg-hover: var(--base-hover-bg);
+  --base-input-icon-color: var(--base-text-color-3);
+  --base-input-icon-bg-hover: var(--base-hover-bg);
 
   /* ======================================================================
    * DROPDOWN / POPOVER
    * ==================================================================== */
-  --base-dropdown-bg: light-dark(#ffffff, #1e293b);
-  --base-dropdown-border: var(--base-border-width) solid light-dark(#e2e8f0, #475569);
-  --base-dropdown-box-shadow: light-dark(0 8px 16px rgba(0, 0, 0, 0.15), 0 8px 16px rgba(0, 0, 0, 0.4));
+  --base-dropdown-bg: var(--base-main-bg);
+  --base-dropdown-border: var(--base-border-width) solid var(--base-border-color);
+  --base-dropdown-box-shadow: 0 8px 16px var(--base-shadow-color);
 
   /* ======================================================================
    * TOOLTIP
    * ==================================================================== */
   --base-tooltip-bg: light-dark(#2c3e50, #475569);
   --base-tooltip-text-color: light-dark(#ffffff, #f1f5f9);
-  --base-tooltip-color: light-dark(#ffffff, #f1f5f9);    /* Alias used by web-grid */
 
   /* ======================================================================
    * CONTEXTUAL / ROLE COLORS — success / danger / warning / info
@@ -149,47 +139,31 @@
    * ==================================================================== */
   /* success (#10b981) */
   --base-success-color: #10b981;
-  --base-success-bg: #10b981;
   --base-success-color-hover: #059669;
-  --base-success-bg-light: light-dark(rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.2));
-  --base-success-bg-subtle: rgba(16, 185, 129, 0.08);
-  --base-success-border: rgba(16, 185, 129, 0.2);
-  --base-success-text: light-dark(#155724, #34d399);
-  --base-success-text-light: light-dark(#d4edda, #059669);
-  --base-text-on-success: #ffffff;
+  --base-success-bg-subtle: light-dark(color-mix(in srgb, var(--base-success-color) 10%, transparent), color-mix(in srgb, var(--base-success-color) 20%, transparent));
+  --base-success-text-color: light-dark(#155724, #34d399);
+  --base-on-success-text-color: #ffffff;
 
   /* danger (#ef4444 fill / #dc2626 strong) */
   --base-danger-color: #ef4444;
-  --base-danger-bg: #ef4444;
   --base-danger-color-hover: #dc2626;
-  --base-danger-bg-light: light-dark(rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.2));
-  --base-danger-bg-subtle: rgba(239, 68, 68, 0.08);
-  --base-danger-border: rgba(239, 68, 68, 0.2);
-  --base-danger-text: light-dark(#721c24, #f87171);
-  --base-danger-text-light: light-dark(#f8d7da, #dc2626);
-  --base-text-on-danger: #ffffff;
+  --base-danger-bg-subtle: light-dark(color-mix(in srgb, var(--base-danger-color) 10%, transparent), color-mix(in srgb, var(--base-danger-color) 20%, transparent));
+  --base-danger-text-color: light-dark(#721c24, #f87171);
+  --base-on-danger-text-color: #ffffff;
 
   /* warning (#f59e0b) */
   --base-warning-color: #f59e0b;
-  --base-warning-bg: #f59e0b;
   --base-warning-color-hover: #d97706;
-  --base-warning-bg-light: light-dark(rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.2));
-  --base-warning-bg-subtle: rgba(245, 158, 11, 0.08);
-  --base-warning-border: rgba(245, 158, 11, 0.2);
-  --base-warning-text: light-dark(#856404, #fbbf24);
-  --base-warning-text-light: light-dark(#fff3cd, #d97706);
-  --base-text-on-warning: #ffffff;
+  --base-warning-bg-subtle: light-dark(color-mix(in srgb, var(--base-warning-color) 10%, transparent), color-mix(in srgb, var(--base-warning-color) 20%, transparent));
+  --base-warning-text-color: light-dark(#856404, #fbbf24);
+  --base-on-warning-text-color: #ffffff;
 
   /* info (#06b6d4 — Corporate cyan) */
   --base-info-color: #06b6d4;
-  --base-info-bg: #06b6d4;
   --base-info-color-hover: #0891b2;
-  --base-info-bg-light: light-dark(rgba(6, 182, 212, 0.1), rgba(6, 182, 212, 0.2));
-  --base-info-bg-subtle: rgba(6, 182, 212, 0.08);
-  --base-info-border: rgba(6, 182, 212, 0.2);
-  --base-info-text: light-dark(#0c5460, #22d3ee);
-  --base-info-text-light: light-dark(#d1ecf1, #0891b2);
-  --base-text-on-info: #ffffff;
+  --base-info-bg-subtle: light-dark(color-mix(in srgb, var(--base-info-color) 10%, transparent), color-mix(in srgb, var(--base-info-color) 20%, transparent));
+  --base-info-text-color: light-dark(#0c5460, #22d3ee);
+  --base-on-info-text-color: #ffffff;
 
   /* ======================================================================
    * TYPOGRAPHY
@@ -360,25 +334,27 @@
 
   /* ======================================================================
    * THEME PALETTE SLOTS (1–9) + paired contrast text — Corporate palette
+   * Unordered categorical slots (badges, tags, cards, charts): the number is
+   * an ID, not a rank — unlike the --base-text-color-1…4 emphasis scale.
    * ==================================================================== */
-  --base-color-1: #f59e0b;  /* Amber */
-  --base-color-2: #ec4899;  /* Pink */
-  --base-color-3: #10b981;  /* Emerald */
-  --base-color-4: #0ea5e9;  /* Sky blue */
-  --base-color-5: #8b5cf6;  /* Violet */
-  --base-color-6: #6366f1;  /* Indigo */
-  --base-color-7: #64748b;  /* Slate */
-  --base-color-8: #0284c7;  /* Corporate blue */
-  --base-color-9: #334155;  /* Dark slate */
-  --base-color-1-text: #1a1a1a;
-  --base-color-2-text: #ffffff;
-  --base-color-3-text: #ffffff;
-  --base-color-4-text: #ffffff;
-  --base-color-5-text: #ffffff;
-  --base-color-6-text: #ffffff;
-  --base-color-7-text: #ffffff;
-  --base-color-8-text: #ffffff;
-  --base-color-9-text: #ffffff;
+  --base-palette-1: #f59e0b;  /* Amber */
+  --base-palette-2: #ec4899;  /* Pink */
+  --base-palette-3: #10b981;  /* Emerald */
+  --base-palette-4: #0ea5e9;  /* Sky blue */
+  --base-palette-5: #8b5cf6;  /* Violet */
+  --base-palette-6: #6366f1;  /* Indigo */
+  --base-palette-7: #64748b;  /* Slate */
+  --base-palette-8: #0284c7;  /* Corporate blue */
+  --base-palette-9: #334155;  /* Dark slate */
+  --base-on-palette-1-text-color: #1a1a1a;
+  --base-on-palette-2-text-color: #ffffff;
+  --base-on-palette-3-text-color: #ffffff;
+  --base-on-palette-4-text-color: #ffffff;
+  --base-on-palette-5-text-color: #ffffff;
+  --base-on-palette-6-text-color: #ffffff;
+  --base-on-palette-7-text-color: #ffffff;
+  --base-on-palette-8-text-color: #ffffff;
+  --base-on-palette-9-text-color: #ffffff;
 }
 
 /* ---------------------------------------------------------------------------

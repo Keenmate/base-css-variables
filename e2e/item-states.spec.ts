@@ -1,7 +1,7 @@
 import { test, expect, type Page, type Locator } from '@playwright/test';
 
 /**
- * Item-state contract: --base-ring-width, --base-highlighted-*, --base-focused-*.
+ * Item-state contract: --base-outline-width, --base-highlighted-*, --base-focused-*.
  *
  * Model (Windows Explorer): focused = the ONE cursor item; highlighted = the
  * Ctrl/Shift-click set; selected = checkbox-checked (checkbox only, no row
@@ -54,35 +54,37 @@ test.beforeEach(async ({ page }) => open(page));
 
 test.describe('token defaults', () => {
   test('ships the item-state tokens with the documented defaults', async ({ page }) => {
-    expect(await rootVar(page, '--base-ring-width')).toBe('1px');
+    expect(await rootVar(page, '--base-outline-width')).toBe('1px');
     expect(await rootVar(page, '--base-highlighted-bg')).toMatch(/color-mix\(in srgb, #0ea5e9 10%, transparent\)/);
     expect(await rootVar(page, '--base-highlighted-bg-hover')).toMatch(/color-mix\(in srgb, #0ea5e9 10%, transparent\)/);
-    expect(await rootVar(page, '--base-highlighted-text')).toBe('currentColor');
-    expect(await rootVar(page, '--base-highlighted-ring')).toBe('none');
+    expect(await rootVar(page, '--base-highlighted-text-color')).toBe('currentColor');
+    expect(await rootVar(page, '--base-highlighted-outline')).toBe('none');
     expect(await rootVar(page, '--base-focused-bg')).toBe('transparent');
-    expect(await rootVar(page, '--base-focused-text')).toBe('currentColor');
-    expect(await rootVar(page, '--base-focused-ring')).toBe('1px solid #0ea5e9');
+    expect(await rootVar(page, '--base-focused-text-color')).toBe('currentColor');
+    expect(await rootVar(page, '--base-focused-outline')).toBe('1px solid #0ea5e9');
   });
 
-  test('the pre-release names are gone (no --base-selected-*, -color, -border, item-ring)', async ({ page }) => {
+  test('old names are gone (pre-release + the 1.0.7 -ring / -text names)', async ({ page }) => {
     for (const old of [
       '--base-selected-bg', '--base-selected-bg-hover', '--base-selected-color', '--base-selected-border',
       '--base-focused-color', '--base-focused-border', '--base-item-ring-width',
       '--base-highlighted-color', '--base-highlighted-border',
+      '--base-ring-width', '--base-highlighted-ring', '--base-focused-ring',
+      '--base-highlighted-text', '--base-focused-text',
     ]) {
       expect(await rootVar(page, old), old).toBe('');
     }
   });
 
-  test('--base-focused-ring composes from --base-ring-width', async ({ page }) => {
-    await setRootVar(page, '--base-ring-width', '3px');
-    expect(await rootVar(page, '--base-focused-ring')).toBe('3px solid #0ea5e9');
+  test('--base-focused-outline composes from --base-outline-width', async ({ page }) => {
+    await setRootVar(page, '--base-outline-width', '3px');
+    expect(await rootVar(page, '--base-focused-outline')).toBe('3px solid #0ea5e9');
   });
 
-  test('highlight tint follows a runtime --base-accent-color override', async ({ page }) => {
-    await setRootVar(page, '--base-accent-color', '#ff0000');
+  test('highlight tint follows a runtime --base-primary-color override', async ({ page }) => {
+    await setRootVar(page, '--base-primary-color', '#ff0000');
     expect(await rootVar(page, '--base-highlighted-bg')).toMatch(/#ff0000 10%/);
-    expect(await rootVar(page, '--base-focused-ring')).toBe('1px solid #ff0000');
+    expect(await rootVar(page, '--base-focused-outline')).toBe('1px solid #ff0000');
   });
 });
 
@@ -152,18 +154,18 @@ test.describe('reference list — rendering from the tokens', () => {
     expect(await ring(refRow(page, 'Videos'))).toEqual({ width: 1, offset: -1, style: 'solid' });
   });
 
-  test('a thicker --base-ring-width keeps the ring inset (offset = −width)', async ({ page }) => {
+  test('a thicker --base-outline-width keeps the ring inset (offset = −width)', async ({ page }) => {
     await refRow(page, 'Music').click();
     await page.locator('#ctl-ring-width').fill('3');
     expect(await ring(refRow(page, 'Music'))).toEqual({ width: 3, offset: -3, style: 'solid' });
   });
 
-  test('anti-pattern: a px hard-coded into --base-focused-ring spills (why the width token exists)', async ({ page }) => {
+  test('anti-pattern: a px hard-coded into --base-focused-outline spills (why the width token exists)', async ({ page }) => {
     await refRow(page, 'Music').click();
     await page.locator('#ctl-wrong').check();
     const r = await ring(refRow(page, 'Music'));
     expect(r.width).toBe(3);
-    expect(r.offset).toBe(-1); // offset still tracks --base-ring-width → 2px of ring outside the row
+    expect(r.offset).toBe(-1); // offset still tracks --base-outline-width → 2px of ring outside the row
   });
 
   test('the ring is an outline, so states never shift layout', async ({ page }) => {
@@ -211,14 +213,14 @@ test.describe('web-treeview reads the same tokens', () => {
       .toBe(await style(refRow(page, 'Music'), 'background-color'));
   });
 
-  test('focus ring follows --base-ring-width and stays inset', async ({ page }) => {
+  test('focus ring follows --base-outline-width and stays inset', async ({ page }) => {
     await node(page, 'Pictures').click();
     await expect(node(page, 'Pictures')).toHaveClass(/wtv__node-content--focused/);
     expect(await ring(node(page, 'Pictures'))).toEqual({ width: 1, offset: -1, style: 'solid' });
 
     await page.locator('#ctl-ring-width').fill('3');
     expect(await ring(node(page, 'Pictures'))).toEqual({ width: 3, offset: -3, style: 'solid' });
-    expect(await style(node(page, 'Pictures'), 'outline-color')).toBe(await resolve(page, 'color', 'var(--base-accent-color)'));
+    expect(await style(node(page, 'Pictures'), 'outline-color')).toBe(await resolve(page, 'color', 'var(--base-primary-color)'));
   });
 });
 
@@ -249,7 +251,7 @@ test.describe('web-multiselect reads the same tokens', () => {
       .toBe(await style(refRow(page, 'Music'), 'background-color'));
   });
 
-  test('cursor option gets the inset focus ring, following --base-ring-width', async ({ page }) => {
+  test('cursor option gets the inset focus ring, following --base-outline-width', async ({ page }) => {
     await page.locator('#ctl-ring-width').fill('2');
     await openDropdown(page);
     await page.keyboard.press('ArrowDown');

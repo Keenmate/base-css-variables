@@ -90,7 +90,6 @@ prominent than the last — with a separate **interaction-state** axis on top:
 - **hover** — pointer hover on a surface (rows, options)
 - **active** — pressed / selected
 - **disabled** — inert / readonly surface
-- **inverse** — high-contrast surface, used for tooltips
 
 Role-specific surfaces (`--base-input-bg`, `--base-dropdown-bg`, `--base-tooltip-bg`)
 default to values in this scale but can be retargeted on their own — that's the
@@ -109,28 +108,28 @@ consumers never define a parallel source of truth, they derive from it:
 
 Every `--pc-*` is wired as `var(--base-*, <fallback>)`, so overriding **one**
 `--base-*` re-themes pure-admin components *and* the web components together.
-Traced end-to-end for the accent:
+Traced end-to-end for the primary color:
 
 ```
-LAYER 0  contract (THIS file, CSS)       :root { --base-accent-color: #0ea5e9 }
+LAYER 0  contract (THIS file, CSS)       :root { --base-primary-color: #0ea5e9 }
             │  pure-css mirrors the list into SCSS
-LAYER 1  pure-css source (SCSS)          $base-accent-color: #0ea5e9 !default;   ◀─ a THEME overrides here
+LAYER 1  pure-css source (SCSS)          $base-primary-color: #0ea5e9 !default;   ◀─ a THEME overrides here
             │  derive
-LAYER 2  pure-css framework var (SCSS)   $accent-color: $base-accent-color;       (serves only as the build fallback)
+LAYER 2  pure-css framework var (SCSS)   $primary-color: $base-primary-color;       (serves only as the build fallback)
             │  emit (two mixins)
-LAYER 3  pure-css emit  ──▶ CSS          --base-accent-color: #0ea5e9;                   ◀─ RAIL A · the knob
-                                         --pc-accent: var(--base-accent-color, #0ea5e9)  ◀─ RAIL B · pure-admin's token
+LAYER 3  pure-css emit  ──▶ CSS          --base-primary-color: #0ea5e9;                   ◀─ RAIL A · the knob
+                                         --pc-primary: var(--base-primary-color, #0ea5e9)  ◀─ RAIL B · pure-admin's token
             │
-LAYER 4  pure-admin-core (CSS)           --pc-accent-light, --pc-accent-hover,
-                                         --pc-link-color: var(--pc-accent), …
+LAYER 4  pure-admin-core (CSS)           --pc-primary-bg-subtle, --pc-primary-bg-subtle-hover,
+                                         --pc-link-color: var(--pc-primary), …
             │
 LAYER 5  consumers
-            pure-admin components         background: var(--pc-accent-light);
-            web components                --ms-accent-color: var(--base-accent-color, #3b82f6);
+            pure-admin components         background: var(--pc-primary-bg-subtle);
+            web components                --ms-accent-color: var(--base-primary-color, #3b82f6);
 ```
 
-- **RAIL A** (`--base-accent-color`) is the knob; **RAIL B** (`--pc-accent`) is
-  `var(--base-accent-color, …)`, so at runtime it simply *is* the base value — the
+- **RAIL A** (`--base-primary-color`) is the knob; **RAIL B** (`--pc-primary`) is
+  `var(--base-primary-color, …)`, so at runtime it simply *is* the base value — the
   `<fallback>` only fires if RAIL A is ever missing (it isn't, once this file or a
   theme is loaded).
 - There is **no `$pc-*` SCSS variable**. The `pc` layer is born at emission as a CSS
@@ -138,9 +137,9 @@ LAYER 5  consumers
 
 | Override… | Where | Effect |
 |---|---|---|
-| `--base-accent-color` | any `:root` / `.pc-mode-*` / `[data-*]` scope (runtime) | **everything** downstream, live — pure-admin **and** web components |
-| `$base-accent-color` | pure-css SCSS (build) | the default baked into `base.css` + every `--pc-*` fallback |
-| `--pc-accent` | a single `--pc-*` (runtime) | pure-admin only — use for a deliberate pure-admin-only divergence |
+| `--base-primary-color` | any `:root` / `.pc-mode-*` / `[data-*]` scope (runtime) | **everything** downstream, live — pure-admin **and** web components |
+| `$base-primary-color` | pure-css SCSS (build) | the default baked into `base.css` + every `--pc-*` fallback |
+| `--pc-primary` | a single `--pc-*` (runtime) | pure-admin only — use for a deliberate pure-admin-only divergence |
 
 That middle-less "one knob" row is the whole design: a theme (or a time-of-day
 `[data-daypart]` scope) re-sets `--base-*` and the entire `--pc-*` layer re-resolves.
@@ -152,7 +151,7 @@ flows into every component:
 
 ```css
 :root {
-  --base-accent-color: #e11d48;   /* rebrand every component's accent */
+  --base-primary-color: #e11d48;   /* rebrand every component's primary color */
   --base-main-bg: #fafafa;
   --base-border-radius-md: 1;      /* rounder corners everywhere */
 }
@@ -236,22 +235,17 @@ These tables are the complete `--base-*` contract, mirrored token-for-token by
 `@keenmate/pure-css` (`$base-*`). Light values are Corporate light mode, dark are
 Corporate dark mode.
 
-### Accent / primary colors
-`primary` is the canonical role name; `accent` is the legacy alias each `--base-primary-*`
-points back to via `var()`. Brand blue, kept across light / dark.
+### Primary role
+The brand / interactive color — primary buttons, focus, selection, checked state, links.
+Brand blue, kept across light / dark. (Before 2.0.0 this was `--base-accent-*`.)
 
 | Variable | Purpose |
 |----------|---------|
-| `--base-accent-color` | Primary brand / action color |
-| `--base-accent-color-hover` | Accent hover state |
-| `--base-accent-color-active` | Accent active / pressed state |
-| `--base-accent-color-light` | Subtle accent tint for backgrounds |
-| `--base-accent-color-light-hover` | Subtle accent tint, hover |
-| `--base-primary-color` | Canonical alias → `--base-accent-color` |
-| `--base-primary-color-hover` | Alias → `--base-accent-color-hover` |
-| `--base-primary-color-active` | Alias → `--base-accent-color-active` |
-| `--base-primary-color-light` | Alias → `--base-accent-color-light` |
-| `--base-primary-color-light-hover` | Alias → `--base-accent-color-light-hover` |
+| `--base-primary-color` | Primary brand / action color |
+| `--base-primary-color-hover` | Darker hover step |
+| `--base-primary-color-active` | Active / pressed step |
+| `--base-primary-bg-subtle` | Primary tint for badges, chips, soft fills: `-color` mixed 10% (light) / 20% (dark) into transparent — same pattern as the role tints |
+| `--base-primary-bg-subtle-hover` | The primary tint on hover: 15% (light) / 30% (dark) |
 
 ### Secondary role
 | Variable | Purpose |
@@ -269,9 +263,8 @@ Elevation ladder: `page` (canvas) < `subtle` (recessed) < `main` (content) <
 | `--base-main-bg` | Content surface — cards, panels, grid |
 | `--base-subtle-bg` | Recessed / inset surface (code, wells) |
 | `--base-elevated-bg` | Raised surface — headers, toolbars, popovers |
-| `--base-inverse-bg` | Inverse surface (fallback for tooltip background) |
 | `--base-overlay-bg` | Modal / overlay scrim |
-| `--base-shadow-color` | Shadow tint for elevation (used by the shadow scale) |
+| `--base-shadow-color` | Shadow tint for elevation: 15% black (light) / 40% (dark); used by the shadow scale and the dropdown shadow |
 | `--base-hover-bg` | Hover state for any surface (option / row hover) |
 | `--base-active-bg` | Active / pressed surface |
 | `--base-disabled-bg` | Disabled / readonly surface |
@@ -287,33 +280,31 @@ with three states:
   `--base-selected-*` row tokens. With no checkboxes, highlighted *is* the selection
   (svelte-treeview keeps the two arrays identical in that mode).
 
-`*-ring` is an `outline` (not `border`) shorthand that consumers draw **inset** (`outline-offset: calc(-1 * var(--base-ring-width))`):
+`*-outline` is an `outline` (not `border`) shorthand that consumers draw **inset** (`outline-offset: calc(-1 * var(--base-outline-width))`):
 no layout shift, no bleed onto neighbouring rows, and a separate paint channel from
-background / box-shadow. To thicken the ring, change `--base-ring-width` — a px
-written directly into `*-ring` won't move the inset offset, so the ring spills out of the row.
+background / box-shadow. To thicken it, change `--base-outline-width` — a px
+written directly into `*-outline` won't move the inset offset, so the outline spills out of the row.
 
 | Variable | Purpose |
 |----------|---------|
-| `--base-ring-width` | Ring thickness for `*-ring`; consumers inset the outline by −this (default: `1px`) |
-| `--base-highlighted-bg` | Highlighted item tint (default: accent at 10%) |
+| `--base-outline-width` | Thickness for `*-outline`; consumers inset the outline by −this (default: `1px`) |
+| `--base-highlighted-bg` | Highlighted item tint (default: primary at 10%) |
 | `--base-highlighted-bg-hover` | Highlighted item on hover (default: same as `--base-highlighted-bg`) |
-| `--base-highlighted-text` | Text on a highlighted item (default: `currentColor` = unchanged) |
-| `--base-highlighted-ring` | Highlighted item ring, outline shorthand (default: `none`) |
-| `--base-focused-bg` | Focused item background (default: `transparent`, the ring alone marks focus) |
-| `--base-focused-text` | Text on the focused item (default: `currentColor`) |
-| `--base-focused-ring` | Keyboard-focus ring, outline shorthand (default: `--base-ring-width solid` accent) |
+| `--base-highlighted-text-color` | Text on a highlighted item (default: `currentColor` = unchanged) |
+| `--base-highlighted-outline` | Highlighted item outline shorthand (default: `none`) |
+| `--base-focused-bg` | Focused item background (default: `transparent`, the outline alone marks focus) |
+| `--base-focused-text-color` | Text on the focused item (default: `currentColor`) |
+| `--base-focused-outline` | Keyboard-focus outline shorthand (default: `--base-outline-width solid` primary) |
 
 ### Text
 | Variable | Purpose |
 |----------|---------|
-| `--base-text-color-1` | Headers, titles, high-emphasis |
-| `--base-text-color-2` | Body text, labels |
-| `--base-text-color-3` | Secondary content, subtitles |
-| `--base-text-color-4` | Hints, placeholders, captions |
-| `--base-text-color-on-accent` | Text on accent backgrounds |
-| `--base-text-inverted` | Inverse of main text (on inverse / accent surfaces) |
-| `--base-text-on-primary` | Readable text on the primary fill (→ `--base-text-color-on-accent`) |
-| `--base-text-on-secondary` | Readable text on the secondary fill |
+| `--base-text-color-1` | Primary — default body text, titles |
+| `--base-text-color-2` | Secondary — muted labels, supporting text |
+| `--base-text-color-3` | Tertiary — icons, metadata, paths |
+| `--base-text-color-4` | Faint — hints, placeholders, disabled |
+| `--base-on-primary-text-color` | Text on the primary fill |
+| `--base-on-secondary-text-color` | Readable text on the secondary fill |
 
 ### Borders
 | Variable | Purpose |
@@ -327,29 +318,28 @@ written directly into `*-ring` won't move the inset offset, so the ring spills o
 | Variable | Purpose |
 |----------|---------|
 | `--base-input-bg` | Input background |
-| `--base-input-color` | Input text color |
+| `--base-input-text-color` | Input text color |
 | `--base-input-border-color` | Input border color |
 | `--base-input-border` | Input border (normal) |
 | `--base-input-border-hover` | Input border on hover |
 | `--base-input-border-focus` | Input border on focus |
 | `--base-input-placeholder-color` | Placeholder text |
 | `--base-input-bg-disabled` | Disabled input background |
-| `--base-input-clear-color` | Clear (✕) button color |
-| `--base-input-clear-bg-hover` | Clear button background on hover |
+| `--base-input-icon-color` | Icons inside an input (clear ✕, chevron, calendar, search) |
+| `--base-input-icon-bg-hover` | Background of an input icon button on hover |
 
 ### Dropdown / popover
 | Variable | Purpose |
 |----------|---------|
 | `--base-dropdown-bg` | Dropdown / popover background |
 | `--base-dropdown-border` | Dropdown border |
-| `--base-dropdown-box-shadow` | Dropdown shadow |
+| `--base-dropdown-box-shadow` | Dropdown shadow (`0 8px 16px` in `--base-shadow-color`) |
 
 ### Tooltip
 | Variable | Purpose |
 |----------|---------|
 | `--base-tooltip-bg` | Tooltip background |
 | `--base-tooltip-text-color` | Tooltip text |
-| `--base-tooltip-color` | Tooltip text alias (web-grid) |
 
 ### Status colors
 Role ∈ `success` / `danger` / `warning` / `info`. Each role defines the full set below.
@@ -357,14 +347,10 @@ Role ∈ `success` / `danger` / `warning` / `info`. Each role defines the full s
 | Variable | Purpose |
 |----------|---------|
 | `--base-<role>-color` | Role **fill identity** (vivid) |
-| `--base-<role>-bg` | Solid role fill (= `-color`) |
 | `--base-<role>-color-hover` | Role fill, hover |
-| `--base-<role>-bg-light` | Subtle role tint (light fill) |
-| `--base-<role>-bg-subtle` | Even fainter role tint |
-| `--base-<role>-border` | Role border tint |
-| `--base-<role>-text` | Role as **foreground on a light surface** (text / links) |
-| `--base-<role>-text-light` | Lighter role foreground variant |
-| `--base-text-on-<role>` | Readable text **on** the role fill |
+| `--base-<role>-bg-subtle` | Role tint for backgrounds (labels, toasts, invalid cells): `-color` mixed 10% (light) / 20% (dark) into transparent |
+| `--base-<role>-text-color` | Role as **foreground on a light surface** (text / links) |
+| `--base-on-<role>-text-color` | Readable text **on** the role fill |
 
 ### Typography
 | Variable | Purpose |
@@ -464,8 +450,8 @@ categorical color (charts, tags, avatars).
 
 | Variable | Purpose |
 |----------|---------|
-| `--base-color-1 … 9` | Palette slots 1–9 (amber, pink, emerald, sky, violet, indigo, slate, corporate-blue, dark-slate) |
-| `--base-color-1-text … 9-text` | Readable text paired with each slot |
+| `--base-palette-1 … 9` | Palette slots 1–9 (amber, pink, emerald, sky, violet, indigo, slate, corporate-blue, dark-slate) |
+| `--base-on-palette-1-text-color … 9` | Readable text on each slot |
 
 > **Unitless multipliers:** font sizes, radii, input heights and the spacing scale
 > are stored as plain numbers and combined by components against `--base-rem` — e.g.

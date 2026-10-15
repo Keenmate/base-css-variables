@@ -1,0 +1,122 @@
+import { test, expect, type Page } from '@playwright/test';
+
+/**
+ * Derivation contract: a derived --base-* token must FOLLOW its source at
+ * runtime. Each spec overrides one source token on :root and checks that every
+ * dependent resolves to the new value — so a pasted literal (the old
+ * `--base-input-border-focus: … #0ea5e9`, `--base-success-bg: #10b981`) fails.
+ *
+ * Probes paint a real property (border / background / outline) from the token
+ * and compare against the same value computed by the browser directly.
+ */
+
+const PAGE = '/demo/item-states.html';
+
+async function open(page: Page, scheme: 'light' | 'dark' = 'light'): Promise<void> {
+  await page.goto(PAGE);
+  await page.waitForFunction(() => (window as any).__demo?.ready === true);
+  await page.evaluate((s) => { document.documentElement.style.colorScheme = s; }, scheme);
+}
+
+const setRoot = (page: Page, vars: Record<string, string>) =>
+  page.evaluate((v) => {
+    for (const [k, val] of Object.entries(v)) document.documentElement.style.setProperty(k, val);
+  }, vars);
+
+/** Computed `prop` of a fresh element styled with `css`. */
+const paint = (page: Page, css: string, prop: string) =>
+  page.evaluate(([c, p]) => {
+    const el = document.createElement('div');
+    el.style.cssText = c;
+    document.body.appendChild(el);
+    const out = getComputedStyle(el).getPropertyValue(p);
+    el.remove();
+    return out;
+  }, [css, prop]);
+
+const bg = (page: Page, value: string) => paint(page, `background-color: ${value}`, 'background-color');
+const borderColor = (page: Page, shorthand: string) => paint(page, `border: ${shorthand}`, 'border-top-color');
+const color = (page: Page, value: string) => paint(page, `color: ${value}`, 'color');
+
+const RED = 'rgb(255, 0, 0)';
+const GREEN = 'rgb(0, 128, 0)';
+
+test('primary: tints, input borders and item states follow --base-primary-color', async ({ page }) => {
+  await open(page);
+  await setRoot(page, { '--base-primary-color': RED });
+
+  expect(await borderColor(page, 'var(--base-input-border-focus)')).toBe(RED);
+  expect(await borderColor(page, 'var(--base-input-border-hover)')).toBe(RED);
+  expect(await bg(page, 'var(--base-primary-bg-subtle)')).toBe(await bg(page, `color-mix(in srgb, ${RED} 10%, transparent)`));
+  expect(await bg(page, 'var(--base-primary-bg-subtle-hover)')).toBe(await bg(page, `color-mix(in srgb, ${RED} 15%, transparent)`));
+  expect(await bg(page, 'var(--base-highlighted-bg)')).toBe(await bg(page, `color-mix(in srgb, ${RED} 10%, transparent)`));
+  expect(await paint(page, 'outline: var(--base-focused-outline)', 'outline-color')).toBe(RED);
+});
+
+test('primary tint is mode-aware like the role tints (dark 20% / 30%)', async ({ page }) => {
+  await open(page, 'dark');
+  await setRoot(page, { '--base-primary-color': RED });
+  expect(await bg(page, 'var(--base-primary-bg-subtle)')).toBe(await bg(page, `color-mix(in srgb, ${RED} 20%, transparent)`));
+  expect(await bg(page, 'var(--base-primary-bg-subtle-hover)')).toBe(await bg(page, `color-mix(in srgb, ${RED} 30%, transparent)`));
+});
+
+test('shadow: the dropdown shadow follows --base-shadow-color', async ({ page }) => {
+  await open(page);
+  expect(await paint(page, 'box-shadow: var(--base-dropdown-box-shadow)', 'box-shadow')).toBe('rgba(0, 0, 0, 0.15) 0px 8px 16px 0px');
+  await open(page, 'dark');
+  expect(await paint(page, 'box-shadow: var(--base-dropdown-box-shadow)', 'box-shadow')).toBe('rgba(0, 0, 0, 0.4) 0px 8px 16px 0px');
+  await setRoot(page, { '--base-shadow-color': RED });
+  expect(await paint(page, 'box-shadow: var(--base-dropdown-box-shadow)', 'box-shadow')).toBe(`${RED} 0px 8px 16px 0px`);
+});
+
+test('border: every border token follows --base-border-color', async ({ page }) => {
+  await open(page);
+  await setRoot(page, { '--base-border-color': GREEN });
+
+  expect(await borderColor(page, 'var(--base-border)')).toBe(GREEN);
+  expect(await borderColor(page, 'var(--base-input-border)')).toBe(GREEN);
+  expect(await borderColor(page, 'var(--base-dropdown-border)')).toBe(GREEN);
+  expect(await borderColor(page, '1px solid var(--base-input-border-color)')).toBe(GREEN);
+  expect(await borderColor(page, '1px solid var(--base-checkbox-border-color)')).toBe(GREEN);
+});
+
+test('surfaces + text: input / dropdown tokens follow their source', async ({ page }) => {
+  await open(page);
+  await setRoot(page, { '--base-text-color-1': RED, '--base-text-color-3': GREEN, '--base-main-bg': RED });
+
+  expect(await color(page, 'var(--base-input-text-color)')).toBe(RED);
+  expect(await color(page, 'var(--base-input-icon-color)')).toBe(GREEN);
+  expect(await bg(page, 'var(--base-dropdown-bg)')).toBe(RED);
+});
+
+for (const role of ['success', 'danger', 'warning', 'info'] as const) {
+  for (const [scheme, pct] of [['light', 10], ['dark', 20]] as const) {
+    test(`${role}: tint (${scheme} ${pct}%) follows --base-${role}-color`, async ({ page }) => {
+      await open(page, scheme);
+      await setRoot(page, { [`--base-${role}-color`]: RED });
+
+      expect(await bg(page, `var(--base-${role}-bg-subtle)`)).toBe(await bg(page, `color-mix(in srgb, ${RED} ${pct}%, transparent)`));
+    });
+  }
+}
+
+test('2.0.0 removed / renamed names are not defined', async ({ page }) => {
+  await open(page);
+  const roles = ['success', 'danger', 'warning', 'info'];
+  const gone = [
+    '--base-accent-color', '--base-accent-color-hover', '--base-accent-color-active',
+    '--base-accent-color-light', '--base-accent-color-light-hover', '--base-text-color-on-accent',
+    '--base-primary-color-light', '--base-primary-color-light-hover', '--base-text-on-primary',
+    '--base-text-on-secondary', '--base-text-inverted', '--base-inverse-text', '--base-inverse-bg', '--base-inverse-text-color',
+    '--base-input-color', '--base-input-clear-color', '--base-input-clear-bg-hover', '--base-tooltip-color',
+    ...roles.flatMap((r) => [`--base-${r}-bg`, `--base-${r}-bg-light`, `--base-${r}-text-light`,
+      `--base-${r}-border`, `--base-${r}-text`, `--base-text-on-${r}`]),
+    ...Array.from({ length: 9 }, (_, i) => [`--base-color-${i + 1}`, `--base-color-${i + 1}-text`,
+      `--base-palette-${i + 1}-text`, `--base-text-on-palette-${i + 1}`]).flat(),
+  ];
+  const defined = await page.evaluate((names) => {
+    const cs = getComputedStyle(document.documentElement);
+    return names.filter((n) => cs.getPropertyValue(n).trim() !== '');
+  }, gone);
+  expect(defined).toEqual([]);
+});

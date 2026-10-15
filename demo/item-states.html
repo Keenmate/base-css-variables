@@ -46,10 +46,10 @@
     /* Controls */
     .controls { display: flex; flex-wrap: wrap; gap: 1.2rem 2.4rem; align-items: center; }
     .controls label { display: inline-flex; align-items: center; gap: 0.6rem; white-space: nowrap; }
-    .controls .wrong { color: var(--base-danger-text); }
+    .controls .wrong { color: var(--base-danger-text-color); }
     .controls button, .controls select {
       font: inherit;
-      color: var(--base-input-color);
+      color: var(--base-input-text-color);
       background: var(--base-input-bg);
       border: var(--base-input-border);
       border-radius: calc(var(--base-border-radius-md) * var(--base-rem));
@@ -73,9 +73,9 @@
     .notice {
       padding: 1rem 1.2rem;
       border-radius: calc(var(--base-border-radius-md) * var(--base-rem));
-      background: var(--base-warning-bg-light);
-      color: var(--base-warning-text);
-      border: var(--base-border-width) solid var(--base-warning-border);
+      background: var(--base-warning-bg-subtle);
+      color: var(--base-warning-text-color);
+      border: var(--base-border-width) solid color-mix(in srgb, var(--base-warning-color) 20%, transparent);
     }
     .notice[hidden] { display: none; }
 
@@ -93,26 +93,26 @@
       background: var(--base-main-bg);
       user-select: none;
     }
-    .ref-list:focus-visible { outline: 2px solid var(--base-accent-color); outline-offset: 2px; }
+    .ref-list:focus-visible { outline: 2px solid var(--base-primary-color); outline-offset: 2px; }
     .ref-item {
       display: flex; align-items: center; gap: 0.8rem;
       padding: 0.6rem 0.8rem;
       border-radius: calc(var(--base-border-radius-sm) * var(--base-rem));
       color: var(--base-text-color-1);
       cursor: default;
-      /* Rings are outlines drawn INSET by exactly the shared ring width. */
-      outline-offset: calc(-1 * var(--base-ring-width));
+      /* Outlines are drawn INSET by exactly the shared outline width. */
+      outline-offset: calc(-1 * var(--base-outline-width));
     }
     .ref-item:hover { background: var(--base-hover-bg); }
     .ref-item--highlighted {
       background: var(--base-highlighted-bg);
-      color: var(--base-highlighted-text);
-      outline: var(--base-highlighted-ring);
+      color: var(--base-highlighted-text-color);
+      outline: var(--base-highlighted-outline);
     }
     .ref-item--highlighted:hover { background: var(--base-highlighted-bg-hover); }
     .ref-item--focused {
-      color: var(--base-focused-text);
-      outline: var(--base-focused-ring);         /* focus ring wins over the highlight ring */
+      color: var(--base-focused-text-color);
+      outline: var(--base-focused-outline);         /* focus outline wins over the highlight outline */
     }
     .ref-item--focused:not(.ref-item--highlighted) { background: var(--base-focused-bg); }
 
@@ -133,12 +133,12 @@
       background: var(--base-input-bg);
       position: relative;
     }
-    .ref-checkbox--checked { background: var(--base-accent-color); border-color: var(--base-accent-color); }
+    .ref-checkbox--checked { background: var(--base-primary-color); border-color: var(--base-primary-color); }
     .ref-checkbox--checked::after {
       content: '';
       position: absolute;
       inset: 0;
-      background-color: var(--base-text-on-primary);
+      background-color: var(--base-on-primary-text-color);
       mask: var(--base-icon-check) no-repeat center / var(--base-icon-check-size, 68%);
     }
     .ref-list:not(.ref-list--checkboxes) .ref-checkbox { display: none; }
@@ -163,10 +163,10 @@
     <dl class="model">
       <dt>focused</dt>
       <dd>The <em>one</em> item the keyboard / mouse cursor is on. Arrows move it. Inset ring:
-        <code>--base-focused-bg</code> / <code>-text</code> / <code>-ring</code>.</dd>
+        <code>--base-focused-bg</code> / <code>-text-color</code> / <code>-outline</code>.</dd>
       <dt>highlighted</dt>
       <dd>The Ctrl/Shift-click (Shift+arrow) set, 0..n items. Accent tint:
-        <code>--base-highlighted-bg</code> / <code>-bg-hover</code> / <code>-text</code> / <code>-ring</code>.</dd>
+        <code>--base-highlighted-bg</code> / <code>-bg-hover</code> / <code>-text-color</code> / <code>-outline</code>.</dd>
       <dt>selected</dt>
       <dd>The checkbox-<em>checked</em> items, shown by the checkbox only, so there are no row tokens.
         With checkboxes off, highlighted <em>is</em> the selection.</dd>
@@ -184,7 +184,7 @@
         </select>
       </label>
       <label>Accent <input type="color" id="ctl-accent" value="#0ea5e9"></label>
-      <label><code>--base-ring-width</code>
+      <label><code>--base-outline-width</code>
         <input type="range" id="ctl-ring-width" min="1" max="4" step="1" value="1">
         <output id="out-ring-width">1px</output></label>
       <label title="The general small-corner radius (unitless × --base-rem). Rows and their rings follow it — so do badges, buttons and every other 'sm' corner.">
@@ -194,12 +194,12 @@
       <label>Highlight tint
         <input type="range" id="ctl-tint" min="0" max="40" step="1" value="10">
         <output id="out-tint">10%</output></label>
-      <label title="Sets --base-highlighted-ring (default none). Shown dashed here so it can't be confused with the solid focus ring.">
-        <input type="checkbox" id="ctl-highlight-ring"> Ring on highlighted <span class="muted">(dashed)</span></label>
+      <label title="Sets --base-highlighted-outline (default none). Shown dashed here so it can't be confused with the solid focus outline.">
+        <input type="checkbox" id="ctl-highlight-ring"> Outline on highlighted <span class="muted">(dashed)</span></label>
       <label><input type="checkbox" id="ctl-focused-bg"> Tint focused row</label>
       <label><input type="checkbox" id="ctl-checkboxes"> Show checkboxes</label>
-      <label class="wrong" title="Puts the width inside the shorthand instead of in --base-ring-width: the inset offset no longer matches and the ring spills outside the row.">
-        <input type="checkbox" id="ctl-wrong"> Anti-pattern: <code>--base-focused-ring: 3px solid …</code></label>
+      <label class="wrong" title="Puts the width inside the shorthand instead of in --base-outline-width: the inset offset no longer matches and the ring spills outside the row.">
+        <input type="checkbox" id="ctl-wrong"> Anti-pattern: <code>--base-focused-outline: 3px solid …</code></label>
       <button type="button" id="ctl-reset">Reset</button>
     </div>
     <table class="tokens" id="token-table" aria-label="Computed token values"></table>
@@ -260,9 +260,9 @@
 
   /* ---------------------------------------------------------------- tokens */
   const TOKENS = [
-    '--base-border-radius-sm', '--base-ring-width',
-    '--base-highlighted-bg', '--base-highlighted-bg-hover', '--base-highlighted-text', '--base-highlighted-ring',
-    '--base-focused-bg', '--base-focused-text', '--base-focused-ring',
+    '--base-border-radius-sm', '--base-outline-width',
+    '--base-highlighted-bg', '--base-highlighted-bg-hover', '--base-highlighted-text-color', '--base-highlighted-outline',
+    '--base-focused-bg', '--base-focused-text-color', '--base-focused-outline',
   ];
 
   // Each control writes one inline override on :root; Reset removes them all.
@@ -273,11 +273,11 @@
     theme ? root.setAttribute('data-theme', theme) : root.removeAttribute('data-theme');
 
     const accent = $('ctl-accent').value;
-    set('--base-accent-color', accent.toLowerCase() === '#0ea5e9' ? null : accent);
+    set('--base-primary-color', accent.toLowerCase() === '#0ea5e9' ? null : accent);
 
     const width = Number($('ctl-ring-width').value);
     $('out-ring-width').textContent = `${width}px`;
-    set('--base-ring-width', width === 1 ? null : `${width}px`);
+    set('--base-outline-width', width === 1 ? null : `${width}px`);
 
     const radius = Number($('ctl-radius').value);
     $('out-radius').textContent = `${radius} (${Math.round(radius * 10)}px)`;
@@ -286,12 +286,12 @@
     const tint = Number($('ctl-tint').value);
     $('out-tint').textContent = `${tint}%`;
     set('--base-highlighted-bg', tint === 10 ? null
-      : `color-mix(in srgb, var(--base-accent-color) ${tint}%, transparent)`);
+      : `color-mix(in srgb, var(--base-primary-color) ${tint}%, transparent)`);
 
-    set('--base-highlighted-ring', $('ctl-highlight-ring').checked
-      ? 'var(--base-ring-width) dashed color-mix(in srgb, var(--base-accent-color) 60%, transparent)' : null);
+    set('--base-highlighted-outline', $('ctl-highlight-ring').checked
+      ? 'var(--base-outline-width) dashed color-mix(in srgb, var(--base-primary-color) 60%, transparent)' : null);
     set('--base-focused-bg', $('ctl-focused-bg').checked ? 'var(--base-hover-bg)' : null);
-    set('--base-focused-ring', $('ctl-wrong').checked ? '3px solid var(--base-accent-color)' : null);
+    set('--base-focused-outline', $('ctl-wrong').checked ? '3px solid var(--base-primary-color)' : null);
 
     setCheckboxes($('ctl-checkboxes').checked);
     renderTokenTable();

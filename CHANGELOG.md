@@ -3,6 +3,81 @@
 All notable changes to `@keenmate/base-css-variables` are documented here. Format based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.0.0] — 2026-10-14
+
+A breaking cleanup of the color contract: one name per concept, names that state their
+type, one tint per role, and derived tokens that follow their source at runtime. No aliases —
+rename overrides per the table below. Mirrored in `@keenmate/pure-css` (`$base-*` / `--pc-*`)
+and its consumers.
+
+### Changed
+
+- **BREAKING: `accent` → `primary` — one brand role.** Accent and primary were the same color
+  everywhere (primary button, focus, selection, checked state, links); `primary` matches the role
+  set (secondary, success, danger, warning, info). The `--base-primary-*` aliases are gone — the
+  primary tokens are now the real ones. Component tokens (`--ms-accent-color`, …) keep their names.
+- **BREAKING: names state their type.** A token ends in what it is — `-color`, `-bg`, or the CSS
+  shorthand it feeds (`-border`, `-outline`). `-text` alone (color? size? weight?) and `-ring`
+  (not a CSS property) are gone.
+- **BREAKING: palette slots are `--base-palette-1…9`** (were `--base-color-N`, which read like a
+  ranked scale next to `--base-text-color-1…4`; the number is an ID, not a rank).
+- **BREAKING: one role tint** (success, danger, warning, info): `--base-<role>-bg-subtle` is now
+  `color-mix` of `--base-<role>-color` (10% light / 20% dark), so it follows a runtime role-color
+  override. pure-admin-core now reads it (labels, toasts, statistics, callouts, validation glow)
+  instead of a private copy, and web-grid's invalid-cell tint reads it.
+- **The primary tint follows the role-tint pattern.** `--base-primary-bg-subtle` is now 10% light /
+  20% dark (was a fixed 5%), `-hover` 15% / 30% (was 8%). It is the generic primary tint (badges,
+  chips, soft fills — not row selection, which is `--base-highlighted-bg`). pure-css's
+  `--pc-primary-bg-subtle[-hover]` now read it, so pure-admin and the web components share one value
+  (before, pure-admin used a private 5% and ignored the theme's value).
+- **The dropdown shadow follows `--base-shadow-color`**, which is now mode-aware (15% black light /
+  40% dark): `--base-dropdown-box-shadow: 0 8px 16px var(--base-shadow-color)`. Same look; a
+  shadow-color override now reaches the dropdown.
+- **Input icons:** the clear-button tokens now cover every icon inside an input (clear ✕,
+  chevron, calendar, search).
+- **Derived tokens follow their source.** Pasted copies are now `var()` of the token they copy:
+  `--base-border`, `--base-input-border-color`, `--base-input-border`, `--base-dropdown-border`,
+  `--base-checkbox-border-color` (← `--base-border-color`); `--base-input-border-hover` / `-focus`
+  (← `--base-primary-color`, were a hard-coded `#0ea5e9`); `--base-input-text-color`
+  (← `--base-text-color-1`); `--base-input-icon-color` (← `--base-text-color-3`);
+  `--base-dropdown-bg` (← `--base-main-bg`). Same values; an override of the source now cascades.
+- **Text-level descriptions corrected** (comments / README): `--base-text-color-1` is the primary
+  (default body) text, `-2` secondary/muted, `-3` tertiary (icons, metadata), `-4` faint (hints,
+  placeholders, disabled).
+
+#### Rename table
+
+| 1.0.x | 2.0.0 |
+|---|---|
+| `--base-accent-color` / `-hover` / `-active` | `--base-primary-color` / `-hover` / `-active` |
+| `--base-accent-color-light` / `-light-hover` | `--base-primary-bg-subtle` / `-bg-subtle-hover` |
+| `--base-text-color-on-accent`, `--base-text-on-primary` | `--base-on-primary-text-color` |
+| `--base-text-on-secondary` | `--base-on-secondary-text-color` |
+| `--base-text-on-<role>` | `--base-on-<role>-text-color` |
+| `--base-<role>-text` | `--base-<role>-text-color` |
+| `--base-<role>-bg-light` | `--base-<role>-bg-subtle` |
+| `--base-color-N` | `--base-palette-N` |
+| `--base-color-N-text` | `--base-on-palette-N-text-color` |
+| `--base-ring-width` | `--base-outline-width` |
+| `--base-highlighted-ring` / `--base-focused-ring` | `--base-highlighted-outline` / `--base-focused-outline` |
+| `--base-highlighted-text` / `--base-focused-text` | `--base-highlighted-text-color` / `--base-focused-text-color` |
+| `--base-input-color` | `--base-input-text-color` |
+| `--base-input-clear-color` / `-clear-bg-hover` | `--base-input-icon-color` / `-icon-bg-hover` |
+| `--base-tooltip-color` | `--base-tooltip-text-color` (was a duplicate) |
+
+### Removed
+
+- **BREAKING: `--base-<role>-bg`** (success, danger, warning, info) — a pasted copy of `-color`,
+  so overriding the role color left the fill behind. Use `--base-<role>-color`.
+- **BREAKING: `--base-<role>-text-light`** — nothing read it, and its meaning flipped between
+  modes (a pale tint in light, a vivid color in dark).
+- **BREAKING: `--base-<role>-border`** — nothing read it (alerts use their own border token).
+- **BREAKING: the `--base-primary-*` aliases** of accent (primary is now the real token).
+- **BREAKING: `--base-inverse-bg` and `--base-inverse-text-color`** (was `--base-text-inverted`).
+  Components only used `--base-inverse-bg` as a second fallback behind `--base-tooltip-bg`, which is
+  always defined, so it never applied; nothing read the text color. The tooltip has its own
+  `--base-tooltip-bg` / `--base-tooltip-text-color` pair.
+
 ## [1.0.7] — 2026-10-14 [PUBLISHED]
 
 ### Added

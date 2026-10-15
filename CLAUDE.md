@@ -32,11 +32,11 @@ downstream derives from it and must not define a parallel source of truth:
   derivation + `.pc-mode-*`, and emits each `--pc-*` as `var(--base-*, <fallback>)`.
 - `@keenmate/pure-admin-core` builds component tokens on top of `--pc-*`.
 - KeenMate web components read `--base-*` directly with inline fallbacks
-  (e.g. `--ms-accent-color: var(--base-accent-color, #3b82f6)`).
+  (e.g. `--ms-accent-color: var(--base-primary-color, #3b82f6)`).
 
 Because every downstream token is `var(--base-*, …)`, overriding **one** `--base-*` at runtime
 re-themes pure-admin *and* the web components together. The README's "layer pipeline" section
-traces this end-to-end for the accent color — read it before touching token structure.
+traces this end-to-end for the primary color — read it before touching token structure.
 
 **Consequences for any edit:**
 - **Do not add a token here that pure-css lacks, or remove/rename one it mirrors, without keeping
@@ -48,7 +48,7 @@ traces this end-to-end for the accent color — read it before touching token st
 
 ## Token conventions (follow the existing patterns)
 
-- **Default theme is pure-admin "Corporate"** (sky-blue `#0ea5e9` accent, slate surfaces, cyan info).
+- **Default theme is pure-admin "Corporate"** (sky-blue `#0ea5e9` primary, slate surfaces, cyan info).
   Light values = Corporate light mode, dark = Corporate dark mode.
 - **Light/dark** is done with CSS `light-dark()`, driven by `color-scheme`. `:root` sets
   `color-scheme: light dark` (auto/OS). `[data-theme="light"|"dark"]` blocks force a mode on a
@@ -57,11 +57,17 @@ traces this end-to-end for the accent color — read it before touching token st
 - **Unitless multipliers:** font sizes, radii, input heights, and the spacing scale are stored as
   bare numbers, combined by consumers as `calc(var(--base-…) * var(--base-rem))` (`--base-rem: 1rem`).
   Keep new sizing tokens unitless to match.
-- **Aliases** point back via `var()`: `--base-primary-*` aliases `--base-accent-*` (accent is the
-  legacy name, primary the canonical role); `--base-icon-clear`/`-remove` follow `--base-icon-close`.
-- **Role/status color model** (success/danger/warning/info): `-color` = vivid fill identity;
-  `-bg` = solid fill (equals `-color`); `-bg-light`/`-bg-subtle` = tints; `-border` = border tint;
-  `-text` = role as foreground on a light surface; `--base-text-on-<role>` = readable text *on* the fill.
+- **Aliases** point back via `var()`: `--base-icon-clear`/`-remove` follow `--base-icon-close`.
+  2.0.0 removed the `accent` ↔ `primary` pair — `primary` is the only name.
+- **Role color model** (primary/secondary/success/danger/warning/info): `-color` = vivid fill
+  identity (also the solid fill); `-color-hover`/`-active` = darker steps; `-bg-subtle` = the one
+  tint (a `color-mix` of `-color`, so it follows it); `-text-color` = role as foreground on a
+  light surface; `--base-on-<role>-text-color` = readable text *on* the fill. Derive from the
+  source token with `var()` / `color-mix()` — never paste its literal.
+- **Names state their type (2.0.0):** a token ends in what it is — `-color` (any color value),
+  `-bg` (background color), or the CSS shorthand it feeds (`-border`, `-outline`, `-box-shadow`),
+  e.g. `--base-input-text-color`, not `--base-input-text`. Item states are `-bg` / `-text-color` /
+  `-outline`; `-outline` tokens are drawn inset by `--base-outline-width`.
 - **Surface elevation ladder:** `page` < `subtle` < `main` < `elevated`; `hover`/`active`/`disabled`
   are the interaction-state axis. Role-specific surfaces (`--base-input-bg`, `--base-dropdown-bg`,
   `--base-tooltip-bg`) default into this scale but stay distinct tokens so they can be retargeted alone.
