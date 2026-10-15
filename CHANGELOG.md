@@ -231,7 +231,7 @@ and its consumers.
 ## [1.0.0] — 2026-09-10
 
 The **canonical `--base-*` contract** release. `base-variables.css` is LAYER 0 — the single
-source of truth every KeenMate consumer derives from. `@keenmate/pure-css` mirrors this exact
+source of truth every Keenmate consumer derives from. `@keenmate/pure-css` mirrors this exact
 token list into SCSS (`$base-*`), and the web components read `--base-*` directly, so overriding
 one `--base-*` re-themes pure-admin **and** the web components together.
 

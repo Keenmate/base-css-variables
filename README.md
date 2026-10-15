@@ -1,9 +1,11 @@
 # @keenmate/base-css-variables
 
 The shared **base layer** of CSS custom properties (`--base-*`) used by all
-KeenMate web components — [web-multiselect](https://www.npmjs.com/package/@keenmate/web-multiselect),
+Keenmate web components — [web-multiselect](https://www.npmjs.com/package/@keenmate/web-multiselect),
 [web-daterangepicker](https://www.npmjs.com/package/@keenmate/web-daterangepicker),
-[web-grid](https://www.npmjs.com/package/@keenmate/web-grid), web-treeview, and more.
+[web-grid](https://www.npmjs.com/package/@keenmate/web-grid), web-dropzone, web-treeview,
+svelte-treeview — and by [`@keenmate/pure-css`](https://www.npmjs.com/package/@keenmate/pure-css) /
+`@keenmate/pure-admin-core`, so an app and the components inside it share one theme.
 
 Each component ships its own prefixed variables (`--ms-*`, `--drp-*`, `--wg-*`, …)
 that **cascade from these `--base-*` values**. Define the base layer once and every
@@ -17,7 +19,7 @@ variable and the change propagates everywhere.
 - **Breaking — `accent` is now `primary`** — `--base-accent-color[-hover|-active]` → `--base-primary-color[-hover|-active]`, `--base-accent-color-light[-hover]` → `--base-primary-bg-subtle[-hover]`, `--base-text-color-on-accent` → `--base-on-primary-text-color`. One brand role, named like the rest of the role set. No aliases.
 - **Breaking — names state their type** — a token ends in `-color`, `-bg`, or the shorthand it feeds (`-border`, `-outline`): `--base-<role>-text` → `-text-color`, `--base-text-on-<role>` → `--base-on-<role>-text-color`, `--base-ring-width` / `*-ring` → `--base-outline-width` / `*-outline`, `--base-input-color` → `--base-input-text-color`, `--base-input-clear-*` → `--base-input-icon-*`. Palette slots are `--base-palette-1…9` (were `--base-color-N`). Full table in the CHANGELOG.
 - **Breaking — one tint per role, copies removed** — `--base-<role>-bg-subtle` (10% light / 20% dark of the role color) is the only role tint; `--base-<role>-bg`, `-bg-light`, `-text-light`, `-border` and the `--base-inverse-*` pair are gone.
-- **Shadows — one tone** — `--base-shadow-color` is mode-aware (15% black light / 40% dark) and every shadow derives from it, including `--base-dropdown-box-shadow`; pure-css, pure-admin and the KeenMate components now use it for all their shadows, so a component inside pure-admin matches its surroundings.
+- **Shadows — one tone** — `--base-shadow-color` is mode-aware (15% black light / 40% dark) and every shadow derives from it, including `--base-dropdown-box-shadow`; pure-css, pure-admin and the Keenmate components now use it for all their shadows, so a component inside pure-admin matches its surroundings.
 
 ## What's New in 1.0.7
 
@@ -49,6 +51,17 @@ or in CSS / HTML:
 <link rel="stylesheet" href="node_modules/@keenmate/base-css-variables/base-variables.css">
 ```
 
+**Browser support:** the derived tokens use `light-dark()`, `color-mix()` and relative color
+syntax (`oklch(from …)`) — Chrome / Edge 119+, Safari 16.4+, Firefox 128+.
+
+### Upgrading from 1.x
+
+2.0 renamed and removed tokens **without aliases**: an override that still uses a 1.x name
+(`--base-accent-color`, `--base-color-3`, `--base-success-bg`, …) is silently ignored and the
+default shows instead. Rename overrides with the table in the
+[CHANGELOG](./CHANGELOG.md) (2.0.0 → *Rename table*), and upgrade the components together with
+this package — each one reads the 2.0 names from its matching release.
+
 ## How it works
 
 The base layer is a set of **semantic design tokens**, not raw colors. Several
@@ -57,26 +70,23 @@ each **role** can be themed independently.
 
 ### Semantic roles that overlap by default
 
-`--base-main-bg` and `--base-input-bg` both default to white (light) / near-black
-(dark), but they mean different things:
+`--base-main-bg` and `--base-input-bg` resolve to the same color by default, but they mean
+different things:
 
 | Token | Meaning | Example component consumers |
 |-------|---------|-----------------------------|
-| `--base-main-bg` | The **global / primary surface** — the canvas an app shell, grid, dropzone or panel paints itself on | `--wg-surface-1` (grid surface), `--drp-primary-bg` (calendar panel), `--ms-hint-bg`, `--ms-actions-bg` |
+| `--base-main-bg` | The **content surface** — the canvas a grid, tree, dropzone or panel paints itself on | `--wg-main-bg`, `--wtv-bg-color`, `--dz-background`, `--ms-hint-bg`, `--ms-actions-bg` |
 | `--base-input-bg` | The background of **form fields** specifically | `--ms-input-bg`, `--drp-input-bg`, `--wg-input-bg` |
 
-Because they are separate variables, you can, for example, keep a grid or dropzone
-on a plain page background while giving input fields a subtly tinted fill:
+`--base-input-bg` is derived — `var(--base-main-bg)` — so by default inputs follow the
+surface. Because it's a separate token you can still give input fields their own fill:
 
 ```css
 :root {
-  --base-main-bg: #ffffff;   /* page / grid / dropzone canvas */
+  --base-main-bg: #ffffff;   /* grid / tree / dropzone canvas */
   --base-input-bg: #f7f9fc;  /* inputs stand out slightly      */
 }
 ```
-
-If you only set `--base-main-bg`, inputs keep their own default — they don't
-inherit from it. Set both when you want them to match.
 
 ### Surface hierarchy
 
@@ -91,14 +101,14 @@ prominent than the last — with a separate **interaction-state** axis on top:
 - **page** — canvas / backdrop below the content
 - **subtle** — recessed / inset surface (code, wells)
 - **main** — content surface (cards, panels, grid, dropzone)
-- **elevated** — raised areas: headers, toolbars, dropdowns, popovers
-- **hover** — pointer hover on a surface (rows, options)
-- **active** — pressed / selected
+- **elevated** — raised areas: table headers, toolbars, popovers
+- **hover** — pointer hover on a surface (rows, options) — a translucent overlay
+- **active** — pressed — a stronger overlay (selection is `--base-highlighted-bg`, see [Item states](#item-states))
 - **disabled** — inert / readonly surface
 
-Role-specific surfaces (`--base-input-bg`, `--base-dropdown-bg`, `--base-tooltip-bg`)
-default to values in this scale but can be retargeted on their own — that's the
-whole point of keeping them as distinct tokens.
+Role-specific surfaces default into this scale — `--base-input-bg` and `--base-dropdown-bg`
+are `var(--base-main-bg)`; `--base-tooltip-bg` is its own always-dark tone — but each can be
+retargeted on its own. That's the whole point of keeping them as distinct tokens.
 
 ## The layer pipeline (pure-css → pure-admin)
 
@@ -106,13 +116,17 @@ whole point of keeping them as distinct tokens.
 consumers never define a parallel source of truth, they derive from it:
 
 - **[`@keenmate/pure-css`](https://www.npmjs.com/package/@keenmate/pure-css)** mirrors
-  this token list into SCSS (`$base-*`), adds theme derivation + its own `--pc-*`
-  foundation tokens, and ships the grid / utilities / app-shell.
-- **`@keenmate/pure-admin-core`** builds its component tokens (`--pc-*`) on top.
-- **KeenMate web components** read `--base-*` directly (with inline fallbacks).
+  this token list into SCSS (`$base-*`) — inputs as Sass colors, derived tokens as the
+  *same formulas* as this file — adds its own `--pc-*` foundation tokens, and ships the
+  grid / utilities / app-shell.
+- **`@keenmate/pure-admin-core`** builds its component tokens (`--pa-*`) on top.
+  pure-admin themes are pure-css builds that set the `$base-*` inputs (and hand-tune
+  derived tokens where they want a specific value).
+- **Keenmate web components** read `--base-*` directly (with inline fallbacks, so they
+  also work without this package).
 
-Every `--pc-*` is wired as `var(--base-*, <fallback>)`, so overriding **one**
-`--base-*` re-themes pure-admin components *and* the web components together.
+The `--pc-*` / `--pa-*` tokens are wired as `var(--base-*, <fallback>)`, so overriding
+**one** `--base-*` re-themes pure-admin components *and* the web components together.
 Traced end-to-end for the primary color:
 
 ```
@@ -124,12 +138,13 @@ LAYER 2  pure-css framework var (SCSS)   $primary-color: $base-primary-color;   
             │  emit (two mixins)
 LAYER 3  pure-css emit  ──▶ CSS          --base-primary-color: #0ea5e9;                   ◀─ RAIL A · the knob
                                          --pc-primary: var(--base-primary-color, #0ea5e9)  ◀─ RAIL B · pure-admin's token
-            │
-LAYER 4  pure-admin-core (CSS)           --pc-primary-bg-subtle, --pc-primary-bg-subtle-hover,
+                                         --pc-primary-bg-subtle: var(--base-primary-bg-subtle, …)
                                          --pc-link-color: var(--pc-primary), …
             │
+LAYER 4  pure-admin-core (CSS)           --pa-btn-primary-bg: var(--base-primary-color, #0ea5e9), …
+            │
 LAYER 5  consumers
-            pure-admin components         background: var(--pc-primary-bg-subtle);
+            pure-admin components         background: var(--pa-btn-primary-bg);
             web components                --ms-accent-color: var(--base-primary-color, #3b82f6);
 ```
 
@@ -142,17 +157,19 @@ LAYER 5  consumers
 
 | Override… | Where | Effect |
 |---|---|---|
-| `--base-primary-color` | any `:root` / `.pc-mode-*` / `[data-*]` scope (runtime) | **everything** downstream, live — pure-admin **and** web components |
+| `--base-primary-color` | the root element — `:root`, or `<html>` carrying `.pc-mode-*` / `[data-*]` (runtime) | **everything** downstream, live — pure-admin **and** web components |
+| `--base-primary-color` | a descendant element (runtime) | web components inside it (they read `--base-*` on their own host); pure-admin's `--pc-*` / `--pa-*` are declared on `:root`, so they don't see a subtree override |
 | `$base-primary-color` | pure-css SCSS (build) | the default baked into `base.css` + every `--pc-*` fallback |
 | `--pc-primary` | a single `--pc-*` (runtime) | pure-admin only — use for a deliberate pure-admin-only divergence |
 
-That middle-less "one knob" row is the whole design: a theme (or a time-of-day
-`[data-daypart]` scope) re-sets `--base-*` and the entire `--pc-*` layer re-resolves.
+The first row is the whole design: a theme (or a time-of-day `[data-daypart]` scope on
+`<html>`) re-sets `--base-*` and the entire `--pc-*` / `--pa-*` layer re-resolves. Put mode
+and variant classes on `<html>`, not `<body>`, for the same reason.
 
 ## Theming
 
-Override any `--base-*` variable in your own `:root` (or any scope) — the value
-flows into every component:
+Override any `--base-*` variable in your own `:root` — the value flows into every
+component (for overriding on part of a page, see *Re-theming part of a page* below):
 
 ```css
 :root {
@@ -185,10 +202,13 @@ The colors come in two kinds:
 
 ```css
 :root {
-  --base-main-bg: #fff8e7;          /* input: text levels, surfaces, borders all follow */
-  --base-elevated-bg: #f2e5c4;      /* hand-set: this one keeps your exact color */
+  --base-main-bg: light-dark(#fff8e7, #1f1a12);  /* input: text levels, surfaces, borders all follow */
+  --base-elevated-bg: light-dark(#f2e5c4, #2b2418); /* hand-set: this one keeps your exact color */
 }
 ```
+
+Write overrides of mode-dependent tokens with `light-dark(<light>, <dark>)` — a plain value
+pins that token to one color in both modes.
 
 **Re-theming part of a page.** A `var()` inside a custom property is resolved on the element
 that *declares* it, so derived tokens declared on `:root` don't recalculate when you change an
@@ -220,7 +240,7 @@ so they follow the active `color-scheme`.
 
 ## Checkbox render method
 
-Every KeenMate component that draws a checkbox (multiselect options, tree nodes,
+Every Keenmate component that draws a checkbox (multiselect options, tree nodes,
 grid selection, …) should render it the **same way**, so the tick/dash lands
 identically everywhere. The contract has two knobs — `--base-checkbox-scale` (box
 size) and `--base-icon-check-size` (glyph size) — and one hard rule: **scale the
@@ -274,12 +294,14 @@ and then only paired with integer box + glyph sizes to minimise the snap.
 ## Variable reference
 
 Naming is intentionally **not 1:1** between the base layer and component variables.
-For example `--ms-primary-bg` reads `--base-hover-bg`, and `--drp-primary-bg` reads
-`--base-main-bg`. Always theme via the `--base-*` variables listed here.
+For example `--ms-primary-bg` and `--drp-primary-bg` both read `--base-hover-bg`. Always
+theme via the `--base-*` variables listed here.
 
 These tables are the complete `--base-*` contract, mirrored token-for-token by
-`@keenmate/pure-css` (`$base-*`). Light values are Corporate light mode, dark are
-Corporate dark mode.
+`@keenmate/pure-css` (`$base-*`). **Input** marks a hand-set token (defaults are the
+pure-admin Corporate theme, light / dark); *Derived* marks a formula — see
+[Inputs and derived tokens](#inputs-and-derived-tokens). Unmarked rows are plain values
+(sizes, icons, …).
 
 ### Primary role
 The brand / interactive color — primary buttons, focus, selection, checked state, links.
@@ -287,7 +309,7 @@ Brand blue, kept across light / dark. (Before 2.0.0 this was `--base-accent-*`.)
 
 | Variable | Purpose |
 |----------|---------|
-| `--base-primary-color` | Primary brand / action color |
+| `--base-primary-color` | **Input.** Primary brand / action color |
 | `--base-primary-color-hover` | Hover step. *Derived:* 15% black (light) / white (dark) |
 | `--base-primary-color-active` | Active / pressed step. *Derived:* 30% black / white |
 | `--base-primary-bg-subtle` | Primary tint for badges, chips, soft fills: `-color` mixed 10% (light) / 20% (dark) into transparent — same pattern as the role tints |
@@ -296,7 +318,7 @@ Brand blue, kept across light / dark. (Before 2.0.0 this was `--base-accent-*`.)
 ### Secondary role
 | Variable | Purpose |
 |----------|---------|
-| `--base-secondary-color` | Neutral grey secondary action color |
+| `--base-secondary-color` | **Input.** Neutral grey secondary action color |
 | `--base-secondary-color-hover` | Secondary hover state. *Derived:* like primary |
 
 ### Background / surface
@@ -309,8 +331,8 @@ Elevation ladder: `page` (canvas) < `subtle` (recessed) < `main` (content) <
 | `--base-main-bg` | **Input.** Content surface — cards, panels, grid |
 | `--base-subtle-bg` | Recessed / inset surface (code, wells). *Derived:* page-bg shifted in lightness |
 | `--base-elevated-bg` | Raised surface — headers, toolbars, popovers. *Derived:* main-bg shifted in lightness |
-| `--base-overlay-bg` | Modal / overlay scrim |
-| `--base-shadow-color` | Shadow tint for elevation: 15% black (light) / 40% (dark); used by the shadow scale and the dropdown shadow |
+| `--base-overlay-bg` | **Input.** Modal / overlay scrim |
+| `--base-shadow-color` | **Input.** Shadow tint for elevation: 15% black (light) / 40% (dark); every shadow derives from it — the shadow scale, the dropdown shadow, and the shadows in pure-css / pure-admin / the components |
 | `--base-hover-bg` | Hover state for any surface (option / row hover). *Derived:* translucent overlay of the background hue |
 | `--base-active-bg` | Active / pressed surface. *Derived:* stronger overlay |
 | `--base-disabled-bg` | Disabled / readonly surface. *Derived:* main-bg shifted in lightness |
@@ -334,13 +356,13 @@ written directly into `*-outline` won't move the inset offset, so the outline sp
 | Variable | Purpose |
 |----------|---------|
 | `--base-outline-width` | Thickness for `*-outline`; consumers inset the outline by −this (default: `1px`) |
-| `--base-highlighted-bg` | Highlighted item tint (default: primary at 10%) |
-| `--base-highlighted-bg-hover` | Highlighted item on hover (default: same as `--base-highlighted-bg`) |
+| `--base-highlighted-bg` | Highlighted item tint. *Derived:* `var(--base-primary-bg-subtle)` (primary at 10% light / 20% dark) |
+| `--base-highlighted-bg-hover` | Highlighted item on hover. *Derived:* same as `--base-highlighted-bg` |
 | `--base-highlighted-text-color` | Text on a highlighted item (default: `currentColor` = unchanged) |
 | `--base-highlighted-outline` | Highlighted item outline shorthand (default: `none`) |
 | `--base-focused-bg` | Focused item background (default: `transparent`, the outline alone marks focus) |
 | `--base-focused-text-color` | Text on the focused item (default: `currentColor`) |
-| `--base-focused-outline` | Keyboard-focus outline shorthand (default: `--base-outline-width solid` primary) |
+| `--base-focused-outline` | Keyboard-focus outline shorthand. *Derived:* `var(--base-outline-width) solid var(--base-primary-color)` |
 
 ### Text
 | Variable | Purpose |
@@ -349,37 +371,37 @@ written directly into `*-outline` won't move the inset offset, so the outline sp
 | `--base-text-color-2` | Secondary — muted labels, supporting text. *Derived:* text-color-1 75% into main-bg |
 | `--base-text-color-3` | Tertiary — icons, metadata, paths. *Derived:* 55% |
 | `--base-text-color-4` | Faint — hints, placeholders, disabled. *Derived:* 40% |
-| `--base-on-primary-text-color` | Text on the primary fill |
-| `--base-on-secondary-text-color` | Readable text on the secondary fill |
+| `--base-on-primary-text-color` | **Input.** Text on the primary fill |
+| `--base-on-secondary-text-color` | **Input.** Readable text on the secondary fill |
 
 ### Borders
 | Variable | Purpose |
 |----------|---------|
 | `--base-border-width` | Shared stroke width the shorthands compose from |
 | `--base-border-color` | Standard border color. *Derived:* main-bg shifted in lightness |
-| `--base-border` | Full border shorthand (`1px solid …`) |
-| `--base-checkbox-border-color` | Checkbox border |
+| `--base-border` | Full border shorthand. *Derived:* `var(--base-border-width) solid var(--base-border-color)` |
+| `--base-checkbox-border-color` | Checkbox border. *Derived:* `var(--base-border-color)` |
 
 ### Input fields
 | Variable | Purpose |
 |----------|---------|
-| `--base-input-bg` | Input background |
-| `--base-input-text-color` | Input text color |
-| `--base-input-border-color` | Input border color |
-| `--base-input-border` | Input border (normal) |
-| `--base-input-border-hover` | Input border on hover |
-| `--base-input-border-focus` | Input border on focus |
-| `--base-input-placeholder-color` | Placeholder text |
-| `--base-input-bg-disabled` | Disabled input background |
-| `--base-input-icon-color` | Icons inside an input (clear ✕, chevron, calendar, search) |
-| `--base-input-icon-bg-hover` | Background of an input icon button on hover |
+| `--base-input-bg` | Input background. *Derived:* `var(--base-main-bg)` |
+| `--base-input-text-color` | Input text color. *Derived:* `var(--base-text-color-1)` |
+| `--base-input-border-color` | Input border color. *Derived:* `var(--base-border-color)` |
+| `--base-input-border` | Input border shorthand (normal). *Derived:* from `--base-border-width` + `--base-input-border-color` |
+| `--base-input-border-hover` | Input border on hover. *Derived:* primary color |
+| `--base-input-border-focus` | Input border on focus. *Derived:* primary color |
+| `--base-input-placeholder-color` | Placeholder text. *Derived:* `var(--base-text-color-4)` |
+| `--base-input-bg-disabled` | Disabled input background. *Derived:* `var(--base-disabled-bg)` |
+| `--base-input-icon-color` | Icons inside an input (clear ✕, chevron, calendar, search). *Derived:* `var(--base-text-color-3)` |
+| `--base-input-icon-bg-hover` | Background of an input icon button on hover. *Derived:* `var(--base-hover-bg)` |
 
 ### Dropdown / popover
 | Variable | Purpose |
 |----------|---------|
-| `--base-dropdown-bg` | Dropdown / popover background |
-| `--base-dropdown-border` | Dropdown border |
-| `--base-dropdown-box-shadow` | Dropdown shadow (`0 8px 16px` in `--base-shadow-color`) |
+| `--base-dropdown-bg` | Dropdown / popover background. *Derived:* `var(--base-main-bg)` |
+| `--base-dropdown-border` | Dropdown border. *Derived:* from `--base-border-width` + `--base-border-color` |
+| `--base-dropdown-box-shadow` | Dropdown shadow. *Derived:* `0 8px 16px var(--base-shadow-color)` |
 
 ### Tooltip
 | Variable | Purpose |
@@ -392,11 +414,11 @@ Role ∈ `success` / `danger` / `warning` / `info`. Each role defines the full s
 
 | Variable | Purpose |
 |----------|---------|
-| `--base-<role>-color` | Role **fill identity** (vivid) |
+| `--base-<role>-color` | **Input.** Role **fill identity** (vivid) |
 | `--base-<role>-color-hover` | Role fill, hover. *Derived:* 15% black (light) / white (dark) |
 | `--base-<role>-bg-subtle` | Role tint for backgrounds (labels, toasts, invalid cells): `-color` mixed 10% (light) / 20% (dark) into transparent |
-| `--base-<role>-text-color` | Role as **foreground on a light surface** (text / links) |
-| `--base-on-<role>-text-color` | Readable text **on** the role fill |
+| `--base-<role>-text-color` | **Input.** Role as **foreground** on the page surface (text / links) — dark shade in light mode, light shade in dark |
+| `--base-on-<role>-text-color` | **Input.** Readable text **on** the role fill |
 
 ### Typography
 | Variable | Purpose |
@@ -428,9 +450,9 @@ Colored from `--base-shadow-color` so shadows theme with the surface.
 
 | Variable | Purpose |
 |----------|---------|
-| `--base-shadow-sm` | Small elevation shadow |
-| `--base-shadow-md` | Medium elevation shadow |
-| `--base-shadow-lg` | Large elevation shadow |
+| `--base-shadow-sm` | Small elevation shadow. *Derived:* `0 1px 3px` |
+| `--base-shadow-md` | Medium elevation shadow. *Derived:* `0 2px 8px` |
+| `--base-shadow-lg` | Large elevation shadow. *Derived:* `0 4px 12px` |
 
 ### Motion
 | Variable | Purpose |
@@ -496,19 +518,22 @@ categorical color (charts, tags, avatars).
 
 | Variable | Purpose |
 |----------|---------|
-| `--base-palette-1 … 9` | Palette slots 1–9 (amber, pink, emerald, sky, violet, indigo, slate, corporate-blue, dark-slate) |
-| `--base-on-palette-1-text-color … 9` | Readable text on each slot |
+| `--base-palette-1 … 9` | **Input.** Palette slots 1–9 (amber, pink, emerald, sky, violet, indigo, slate, corporate-blue, dark-slate) |
+| `--base-on-palette-1-text-color … 9` | **Input.** Readable text on each slot |
 
 > **Unitless multipliers:** font sizes, radii, input heights and the spacing scale
 > are stored as plain numbers and combined by components against `--base-rem` — e.g.
 > `calc(var(--base-font-size-base) * var(--base-rem))`. This keeps sizing consistent
-> across all KeenMate components while remaining scalable.
+> across all Keenmate components while remaining scalable.
 
 ## Related
 
 - [`@keenmate/theme-designer`](https://github.com/keenmate/theme-designer) — visual
   theme designer & generator that produces `--base-*` values from 3 input colors.
+  *Not yet updated for 2.0* — it still emits the 1.x names.
+- `demo/derived.html` in the [GitHub repo](https://github.com/Keenmate/base-css-variables) (not in the npm package; `npm run demo`) — compares the derived formulas against
+  the compiled pure-admin themes, with live input pickers and formula knobs.
 
 ## License
 
-MIT © KeenMate
+MIT © Keenmate s.r.o.

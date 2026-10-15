@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## What this is
 
 `@keenmate/base-css-variables` is a **single-file, zero-build npm package**: `base-variables.css`
-defines the shared `--base-*` CSS custom-property contract consumed by all KeenMate web
+defines the shared `--base-*` CSS custom-property contract consumed by all Keenmate web
 components (web-multiselect `--ms-*`, web-daterangepicker `--drp-*`, web-grid `--wg-*`,
 web-treeview, …) and by `@keenmate/pure-css` / `@keenmate/pure-admin-core`.
 
@@ -32,7 +32,7 @@ downstream derives from it and must not define a parallel source of truth:
 - `@keenmate/pure-css` **mirrors this exact token list into SCSS** (`$base-*`), adds theme
   derivation + `.pc-mode-*`, and emits each `--pc-*` as `var(--base-*, <fallback>)`.
 - `@keenmate/pure-admin-core` builds component tokens on top of `--pc-*`.
-- KeenMate web components read `--base-*` directly with inline fallbacks
+- Keenmate web components read `--base-*` directly with inline fallbacks
   (e.g. `--ms-accent-color: var(--base-primary-color, #3b82f6)`).
 
 Because every downstream token is `var(--base-*, …)`, overriding **one** `--base-*` at runtime

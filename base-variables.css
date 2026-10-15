@@ -1,7 +1,7 @@
 /**
- * KeenMate Base CSS Variables
+ * Keenmate Base CSS Variables
  * ---------------------------------------------------------------------------
- * The shared "base layer" (`--base-*`) consumed by all KeenMate web components
+ * The shared "base layer" (`--base-*`) consumed by all Keenmate web components
  * (web-multiselect, web-daterangepicker, web-grid, web-treeview, ...).
  *
  * Each component exposes its own prefixed variables (--ms-*, --drp-*, --wg-*, …)
