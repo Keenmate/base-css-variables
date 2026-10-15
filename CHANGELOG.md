@@ -3,7 +3,7 @@
 All notable changes to `@keenmate/base-css-variables` are documented here. Format based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [2.0.0] — 2026-10-14
+## [2.0.0-rc01] — 2026-10-15 [PUBLISHED]
 
 A breaking cleanup of the color contract: one name per concept, names that state their
 type, one tint per role, and derived tokens that follow their source at runtime. No aliases —

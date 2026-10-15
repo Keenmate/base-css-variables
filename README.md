@@ -10,15 +10,20 @@ that **cascade from these `--base-*` values**. Define the base layer once and ev
 component picks up a consistent, coordinated theme. Override a single `--base-*`
 variable and the change propagates everywhere.
 
+## What's New in 2.0.0-rc01
+
+- **Contract — a few inputs, everything else derived** — only `--base-main-bg`, `--base-page-bg`, `--base-text-color-1`, the role colors and their text / on-fill colors, overlay, shadow color and palette are hand-set. Text levels 2–4, the `subtle` / `elevated` / `disabled` surfaces, `--base-border-color`, the `hover` / `active` overlays, role `-hover` / `-active` steps, tints, input / dropdown / tooltip tokens are formulas (`color-mix`, OKLCH relative colors), so a theme sets the inputs and the rest follows — in light and dark. Any derived token can still be set by hand. Needs relative color syntax (Chrome/Edge 119+, Safari 16.4+, Firefox 128+). See [Inputs and derived tokens](#inputs-and-derived-tokens).
+- **Contract — re-themed scopes recalculate** — the derived block is declared on `:root, [data-theme], .base-scope`, so setting inputs on such an element re-derives every dependent token inside it (a `var()` resolves where it's declared, not where it's used).
+- **Breaking — `accent` is now `primary`** — `--base-accent-color[-hover|-active]` → `--base-primary-color[-hover|-active]`, `--base-accent-color-light[-hover]` → `--base-primary-bg-subtle[-hover]`, `--base-text-color-on-accent` → `--base-on-primary-text-color`. One brand role, named like the rest of the role set. No aliases.
+- **Breaking — names state their type** — a token ends in `-color`, `-bg`, or the shorthand it feeds (`-border`, `-outline`): `--base-<role>-text` → `-text-color`, `--base-text-on-<role>` → `--base-on-<role>-text-color`, `--base-ring-width` / `*-ring` → `--base-outline-width` / `*-outline`, `--base-input-color` → `--base-input-text-color`, `--base-input-clear-*` → `--base-input-icon-*`. Palette slots are `--base-palette-1…9` (were `--base-color-N`). Full table in the CHANGELOG.
+- **Breaking — one tint per role, copies removed** — `--base-<role>-bg-subtle` (10% light / 20% dark of the role color) is the only role tint; `--base-<role>-bg`, `-bg-light`, `-text-light`, `-border` and the `--base-inverse-*` pair are gone.
+- **Shadows — one tone** — `--base-shadow-color` is mode-aware (15% black light / 40% dark) and every shadow derives from it, including `--base-dropdown-box-shadow`; pure-css, pure-admin and the KeenMate components now use it for all their shadows, so a component inside pure-admin matches its surroundings.
+
 ## What's New in 1.0.7
 
 - **Item states — one shared look for focused and highlighted rows** — new `--base-highlighted-bg` / `-bg-hover` / `-text` / `-ring` and `--base-focused-bg` / `-text` / `-ring` tokens give list options, tree rows and grid rows a single look across components, so a picked web-multiselect option and a highlighted web-/svelte-treeview row on the same page match, and one override re-themes all of them. It follows the Windows Explorer model: *focused* is the one cursor item (an inset accent ring), *highlighted* is the Ctrl/Shift-click set (an accent tint), and *selected* means checkbox-checked, shown by the checkbox alone, so it has no row tokens. See [Item states](#item-states).
 - **Item states — `--base-ring-width` keeps rings inset** — the `*-ring` tokens are `outline` shorthands that consumers draw inset with `outline-offset: calc(-1 * var(--base-ring-width))`, so states never shift layout or bleed onto neighbouring rows. Thicken the ring via `--base-ring-width` (default `1px`, composed into `--base-focused-ring`) rather than a px inside the shorthand, and the offset stays in step.
 - **Checkboxes — one `calc`-only render method** — the [render method](#checkbox-render-method) now scales the box, its `border-width` and its `border-radius` all with `calc(… * var(--base-checkbox-scale))` and pins `box-sizing: border-box`, so a native `<input type=checkbox>` and a custom `<span>` box render at the same size. `transform: scale()` is demoted to a legacy-only last resort. Docs only, no token change.
-
-## What's New in 1.0.6
-
-- **Checkboxes — `--base-checkbox-scale` + a canonical render method.** A new token scales the checkbox *box* (multiplying its width/height), so one override resizes every KeenMate checkbox in lockstep. It pairs with a documented [render method](#checkbox-render-method): size the box with `calc(<base-size> * var(--base-checkbox-scale))` and the glyph with `--base-icon-check-size`, and apply **no CSS transform**. A `transform: scale()` promotes the box to its own compositing layer, which pixel-snaps the fractionally-positioned mask glyph and shifts the tick/dash off-centre — inconsistently from row to row. Scaling the box directly keeps the mark crisp at every scale.
 
 ## Install
 
