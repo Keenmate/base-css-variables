@@ -356,15 +356,17 @@
   /* BORDERS */
   --base-border-color: light-dark(oklch(from var(--base-main-bg) calc(l - 0.096) c h), oklch(from var(--base-main-bg) calc(l + 0.192) c h));
   --base-border: var(--base-border-width) solid var(--base-border-color);
-  --base-checkbox-border-color: var(--base-border-color);
+  --base-checkbox-border-color: var(--base-input-border-color);  /* A control, like the input */
 
   /* INPUT FIELDS */
   --base-input-bg: var(--base-main-bg);
   --base-input-text-color: var(--base-text-color-1);
-  --base-input-border-color: var(--base-border-color);
+  --base-input-border-color: light-dark(color-mix(in srgb, var(--base-text-color-1) 45%, var(--base-main-bg)), color-mix(in srgb, var(--base-text-color-1) 35%, var(--base-main-bg)));  /* Control outline — stronger than the divider */
   --base-input-border: var(--base-border-width) solid var(--base-input-border-color);
   --base-input-border-hover: var(--base-border-width) solid var(--base-primary-color);
   --base-input-border-focus: var(--base-border-width) solid var(--base-primary-color);
+  --base-input-shadow-color-focus: color-mix(in srgb, var(--base-primary-color) 5%, transparent);  /* Focus halo tone; set this to tune it */
+  --base-input-box-shadow-focus: 0 0 0 3px var(--base-input-shadow-color-focus);  /* Soft halo around a focused field */
   --base-input-placeholder-color: var(--base-text-color-4);
   --base-input-bg-disabled: var(--base-disabled-bg);
   --base-input-icon-color: var(--base-text-color-3);  /* Icons inside inputs (clear ✕, chevron, calendar) */

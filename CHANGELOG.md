@@ -3,6 +3,26 @@
 All notable changes to `@keenmate/base-css-variables` are documented here. Format based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.0.0-rc02] — 2026-10-16 [PUBLISHED]
+
+### Added
+
+- **Input focus halo.** `--base-input-shadow-color-focus` (5% of `--base-primary-color`) and
+  `--base-input-box-shadow-focus` (`0 0 0 3px` of it) give the soft glow around a focused field
+  its own tokens, so it no longer borrows the `--base-primary-bg-subtle` fill tint — which
+  themes set much stronger (e.g. 25% in a dark theme) and which made the halo heavy. Fields in
+  pure-admin and the components read the same tone; a component with a different halo size
+  composes its own `box-shadow` from the color token.
+
+### Changed
+
+- **Control outlines are no longer the divider.** `--base-input-border-color` was
+  `var(--base-border-color)` — a hairline meant for card and table edges, about 1.2–1.9:1 against
+  the surface, so inputs, checkboxes and outline (secondary) buttons almost disappeared in some
+  themes. It is now `--base-text-color-1` mixed 45% (light) / 35% (dark) into `--base-main-bg`
+  (about 2–3.4:1 across the pure-admin themes), and `--base-checkbox-border-color` follows it. `--base-border-color` stays the quiet divider.
+  Visible change: every form's field outlines get darker.
+
 ## [2.0.0-rc01] — 2026-10-15 [PUBLISHED]
 
 A breaking cleanup of the color contract: one name per concept, names that state their

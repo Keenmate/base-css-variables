@@ -47,6 +47,7 @@ test('primary: tints, input borders and item states follow --base-primary-color'
 
   expect(await borderColor(page, 'var(--base-input-border-focus)')).toBe(RED);
   expect(await borderColor(page, 'var(--base-input-border-hover)')).toBe(RED);
+  expect(await paint(page, 'box-shadow: var(--base-input-box-shadow-focus)', 'box-shadow')).toBe(`${await color(page, `color-mix(in srgb, ${RED} 5%, transparent)`)} 0px 0px 0px 3px`);
   expect(await bg(page, 'var(--base-primary-bg-subtle)')).toBe(await bg(page, `color-mix(in srgb, ${RED} 10%, transparent)`));
   expect(await bg(page, 'var(--base-primary-bg-subtle-hover)')).toBe(await bg(page, `color-mix(in srgb, ${RED} 15%, transparent)`));
   expect(await bg(page, 'var(--base-highlighted-bg)')).toBe(await bg(page, `color-mix(in srgb, ${RED} 10%, transparent)`));
@@ -74,10 +75,18 @@ test('border: every border token follows --base-border-color', async ({ page }) 
   await setRoot(page, { '--base-border-color': GREEN });
 
   expect(await borderColor(page, 'var(--base-border)')).toBe(GREEN);
-  expect(await borderColor(page, 'var(--base-input-border)')).toBe(GREEN);
   expect(await borderColor(page, 'var(--base-dropdown-border)')).toBe(GREEN);
-  expect(await borderColor(page, '1px solid var(--base-input-border-color)')).toBe(GREEN);
-  expect(await borderColor(page, '1px solid var(--base-checkbox-border-color)')).toBe(GREEN);
+});
+
+test('control border: input / checkbox outline mixes text-color-1 into main-bg (light 45% / dark 35%), not the divider', async ({ page }) => {
+  for (const [scheme, pct] of [['light', 45], ['dark', 35]] as const) {
+    await open(page, scheme);
+    await setRoot(page, { '--base-text-color-1': RED, '--base-main-bg': GREEN, '--base-border-color': 'blue' });
+    const want = await borderColor(page, `1px solid color-mix(in srgb, ${RED} ${pct}%, ${GREEN})`);
+    expect(await borderColor(page, '1px solid var(--base-input-border-color)')).toBe(want);
+    expect(await borderColor(page, 'var(--base-input-border)')).toBe(want);
+    expect(await borderColor(page, '1px solid var(--base-checkbox-border-color)')).toBe(want);
+  }
 });
 
 test('surfaces + text: input / dropdown tokens follow their source', async ({ page }) => {
