@@ -115,10 +115,8 @@ pure-css mirrors all of it (`$base-*`, `$<role>-text-color`, `--pc-<role>-text-c
 - **theme-designer** — generates `--base-*`; ~400 old names (accent, palette, `-bg`,
   `-bg-light`, `--base-primary-bg`). Has unrelated uncommitted work; migrate separately.
 - **Apps** with theme copies (keenmate-web, registr-smluv, entra-brand-designer, …).
-- **pure-css runtime follow:** pure-css emits most `--base-*` as compile-time
-  literals, so inside pure-admin a runtime override of a source token doesn't
-  reach its dependents the way it does with base-variables.css.
-- **pure-css e2e:** 5 failures pre-date this work (Bootstrap-default expectations).
+- ~~pure-css runtime follow~~ — DONE (pure-css `1fa04a5`): derived `$base-*` default to the
+  contract formulas; only inputs are Sass colours. e2e expectations moved to Corporate (42/42).
 - **pure-admin-theme.schema.json** `colors.accent` / `accentHover` (theme preview
   metadata, not the CSS contract) — rename with the theme CLI if wanted.
 
