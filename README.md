@@ -135,10 +135,10 @@ LAYER 1  pure-css source (SCSS)          $base-primary-color: #0ea5e9 !default; 
             │  derive
 LAYER 2  pure-css framework var (SCSS)   $primary-color: $base-primary-color;       (serves only as the build fallback)
             │  emit (two mixins)
-LAYER 3  pure-css emit  ──▶ CSS          --base-primary-color: #0ea5e9;                   ◀─ RAIL A · the knob
-                                         --pc-primary: var(--base-primary-color, #0ea5e9)  ◀─ RAIL B · pure-admin's token
+LAYER 3  pure-css emit  ──▶ CSS          --base-primary-color: #0ea5e9;                         ◀─ RAIL A · the knob
+                                         --pc-primary-color: var(--base-primary-color, #0ea5e9)  ◀─ RAIL B · pure-admin's token
                                          --pc-primary-bg-subtle: var(--base-primary-bg-subtle, …)
-                                         --pc-link-color: var(--pc-primary), …
+                                         --pc-link-color: var(--pc-primary-color), …
             │
 LAYER 4  pure-admin-core (CSS)           --pa-btn-primary-bg: var(--base-primary-color, #0ea5e9), …
             │
@@ -147,7 +147,7 @@ LAYER 5  consumers
             web components                --ms-accent-color: var(--base-primary-color, #3b82f6);
 ```
 
-- **RAIL A** (`--base-primary-color`) is the knob; **RAIL B** (`--pc-primary`) is
+- **RAIL A** (`--base-primary-color`) is the knob; **RAIL B** (`--pc-primary-color`) is
   `var(--base-primary-color, …)`, so at runtime it simply *is* the base value — the
   `<fallback>` only fires if RAIL A is ever missing (it isn't, once this file or a
   theme is loaded).
@@ -159,7 +159,7 @@ LAYER 5  consumers
 | `--base-primary-color` | the root element — `:root`, or `<html>` carrying `.pc-mode-*` / `[data-*]` (runtime) | **everything** downstream, live — pure-admin **and** web components |
 | `--base-primary-color` | a descendant element (runtime) | web components inside it (they read `--base-*` on their own host); pure-admin's `--pc-*` / `--pa-*` are declared on `:root`, so they don't see a subtree override |
 | `$base-primary-color` | pure-css SCSS (build) | the default baked into `base.css` + every `--pc-*` fallback |
-| `--pc-primary` | a single `--pc-*` (runtime) | pure-admin only — use for a deliberate pure-admin-only divergence |
+| `--pc-primary-color` | a single `--pc-*` (runtime) | pure-admin only — use for a deliberate pure-admin-only divergence |
 
 The first row is the whole design: a theme (or a time-of-day `[data-daypart]` scope on
 `<html>`) re-sets `--base-*` and the entire `--pc-*` / `--pa-*` layer re-resolves. Put mode
