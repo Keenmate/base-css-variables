@@ -52,7 +52,7 @@ traces this end-to-end for the primary color — read it before touching token s
 - **Default theme is pure-admin "Corporate"** (sky-blue `#0ea5e9` primary, slate surfaces, cyan info).
   Light values = Corporate light mode, dark = Corporate dark mode.
 - **Inputs vs derived (2.0.0):** `:root` holds the hand-set INPUTS (main/page bg, text-color-1,
-  role colors, role text colors, on-fill text colors, overlay, shadow color, palette) plus the
+  role colors, role text colors, overlay, shadow color, palette) plus the
   non-color tokens. Every token calculated from another lives in the second block,
   `:root, [data-theme], .base-scope { … }` — formulas (`color-mix`, OKLCH relative colors), so a
   re-themed scope recalculates. A new derived token goes there, never as a pasted literal.
@@ -69,7 +69,8 @@ traces this end-to-end for the primary color — read it before touching token s
 - **Role color model** (primary/secondary/success/danger/warning/info): `-color` = vivid fill
   identity (also the solid fill); `-color-hover`/`-active` = darker steps; `-bg-subtle` = the one
   tint (a `color-mix` of `-color`, so it follows it); `-text-color` = role as foreground on a
-  light surface; `--base-on-<role>-text-color` = readable text *on* the fill. Derive from the
+  light surface; `--base-on-<role>-text-color` = readable text *on* the fill (derived: black or
+  white by WCAG luminance, so it follows the fill). Derive from the
   source token with `var()` / `color-mix()` — never paste its literal.
 - **Names state their type (2.0.0):** a token ends in what it is — `-color` (any color value),
   `-bg` (background color), or the CSS shorthand it feeds (`-border`, `-outline`, `-box-shadow`),

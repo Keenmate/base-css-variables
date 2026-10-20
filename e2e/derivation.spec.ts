@@ -179,3 +179,49 @@ test('.base-scope recalculates derived tokens for a re-themed subtree; a plain e
   // Without the scope hook the tint was resolved on :root (primary blue) — the documented limitation.
   expect(await tintIn('')).not.toBe(red10);
 });
+
+/** Text colour painted from `on` over the background painted from `fill`, as sRGB bytes. */
+const pair = (page: Page, on: string, fill: string) =>
+  page.evaluate(([o, f]) => {
+    const el = document.createElement('div');
+    el.style.cssText = `color: ${o}; background-color: ${f}`;
+    document.body.appendChild(el);
+    const cs = getComputedStyle(el);
+    const cv = document.createElement('canvas'); cv.width = cv.height = 1;
+    const ctx = cv.getContext('2d')!;
+    const px = (c: string) => { ctx.clearRect(0, 0, 1, 1); ctx.fillStyle = c; ctx.fillRect(0, 0, 1, 1); return [...ctx.getImageData(0, 0, 1, 1).data].slice(0, 3); };
+    const out = { text: px(cs.color), fill: px(cs.backgroundColor) };
+    el.remove();
+    return out;
+  }, [on, fill]);
+
+const lum = (c: number[]) => {
+  const l = c.map((v) => { v /= 255; return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; });
+  return 0.2126 * l[0] + 0.7152 * l[1] + 0.0722 * l[2];
+};
+const contrast = (a: number[], b: number[]) => {
+  const [x, y] = [lum(a), lum(b)];
+  return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05);
+};
+
+test('on-fill text: black or white, whichever contrasts more, following the fill', async ({ page }) => {
+  await open(page);
+  // navy → white, yellow → black, red-500 → black (5.6 vs 3.8), the tie point's neighbours
+  for (const [fill, expected] of [['#1e3a8a', [255, 255, 255]], ['#fde047', [0, 0, 0]], ['#ef4444', [0, 0, 0]], ['#757575', [255, 255, 255]], ['#777777', [0, 0, 0]]] as const) {
+    await setRoot(page, { '--base-primary-color': fill });
+    const { text } = await pair(page, 'var(--base-on-primary-text-color)', 'var(--base-primary-color)');
+    expect(text, fill).toEqual(expected);
+  }
+});
+
+test('on-fill text: every role and palette fill reaches 4.5:1 by default, light and dark', async ({ page }) => {
+  const roles = ['primary', 'secondary', 'success', 'danger', 'warning', 'info'].map((r) => [`--base-on-${r}-text-color`, `--base-${r}-color`]);
+  const slots = [1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => [`--base-on-palette-${i}-text-color`, `--base-palette-${i}`]);
+  for (const scheme of ['light', 'dark'] as const) {
+    await open(page, scheme);
+    for (const [on, fill] of [...roles, ...slots]) {
+      const { text, fill: f } = await pair(page, `var(${on})`, `var(${fill})`);
+      expect(contrast(text, f), `${scheme} ${on}`).toBeGreaterThanOrEqual(4.5);
+    }
+  }
+});
