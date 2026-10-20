@@ -368,8 +368,8 @@ written directly into `*-outline` won't move the inset offset, so the outline sp
 |----------|---------|
 | `--base-text-color-1` | **Input.** Primary — default body text, titles |
 | `--base-text-color-2` | Secondary — muted labels, supporting text. *Derived:* text-color-1 75% into main-bg |
-| `--base-text-color-3` | Tertiary — icons, metadata, paths. *Derived:* 55% |
-| `--base-text-color-4` | Faint — hints, placeholders, disabled. *Derived:* 40% |
+| `--base-text-color-3` | Tertiary — icons, metadata, paths, placeholders, hints. *Derived:* 55% |
+| `--base-text-color-4` | Faint — disabled, decorative. *Derived:* 40% |
 | `--base-on-primary-text-color` | **Input.** Text on the primary fill |
 | `--base-on-secondary-text-color` | **Input.** Readable text on the secondary fill |
 
@@ -392,7 +392,7 @@ written directly into `*-outline` won't move the inset offset, so the outline sp
 | `--base-input-border-focus` | Input border on focus. *Derived:* primary color |
 | `--base-input-shadow-color-focus` | Tone of the halo around a focused input. *Derived:* 5% of `--base-primary-color` |
 | `--base-input-box-shadow-focus` | Focus halo shorthand (`box-shadow`). *Derived:* `0 0 0 3px var(--base-input-shadow-color-focus)`; components with a different halo size reuse the color token |
-| `--base-input-placeholder-color` | Placeholder text. *Derived:* `var(--base-text-color-4)` |
+| `--base-input-placeholder-color` | Placeholder text — the same tone as the field's icons. *Derived:* `var(--base-text-color-3)` |
 | `--base-input-bg-disabled` | Disabled input background. *Derived:* `var(--base-disabled-bg)` |
 | `--base-input-icon-color` | Icons inside an input (clear ✕, chevron, calendar, search). *Derived:* `var(--base-text-color-3)` |
 | `--base-input-icon-bg-hover` | Background of an input icon button on hover. *Derived:* `var(--base-hover-bg)` |

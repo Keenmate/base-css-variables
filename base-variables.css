@@ -329,8 +329,8 @@
 .base-scope {
   /* TEXT LEVELS — text-color-1 mixed into main-bg */
   --base-text-color-2: color-mix(in srgb, var(--base-text-color-1) 75%, var(--base-main-bg));  /* Secondary — muted labels, supporting text */
-  --base-text-color-3: color-mix(in srgb, var(--base-text-color-1) 55%, var(--base-main-bg));  /* Tertiary — icons, metadata, paths */
-  --base-text-color-4: color-mix(in srgb, var(--base-text-color-1) 40%, var(--base-main-bg));  /* Faint — hints, placeholders, disabled */
+  --base-text-color-3: color-mix(in srgb, var(--base-text-color-1) 55%, var(--base-main-bg));  /* Tertiary — icons, metadata, paths, placeholders, hints */
+  --base-text-color-4: color-mix(in srgb, var(--base-text-color-1) 40%, var(--base-main-bg));  /* Faint — disabled, decorative */
 
   /* SURFACES — the background's own hue, shifted in lightness (OKLCH): darker in light
    * mode, lighter in dark mode (dark steps are 2x — the eye separates dark tones less).
@@ -367,7 +367,7 @@
   --base-input-border-focus: var(--base-border-width) solid var(--base-primary-color);
   --base-input-shadow-color-focus: color-mix(in srgb, var(--base-primary-color) 5%, transparent);  /* Focus halo tone; set this to tune it */
   --base-input-box-shadow-focus: 0 0 0 3px var(--base-input-shadow-color-focus);  /* Soft halo around a focused field */
-  --base-input-placeholder-color: var(--base-text-color-4);
+  --base-input-placeholder-color: var(--base-text-color-3);  /* Readable hint, same tone as the field's icons */
   --base-input-bg-disabled: var(--base-disabled-bg);
   --base-input-icon-color: var(--base-text-color-3);  /* Icons inside inputs (clear ✕, chevron, calendar) */
   --base-input-icon-bg-hover: var(--base-hover-bg);

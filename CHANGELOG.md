@@ -3,6 +3,18 @@
 All notable changes to `@keenmate/base-css-variables` are documented here. Format based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.0.0-rc03] — 2026-10-20
+
+### Changed
+
+- **Placeholders use text step 3.** `--base-input-placeholder-color` was `var(--base-text-color-4)`,
+  the faint step — about 2.1–2.5:1 on the input background in most themes, too faint for a hint you
+  are meant to read. It is now `var(--base-text-color-3)` (about 3–7:1 across the pure-admin
+  themes), the same tone as the field's own icons (`--base-input-icon-color`), and still clearly
+  lighter than typed text. Step 4 is now described as "disabled, decorative" and step 3 takes
+  placeholders and hints. Visible change: every placeholder gets darker. Mirrored in
+  `@keenmate/pure-css` (`$base-input-placeholder-color`).
+
 ## [2.0.0-rc02] — 2026-10-16 [PUBLISHED]
 
 ### Added

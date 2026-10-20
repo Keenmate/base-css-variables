@@ -183,13 +183,13 @@ const KNOBS = [
     'Higher = darker in light mode / brighter in dark mode = more contrast.',
     '<b>pure-admin</b>: navbar &amp; sidebar secondary text, cards, tables, alerts, toasts, tooltips, tabs, forms, lists, timeline, pagers… (31 components) · <b>web</b>: multiselect, grid, dropzone, svelte-treeview, command palette'],
   ['t3', 'text-color-3', 55, 100,
-    'TERTIARY text: icons, metadata, tree paths, loading text. Also drives --base-input-icon-color (the ✕ / chevron / calendar icons inside inputs). ' +
-    'Higher = stronger icons and metadata.',
-    '<b>web</b>: treeview, svelte-treeview, multiselect, daterangepicker, grid, dropzone (icons, metadata, input ✕ / chevron / calendar) · <b>pure-admin</b>: none at runtime'],
+    'TERTIARY text: icons, metadata, tree paths, loading text, hints. Also drives --base-input-icon-color (the ✕ / chevron / calendar icons inside inputs) and --base-input-placeholder-color. ' +
+    'Keep it readable (~3:1 against main-bg, see the table) — placeholders are on this step. Higher = stronger icons, metadata and placeholders.',
+    '<b>web</b>: treeview, svelte-treeview, multiselect, daterangepicker, grid, dropzone (icons, metadata, placeholders, input ✕ / chevron / calendar) · <b>pure-admin</b>: placeholders, .text-subtle, KPI / range / sheet labels, settings hints'],
   ['t4', 'text-color-4', 40, 100,
-    'FAINTEST text: hints, placeholders, disabled text, shortcut hints. --base-input-placeholder-color follows it. ' +
-    'Keep it readable (~3:1 against main-bg, see the table) but clearly weaker than text-color-3.',
-    '<b>web</b>: multiselect, daterangepicker, grid, svelte-treeview (placeholders, hints, disabled text) · <b>pure-admin</b>: none at runtime'],
+    'FAINTEST text: disabled and decorative text (WCAG exempts both from contrast). ' +
+    'Keep it clearly weaker than text-color-3.',
+    '<b>web</b>: multiselect, daterangepicker, grid, svelte-treeview (disabled text) · <b>pure-admin</b>: .text-faint'],
   ['subtle', 'subtle-bg (on page)', 4, 30,
     'RECESSED surface: code blocks, wells, inset panels. Mixed into page-bg (not main-bg), so it sits below the content level. ' +
     'Higher = the well stands out more from the page.',
@@ -266,7 +266,7 @@ function formulas(k) {
     ['--base-border-color', surf(k, 'border', B)],
     ['Input / dropdown / tooltip', null],
     ['--base-input-bg', B],
-    ['--base-input-placeholder-color', 'var(--base-text-color-4)'],
+    ['--base-input-placeholder-color', 'var(--base-text-color-3)'],
     ['--base-input-bg-disabled', 'var(--base-disabled-bg)'],
     ['--base-tooltip-bg', `light-dark(${mix(T, k.tip, B)}, oklch(from ${B} calc(l + 0.15) c h))`],
     ['--base-tooltip-text-color', `light-dark(${B}, ${T})`],
@@ -339,8 +339,8 @@ const MOCK = `
   <div class="card">
     <div class="t1">Title — text-color-1</div>
     <div class="t2">Body / muted — text-color-2</div>
-    <div class="t3">Metadata, icons — text-color-3</div>
-    <div class="t4">Hint, disabled — text-color-4</div>
+    <div class="t3">Metadata, icons, placeholders, hints — text-color-3</div>
+    <div class="t4">Disabled, decorative — text-color-4</div>
     <div style="margin-top:6px">
       <div class="row">Row</div>
       <div class="row hover">Row · hover <span class="tag">hover-bg</span></div>

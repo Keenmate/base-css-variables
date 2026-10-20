@@ -1,6 +1,6 @@
 {
   "name": "@keenmate/base-css-variables",
-  "version": "2.0.0-rc02",
+  "version": "2.0.0-rc03",
   "description": "Shared base layer of CSS custom properties (--base-*) for Keenmate web components",
   "license": "MIT",
   "author": "Keenmate s.r.o.",
