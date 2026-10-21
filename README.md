@@ -102,7 +102,7 @@ prominent than the last — with a separate **interaction-state** axis on top:
 - **main** — content surface (cards, panels, grid, dropzone)
 - **elevated** — raised areas: table headers, toolbars, popovers
 - **hover** — pointer hover on a surface (rows, options) — a translucent overlay
-- **active** — pressed — a stronger overlay (selection is `--base-highlighted-bg`, see [Item states](#item-states))
+- **active** — pressed — a stronger overlay (selection is `--base-selected-bg`, see [Item states](#item-states))
 - **disabled** — inert / readonly surface
 
 Role-specific surfaces default into this scale — `--base-input-bg` and `--base-dropdown-bg`
@@ -184,8 +184,8 @@ The colors come in two kinds:
 
 - **Inputs** — set by hand: `--base-main-bg`, `--base-page-bg`, `--base-text-color-1`,
   the role colors (`--base-primary-color`, `--base-secondary-color`,
-  `--base-success/-danger/-warning/-info-color`), the role text colors
-  (`--base-<role>-text-color`), `--base-overlay-bg`, `--base-shadow-color` and the palette.
+  `--base-success/-danger/-warning/-info-color`), the status role text colors
+  (`--base-success/-danger/-warning/-info-text-color`), `--base-overlay-bg`, `--base-shadow-color` and the palette.
   About 28 colors in all — that's what a theme decides.
 - **Derived** — calculated from the inputs, so changing an input moves them all:
   - text levels 2–4 = `--base-text-color-1` mixed into `--base-main-bg` (75 / 55 / 40%);
@@ -193,8 +193,10 @@ The colors come in two kinds:
     shifted in lightness (OKLCH) — darker in light mode, lighter in dark mode, with
     twice the step in dark mode;
   - `hover` / `active` = translucent overlays of that hue, so they show on any surface;
-  - role `-hover` / `-active` = the role color mixed with black (light) / white (dark);
-  - tints (`-bg-subtle`, `--base-highlighted-bg`) = the role color at 10% (light) / 20% (dark);
+  - role `-hover` / `-active` = the role color mixed with black (light) / white (dark), the same
+    for all six roles;
+  - tints (`-bg-subtle`, `-bg-subtle-hover`, `--base-selected-bg`) = the role color at 10% (light) / 20% (dark);
+  - primary / secondary `-text-color` = the role color mixed with black (light) / white (dark);
   - text on a fill (`--base-on-<role>-text-color`, `--base-on-palette-N-text-color`) = black or
     white, whichever reads better on the fill by APCA;
   - input, dropdown, tooltip, border shorthands and shadows reuse the tokens above.
@@ -335,12 +337,19 @@ Brand blue, kept across light / dark. (Before 2.0.0 this was `--base-accent-*`.)
 | `--base-primary-color-active` | Active / pressed step. *Derived:* 30% black / white |
 | `--base-primary-bg-subtle` | Primary tint for badges, chips, soft fills: `-color` mixed 10% (light) / 20% (dark) into transparent — same pattern as the role tints |
 | `--base-primary-bg-subtle-hover` | The primary tint on hover: 15% (light) / 30% (dark) |
+| `--base-primary-text-color` | Primary as **foreground** on a surface (links, emphasised text). *Derived:* 45% black (light) / 25% white (dark) |
+| `--base-on-primary-text-color` | Text on the primary fill. *Derived:* black or white, whichever reads better on the fill by APCA (Lc ≥ 45 on every default fill); hand-set it for a fill near the tie |
 
 ### Secondary role
 | Variable | Purpose |
 |----------|---------|
 | `--base-secondary-color` | **Input.** Neutral grey secondary action color |
-| `--base-secondary-color-hover` | Secondary hover state. *Derived:* like primary |
+| `--base-secondary-color-hover` | Hover step. *Derived:* like primary |
+| `--base-secondary-color-active` | Active / pressed step. *Derived:* like primary |
+| `--base-secondary-bg-subtle` | Secondary tint. *Derived:* like primary |
+| `--base-secondary-bg-subtle-hover` | The secondary tint on hover. *Derived:* like primary |
+| `--base-secondary-text-color` | Secondary as foreground on a surface. *Derived:* like primary |
+| `--base-on-secondary-text-color` | Text on the secondary fill. *Derived:* black or white, whichever reads better on the fill by APCA (Lc ≥ 45 on every default fill); hand-set it for a fill near the tie |
 
 ### Background / surface
 Elevation ladder: `page` (canvas) < `subtle` (recessed) < `main` (content) <
@@ -357,17 +366,20 @@ Elevation ladder: `page` (canvas) < `subtle` (recessed) < `main` (content) <
 | `--base-hover-bg` | Hover state for any surface (option / row hover). *Derived:* translucent overlay of the background hue |
 | `--base-active-bg` | Active / pressed surface. *Derived:* stronger overlay |
 | `--base-disabled-bg` | Disabled / readonly surface. *Derived:* main-bg shifted in lightness |
+| `--base-disabled-opacity` | Fade for a disabled control (`0.65`) — one value for every role, button, input and icon |
 
 ### Item states
 Shared look for list options, tree rows and grid rows, so a selected multiselect option
-and a highlighted tree row on the same page are identical. The model is Windows Explorer's,
+and a selected tree row on the same page are identical. The model is Windows Explorer's,
 with three states:
 
 - **focused** — the *one* item the keyboard / mouse cursor is on;
-- **highlighted** — the Ctrl/Shift-click (Shift+arrow) set, 0..n items;
-- **selected** — the checkbox-*checked* items. Shown by the checkbox only, so there are no
-  `--base-selected-*` row tokens. With no checkboxes, highlighted *is* the selection
-  (svelte-treeview keeps the two arrays identical in that mode).
+- **selected** — the click / Ctrl / Shift-click (Shift+arrow) set, 0..n items;
+- **checked** — the items whose checkbox is ticked. Shown by the checkbox only, so there are
+  no `--base-checked-*` row tokens. With no checkboxes, checked mirrors selected.
+
+Pointer hover is not an item state: it's `--base-hover-bg`, the same overlay on any surface.
+(Before 2.0.0-rc03 *selected* was called *highlighted*: `--base-highlighted-*`.)
 
 `*-outline` is an `outline` (not `border`) shorthand that consumers draw **inset** (`outline-offset: calc(-1 * var(--base-outline-width))`):
 no layout shift, no bleed onto neighbouring rows, and a separate paint channel from
@@ -377,10 +389,10 @@ written directly into `*-outline` won't move the inset offset, so the outline sp
 | Variable | Purpose |
 |----------|---------|
 | `--base-outline-width` | Thickness for `*-outline`; consumers inset the outline by −this (default: `1px`) |
-| `--base-highlighted-bg` | Highlighted item tint. *Derived:* `var(--base-primary-bg-subtle)` (primary at 10% light / 20% dark) |
-| `--base-highlighted-bg-hover` | Highlighted item on hover. *Derived:* same as `--base-highlighted-bg` |
-| `--base-highlighted-text-color` | Text on a highlighted item (default: `currentColor` = unchanged) |
-| `--base-highlighted-outline` | Highlighted item outline shorthand (default: `none`) |
+| `--base-selected-bg` | Selected item tint. *Derived:* `var(--base-primary-bg-subtle)` (primary at 10% light / 20% dark) |
+| `--base-selected-bg-hover` | Selected item on hover. *Derived:* same as `--base-selected-bg` |
+| `--base-selected-text-color` | Text on a selected item (default: `currentColor` = unchanged) |
+| `--base-selected-outline` | Selected item outline shorthand (default: `none`) |
 | `--base-focused-bg` | Focused item background (default: `transparent`, the outline alone marks focus) |
 | `--base-focused-text-color` | Text on the focused item (default: `currentColor`) |
 | `--base-focused-outline` | Keyboard-focus outline shorthand. *Derived:* `var(--base-outline-width) solid var(--base-primary-color)` |
@@ -392,8 +404,6 @@ written directly into `*-outline` won't move the inset offset, so the outline sp
 | `--base-text-color-2` | Secondary — muted labels, supporting text. *Derived:* text-color-1 75% into main-bg |
 | `--base-text-color-3` | Tertiary — icons, metadata, paths, placeholders, hints. *Derived:* 55% |
 | `--base-text-color-4` | Faint — disabled, decorative. *Derived:* 40% |
-| `--base-on-primary-text-color` | Text on the primary fill. *Derived:* black or white, whichever reads better on the fill by APCA (Lc ≥ 45 on every default fill); hand-set it for a fill near the tie |
-| `--base-on-secondary-text-color` | Readable text on the secondary fill. *Derived:* black or white, whichever reads better on the fill by APCA (Lc ≥ 45 on every default fill); hand-set it for a fill near the tie |
 
 ### Borders
 | Variable | Purpose |
@@ -433,13 +443,17 @@ written directly into `*-outline` won't move the inset offset, so the outline sp
 | `--base-tooltip-text-color` | Tooltip text. *Derived:* main-bg (light) / text-color-1 (dark) |
 
 ### Status colors
-Role ∈ `success` / `danger` / `warning` / `info`. Each role defines the full set below.
+Role ∈ `success` / `danger` / `warning` / `info`. Every role — primary and secondary
+included — has the same seven tokens; the status roles differ only in that `-text-color` is
+an input.
 
 | Variable | Purpose |
 |----------|---------|
 | `--base-<role>-color` | **Input.** Role **fill identity** (vivid) |
 | `--base-<role>-color-hover` | Role fill, hover. *Derived:* 15% black (light) / white (dark) |
+| `--base-<role>-color-active` | Role fill, active / pressed. *Derived:* 30% black / white |
 | `--base-<role>-bg-subtle` | Role tint for backgrounds (labels, toasts, invalid cells): `-color` mixed 10% (light) / 20% (dark) into transparent |
+| `--base-<role>-bg-subtle-hover` | The role tint on hover: 15% (light) / 30% (dark) |
 | `--base-<role>-text-color` | **Input.** Role as **foreground** on the page surface (text / links) — dark shade in light mode, light shade in dark |
 | `--base-on-<role>-text-color` | Readable text **on** the role fill. *Derived:* black or white, whichever reads better on the fill by APCA (Lc ≥ 45 on every default fill); hand-set it for a fill near the tie |
 
@@ -518,9 +532,9 @@ one to re-glyph every consumer at once.
 | `--base-icon-search` | Search (magnifier) |
 | `--base-icon-filter` | Filter (funnel) |
 | `--base-icon-refresh` | Refresh (two curved arrows; consumers spin it) |
-| `--base-icon-check` | Selected (tick) |
+| `--base-icon-check` | Checked (tick) |
 | `--base-icon-check-size` | Mask-size of the selection glyph in its box (`68%`) |
-| `--base-icon-indeterminate` | Partially selected (tri-state minus) |
+| `--base-icon-indeterminate` | Partially checked (tri-state minus) |
 | `--base-icon-copy` | Copy to clipboard (two sheets) |
 | `--base-icon-ellipsis` | More / overflow (three dots; vertical = same glyph rotated 90°) |
 | `--base-icon-save` | Save (floppy disk) |
@@ -558,6 +572,8 @@ categorical color (charts, tags, avatars).
   the compiled pure-admin themes, with live input pickers and formula knobs.
 - `demo/fill-states.html` (same place) — text on fills (WCAG 2 vs APCA pick, with both scores),
   hover / press options for buttons, and how a theme overrides a button component's state tokens.
+- `demo/variables.html` (same place) — every `--base-*` token in logical groups, marked input or
+  derived, with its light and dark value, a preview and its definition.
 
 ## License
 

@@ -74,7 +74,7 @@
   .mock .row { padding: 4px 6px; border-radius: var(--r); }
   .mock .row.hover { background: var(--base-hover-bg); }
   .mock .row.active { background: var(--base-active-bg); }
-  .mock .row.hl { background: var(--base-highlighted-bg); }
+  .mock .row.hl { background: var(--base-selected-bg); }
   .mock .row.focus { outline: var(--base-focused-outline); outline-offset: calc(-1 * var(--base-outline-width)); }
   .mock .row .tag { float: right; font-size: 11px; color: var(--base-text-color-3); }
   .mock .elev { background: var(--base-elevated-bg); border-radius: var(--r); padding: 4px; margin-top: 6px; }
@@ -276,7 +276,7 @@ function formulas(k) {
       ...(r === 'primary' ? [[`--base-${r}-color-active`, step(`var(--base-${r}-color)`, k.roleA)]] : []),
     ]),
     ['Item state', null],
-    ['--base-highlighted-bg', 'var(--base-primary-bg-subtle)'],
+    ['--base-selected-bg', 'var(--base-primary-bg-subtle)'],
   ];
   return lines;
 }
@@ -345,7 +345,7 @@ const MOCK = `
       <div class="row">Row</div>
       <div class="row hover">Row · hover <span class="tag">hover-bg</span></div>
       <div class="row active">Row · active <span class="tag">active-bg</span></div>
-      <div class="row hl">Row · highlighted</div>
+      <div class="row hl">Row · selected</div>
       <div class="row focus">Row · focused</div>
     </div>
     <div class="elev">
@@ -451,7 +451,7 @@ const TABLE = [
   ['Surfaces', null],
   ['--base-subtle-bg', 'surf'], ['--base-elevated-bg', 'surf'], ['--base-hover-bg', 'surf'], ['--base-active-bg', 'surf'],
   ['--base-disabled-bg', 'surf'], ['--base-input-bg', 'surf'], ['--base-input-bg-disabled', 'surf'],
-  ['--base-highlighted-bg', 'surf'], ['--base-border-color', 'surf'],
+  ['--base-selected-bg', 'surf'], ['--base-border-color', 'surf'],
   ['Tooltip', null],
   ['--base-tooltip-bg', 'surf'], ['--base-tooltip-text-color', 'text'],
   ['Role steps', null],

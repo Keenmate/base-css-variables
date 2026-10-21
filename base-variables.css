@@ -30,6 +30,7 @@
   /* ======================================================================
    * PRIMARY ROLE — Corporate brand blue (kept across modes). The brand /
    * interactive color: primary buttons, focus, selection, checked state, links.
+   * Hover / active / tints / text color / text on the fill are derived (below).
    * ==================================================================== */
   --base-primary-color: #0ea5e9;
 
@@ -52,11 +53,11 @@
    * ITEM STATES — list options, tree rows, grid rows. One look for every
    * component on the page: web-multiselect options, svelte-/web-treeview rows.
    * The Explorer model has THREE states — only two are row looks here:
-   *   • focused     = the ONE keyboard / mouse cursor item
-   *   • highlighted = the Ctrl/Shift-click (Shift+arrow) set, 0..n items
-   *   • selected    = checkbox-CHECKED — shown by the checkbox only, no row
-   *                   tokens (when there are no checkboxes, highlighted IS the
-   *                   selection, e.g. svelte-treeview mirrors the two arrays).
+   *   • focused  = the ONE keyboard / mouse cursor item
+   *   • selected = the click / Ctrl / Shift-click (Shift+arrow) set, 0..n items
+   *   • checked  = checkbox ticked — shown by the checkbox only, no row tokens
+   *                (when there are no checkboxes, checked mirrors selected).
+   * Pointer hover is separate: --base-hover-bg.
    * Each state is a bg / text-color / outline trio; `*-outline` is an
    * `outline` shorthand (not a border) that consumers draw INSET with
    * `outline-offset: calc(-1 * var(--base-outline-width))`, so it never shifts
@@ -66,8 +67,8 @@
    * tints are mode-invariant (color-mix with transparent works on any surface).
    * ==================================================================== */
   --base-outline-width: 1px;                             /* Width for *-outline; consumers inset by −this */
-  --base-highlighted-text-color: currentColor;           /* Text on a highlighted item (currentColor = unchanged) */
-  --base-highlighted-outline: none;                      /* Outline shorthand, e.g. var(--base-outline-width) solid … */
+  --base-selected-text-color: currentColor;              /* Text on a selected item (currentColor = unchanged) */
+  --base-selected-outline: none;                         /* Outline shorthand, e.g. var(--base-outline-width) solid … */
   --base-focused-bg: transparent;                        /* The outline alone marks focus */
   --base-focused-text-color: currentColor;
 
@@ -97,8 +98,8 @@
    * CONTEXTUAL / ROLE COLORS — success / danger / warning / info
    * Model: `-color` = vivid fill identity (also the solid fill); `-text-color` =
    * the role as foreground on a surface; `--base-on-<role>-text-color` = text ON
-   * the fill (derived — black or white, see the derived block). Corporate hues
-   * (emerald / red / amber / cyan).
+   * the fill (derived — black or white, see the derived block). Hover / active /
+   * tints are derived too. Corporate hues (emerald / red / amber / cyan).
    * ==================================================================== */
   /* success (#10b981) */
   --base-success-color: #10b981;
@@ -175,6 +176,9 @@
   --base-input-size-lg-height: 3.8;   /* 38px */
   --base-input-size-xl-height: 4.1;   /* 41px */
 
+  /* Disabled controls: one fade for every role, button, input and icon */
+  --base-disabled-opacity: 0.65;
+
   /* Rem base for the unitless multipliers above: calc(<multiplier> * var(--base-rem)) */
   --base-rem: 1rem;
 
@@ -236,12 +240,12 @@
   /* refresh = two curved arrows (Lucide refresh-cw) — reload / re-fetch a view or
    * dataset. Consumers spin it (CSS animation) while a refresh is in flight. */
   --base-icon-refresh: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8%22/%3E%3Cpath d=%22M21 3v5h-5%22/%3E%3Cpath d=%22M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16%22/%3E%3Cpath d=%22M3 21v-5h5%22/%3E%3C/svg%3E");
-  /* Selection — the checkbox/tree-node state pair. check = SELECTED (tick);
-   * indeterminate = PARTIALLY selected (tri-state parent, e.g. a tree node whose
+  /* Checkbox — the checkbox/tree-node state pair. check = CHECKED (tick);
+   * indeterminate = PARTIALLY checked (tri-state parent, e.g. a tree node whose
    * children are a mix). Shares the minus shape with `collapse` by default but is
-   * its own knob — selection ≠ disclosure, override one without moving the other. */
+   * its own knob — checking ≠ disclosure, override one without moving the other. */
   --base-icon-check: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M20 6 9 17l-5-5%22/%3E%3C/svg%3E");
-  /* mask-size for the selection glyph inside its box (checkbox / tree-node). One
+  /* mask-size for the check glyph inside its box (checkbox / tree-node). One
    * knob every consumer reads, so overriding the glyph AND its scale re-sizes the
    * mark everywhere in lockstep. Default 68% leaves breathing room; a glyph that
    * fills its viewBox edge-to-edge (e.g. a star) can be shrunk from here without
@@ -353,16 +357,41 @@
   --base-on-palette-8-text-color: color(from color(from var(--base-palette-8) srgb calc(0.21 * r * r * (0.4 + r * (0.82 - 0.22 * r)) + 0.72 * g * g * (0.4 + g * (0.82 - 0.22 * g)) + 0.07 * b * b * (0.4 + b * (0.82 - 0.22 * b))) 0 0) srgb clamp(0, (0.34 - r) * 1e9, 1) clamp(0, (0.34 - r) * 1e9, 1) clamp(0, (0.34 - r) * 1e9, 1));
   --base-on-palette-9-text-color: color(from color(from var(--base-palette-9) srgb calc(0.21 * r * r * (0.4 + r * (0.82 - 0.22 * r)) + 0.72 * g * g * (0.4 + g * (0.82 - 0.22 * g)) + 0.07 * b * b * (0.4 + b * (0.82 - 0.22 * b))) 0 0) srgb clamp(0, (0.34 - r) * 1e9, 1) clamp(0, (0.34 - r) * 1e9, 1) clamp(0, (0.34 - r) * 1e9, 1));
 
-  /* PRIMARY / SECONDARY — hover/active steps (darker in light mode, lighter in dark) + tints */
+  /* ROLE COLORS — the same set for every role (primary, secondary, success, danger,
+   * warning, info): hover / active = the fill 15% / 30% toward black (light) or white
+   * (dark); bg-subtle = tint, 10% / 20%, and 15% / 30% on hover. Status roles hand-set
+   * their -text-color (inputs); primary / secondary derive it: the fill 45% toward
+   * black (light) / 25% toward white (dark). */
   --base-primary-color-hover: light-dark(color-mix(in srgb, black 15%, var(--base-primary-color)), color-mix(in srgb, white 15%, var(--base-primary-color)));
   --base-primary-color-active: light-dark(color-mix(in srgb, black 30%, var(--base-primary-color)), color-mix(in srgb, white 30%, var(--base-primary-color)));
   --base-primary-bg-subtle: light-dark(color-mix(in srgb, var(--base-primary-color) 10%, transparent), color-mix(in srgb, var(--base-primary-color) 20%, transparent));  /* Primary tint: badges, chips, soft fills */
-  --base-primary-bg-subtle-hover: light-dark(color-mix(in srgb, var(--base-primary-color) 15%, transparent), color-mix(in srgb, var(--base-primary-color) 30%, transparent));  /* …on hover */
+  --base-primary-bg-subtle-hover: light-dark(color-mix(in srgb, var(--base-primary-color) 15%, transparent), color-mix(in srgb, var(--base-primary-color) 30%, transparent));
+  --base-primary-text-color: light-dark(color-mix(in srgb, black 45%, var(--base-primary-color)), color-mix(in srgb, white 25%, var(--base-primary-color)));
   --base-secondary-color-hover: light-dark(color-mix(in srgb, black 15%, var(--base-secondary-color)), color-mix(in srgb, white 15%, var(--base-secondary-color)));
+  --base-secondary-color-active: light-dark(color-mix(in srgb, black 30%, var(--base-secondary-color)), color-mix(in srgb, white 30%, var(--base-secondary-color)));
+  --base-secondary-bg-subtle: light-dark(color-mix(in srgb, var(--base-secondary-color) 10%, transparent), color-mix(in srgb, var(--base-secondary-color) 20%, transparent));
+  --base-secondary-bg-subtle-hover: light-dark(color-mix(in srgb, var(--base-secondary-color) 15%, transparent), color-mix(in srgb, var(--base-secondary-color) 30%, transparent));
+  --base-secondary-text-color: light-dark(color-mix(in srgb, black 45%, var(--base-secondary-color)), color-mix(in srgb, white 25%, var(--base-secondary-color)));
+  --base-success-color-hover: light-dark(color-mix(in srgb, black 15%, var(--base-success-color)), color-mix(in srgb, white 15%, var(--base-success-color)));
+  --base-success-color-active: light-dark(color-mix(in srgb, black 30%, var(--base-success-color)), color-mix(in srgb, white 30%, var(--base-success-color)));
+  --base-success-bg-subtle: light-dark(color-mix(in srgb, var(--base-success-color) 10%, transparent), color-mix(in srgb, var(--base-success-color) 20%, transparent));
+  --base-success-bg-subtle-hover: light-dark(color-mix(in srgb, var(--base-success-color) 15%, transparent), color-mix(in srgb, var(--base-success-color) 30%, transparent));
+  --base-danger-color-hover: light-dark(color-mix(in srgb, black 15%, var(--base-danger-color)), color-mix(in srgb, white 15%, var(--base-danger-color)));
+  --base-danger-color-active: light-dark(color-mix(in srgb, black 30%, var(--base-danger-color)), color-mix(in srgb, white 30%, var(--base-danger-color)));
+  --base-danger-bg-subtle: light-dark(color-mix(in srgb, var(--base-danger-color) 10%, transparent), color-mix(in srgb, var(--base-danger-color) 20%, transparent));
+  --base-danger-bg-subtle-hover: light-dark(color-mix(in srgb, var(--base-danger-color) 15%, transparent), color-mix(in srgb, var(--base-danger-color) 30%, transparent));
+  --base-warning-color-hover: light-dark(color-mix(in srgb, black 15%, var(--base-warning-color)), color-mix(in srgb, white 15%, var(--base-warning-color)));
+  --base-warning-color-active: light-dark(color-mix(in srgb, black 30%, var(--base-warning-color)), color-mix(in srgb, white 30%, var(--base-warning-color)));
+  --base-warning-bg-subtle: light-dark(color-mix(in srgb, var(--base-warning-color) 10%, transparent), color-mix(in srgb, var(--base-warning-color) 20%, transparent));
+  --base-warning-bg-subtle-hover: light-dark(color-mix(in srgb, var(--base-warning-color) 15%, transparent), color-mix(in srgb, var(--base-warning-color) 30%, transparent));
+  --base-info-color-hover: light-dark(color-mix(in srgb, black 15%, var(--base-info-color)), color-mix(in srgb, white 15%, var(--base-info-color)));
+  --base-info-color-active: light-dark(color-mix(in srgb, black 30%, var(--base-info-color)), color-mix(in srgb, white 30%, var(--base-info-color)));
+  --base-info-bg-subtle: light-dark(color-mix(in srgb, var(--base-info-color) 10%, transparent), color-mix(in srgb, var(--base-info-color) 20%, transparent));
+  --base-info-bg-subtle-hover: light-dark(color-mix(in srgb, var(--base-info-color) 15%, transparent), color-mix(in srgb, var(--base-info-color) 30%, transparent));
 
   /* ITEM STATES (see the item-state comment in :root) */
-  --base-highlighted-bg: var(--base-primary-bg-subtle);  /* Highlighted item = the primary tint */
-  --base-highlighted-bg-hover: var(--base-highlighted-bg);  /* Highlighted row keeps its tint on hover */
+  --base-selected-bg: var(--base-primary-bg-subtle);  /* Selected item = the primary tint */
+  --base-selected-bg-hover: var(--base-selected-bg);  /* Selected row keeps its tint on hover */
   --base-focused-outline: var(--base-outline-width) solid var(--base-primary-color);  /* Keyboard-focus outline (drawn inset) */
 
   /* BORDERS */
@@ -393,16 +422,6 @@
   --base-shadow-sm: 0 1px 3px var(--base-shadow-color);
   --base-shadow-md: 0 2px 8px var(--base-shadow-color);
   --base-shadow-lg: 0 4px 12px var(--base-shadow-color);
-
-  /* STATUS ROLES — hover steps + tints (10% light / 20% dark) */
-  --base-success-color-hover: light-dark(color-mix(in srgb, black 15%, var(--base-success-color)), color-mix(in srgb, white 15%, var(--base-success-color)));
-  --base-success-bg-subtle: light-dark(color-mix(in srgb, var(--base-success-color) 10%, transparent), color-mix(in srgb, var(--base-success-color) 20%, transparent));
-  --base-danger-color-hover: light-dark(color-mix(in srgb, black 15%, var(--base-danger-color)), color-mix(in srgb, white 15%, var(--base-danger-color)));
-  --base-danger-bg-subtle: light-dark(color-mix(in srgb, var(--base-danger-color) 10%, transparent), color-mix(in srgb, var(--base-danger-color) 20%, transparent));
-  --base-warning-color-hover: light-dark(color-mix(in srgb, black 15%, var(--base-warning-color)), color-mix(in srgb, white 15%, var(--base-warning-color)));
-  --base-warning-bg-subtle: light-dark(color-mix(in srgb, var(--base-warning-color) 10%, transparent), color-mix(in srgb, var(--base-warning-color) 20%, transparent));
-  --base-info-color-hover: light-dark(color-mix(in srgb, black 15%, var(--base-info-color)), color-mix(in srgb, white 15%, var(--base-info-color)));
-  --base-info-bg-subtle: light-dark(color-mix(in srgb, var(--base-info-color) 10%, transparent), color-mix(in srgb, var(--base-info-color) 20%, transparent));
 
   /* ICON ALIASES */
   --base-icon-clear: var(--base-icon-close);  /* field-clear — follows close */

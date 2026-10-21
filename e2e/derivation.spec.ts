@@ -50,7 +50,7 @@ test('primary: tints, input borders and item states follow --base-primary-color'
   expect(await paint(page, 'box-shadow: var(--base-input-box-shadow-focus)', 'box-shadow')).toBe(`${await color(page, `color-mix(in srgb, ${RED} 5%, transparent)`)} 0px 0px 0px 3px`);
   expect(await bg(page, 'var(--base-primary-bg-subtle)')).toBe(await bg(page, `color-mix(in srgb, ${RED} 10%, transparent)`));
   expect(await bg(page, 'var(--base-primary-bg-subtle-hover)')).toBe(await bg(page, `color-mix(in srgb, ${RED} 15%, transparent)`));
-  expect(await bg(page, 'var(--base-highlighted-bg)')).toBe(await bg(page, `color-mix(in srgb, ${RED} 10%, transparent)`));
+  expect(await bg(page, 'var(--base-selected-bg)')).toBe(await bg(page, `color-mix(in srgb, ${RED} 10%, transparent)`));
   expect(await paint(page, 'outline: var(--base-focused-outline)', 'outline-color')).toBe(RED);
 });
 
@@ -98,13 +98,53 @@ test('surfaces + text: input / dropdown tokens follow their source', async ({ pa
   expect(await bg(page, 'var(--base-dropdown-bg)')).toBe(RED);
 });
 
-for (const role of ['success', 'danger', 'warning', 'info'] as const) {
-  for (const [scheme, pct] of [['light', 10], ['dark', 20]] as const) {
-    test(`${role}: tint (${scheme} ${pct}%) follows --base-${role}-color`, async ({ page }) => {
+const ALL_ROLES = ['primary', 'secondary', 'success', 'danger', 'warning', 'info'] as const;
+
+// Every role has the same derived set; each step follows the role's -color.
+for (const role of ALL_ROLES) {
+  for (const [scheme, mix, tint, tintHover] of [['light', 'black', 10, 15], ['dark', 'white', 20, 30]] as const) {
+    test(`${role}: hover / active / tints (${scheme}) follow --base-${role}-color`, async ({ page }) => {
       await open(page, scheme);
       await setRoot(page, { [`--base-${role}-color`]: RED });
 
-      expect(await bg(page, `var(--base-${role}-bg-subtle)`)).toBe(await bg(page, `color-mix(in srgb, ${RED} ${pct}%, transparent)`));
+      expect(await bg(page, `var(--base-${role}-color-hover)`)).toBe(await bg(page, `color-mix(in srgb, ${mix} 15%, ${RED})`));
+      expect(await bg(page, `var(--base-${role}-color-active)`)).toBe(await bg(page, `color-mix(in srgb, ${mix} 30%, ${RED})`));
+      expect(await bg(page, `var(--base-${role}-bg-subtle)`)).toBe(await bg(page, `color-mix(in srgb, ${RED} ${tint}%, transparent)`));
+      expect(await bg(page, `var(--base-${role}-bg-subtle-hover)`)).toBe(await bg(page, `color-mix(in srgb, ${RED} ${tintHover}%, transparent)`));
+    });
+  }
+}
+
+test('every role defines the same seven tokens', async ({ page }) => {
+  await open(page);
+  const parts = ['-color', '-color-hover', '-color-active', '-bg-subtle', '-bg-subtle-hover', '-text-color'];
+  const names = ALL_ROLES.flatMap((r) => [...parts.map((x) => `--base-${r}${x}`), `--base-on-${r}-text-color`]);
+  const missing = await page.evaluate((ns) => {
+    const cs = getComputedStyle(document.documentElement);
+    return ns.filter((n) => cs.getPropertyValue(n).trim() === '');
+  }, names);
+  expect(missing).toEqual([]);
+});
+
+for (const role of ['primary', 'secondary'] as const) {
+  for (const [scheme, mix, pct] of [['light', 'black', 45], ['dark', 'white', 25]] as const) {
+    test(`${role}: text color (${scheme}) follows the fill and reads on the main surface`, async ({ page }) => {
+      await open(page, scheme);
+      const fg = await color(page, `var(--base-${role}-text-color)`);
+      const surface = await bg(page, 'var(--base-main-bg)');
+      const lum = (c: string) => {
+        const scale = c.startsWith('color(srgb') ? 1 : 255;  // color-mix() serializes as color(srgb 0–1 …)
+        const [r, g, b] = c.replace('color(srgb', '').match(/[\d.]+/g)!.slice(0, 3).map((v) => {
+          const x = +v / scale;
+          return x <= 0.04045 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4;
+        });
+        return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+      };
+      const [hi, lo] = [lum(fg), lum(surface)].sort((a, b) => b - a);
+      expect((hi + 0.05) / (lo + 0.05)).toBeGreaterThanOrEqual(4.5);
+
+      await setRoot(page, { [`--base-${role}-color`]: RED });
+      expect(await color(page, `var(--base-${role}-text-color)`)).toBe(await color(page, `color-mix(in srgb, ${mix} ${pct}%, ${RED})`));
     });
   }
 }
@@ -142,15 +182,6 @@ test('text levels and surfaces follow the inputs (main-bg, text-color-1)', async
   expect(await bg(page, 'var(--base-elevated-bg)')).not.toBe(before.elev);
   expect(await borderColor(page, '1px solid var(--base-border-color)')).not.toBe(before.border);
   expect(before.t2).not.toBe(await color(page, 'var(--base-text-color-2)'));
-});
-
-test('role hover steps follow the role color (darker in light, lighter in dark)', async ({ page }) => {
-  await open(page);
-  await setRoot(page, { '--base-danger-color': RED });
-  expect(await bg(page, 'var(--base-danger-color-hover)')).toBe(await bg(page, `color-mix(in srgb, black 15%, ${RED})`));
-  await open(page, 'dark');
-  await setRoot(page, { '--base-danger-color': RED });
-  expect(await bg(page, 'var(--base-danger-color-hover)')).toBe(await bg(page, `color-mix(in srgb, white 15%, ${RED})`));
 });
 
 test('dark mode: hover differs from the elevated surface, faint text from the border', async ({ page }) => {

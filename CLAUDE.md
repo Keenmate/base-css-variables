@@ -57,7 +57,8 @@ traces this end-to-end for the primary color — read it before touching token s
   `:root, [data-theme], .base-scope { … }` — formulas (`color-mix`, OKLCH relative colors), so a
   re-themed scope recalculates. A new derived token goes there, never as a pasted literal.
   `demo/derived.html` compares the formulas against the compiled pure-admin themes;
-  `demo/fill-states.html` shows text on fills (WCAG 2 vs APCA pick) and button hover / press states.
+  `demo/fill-states.html` shows text on fills (WCAG 2 vs APCA pick) and button hover / press states;
+  `demo/variables.html` lists every token in groups (input / derived, light + dark values).
 - **What belongs here (three categories):** INPUTS = what a theme decides (keep few);
   DERIVED = shared formulas for anything more than one consumer asks (hover / active steps,
   tints, text levels, text on fills…) — free to grow, a theme never sets them; COMPONENT tokens =
@@ -74,12 +75,14 @@ traces this end-to-end for the primary color — read it before touching token s
   Keep new sizing tokens unitless to match.
 - **Aliases** point back via `var()`: `--base-icon-clear`/`-remove` follow `--base-icon-close`.
   2.0.0 removed the `accent` ↔ `primary` pair — `primary` is the only name.
-- **Role color model** (primary/secondary/success/danger/warning/info): `-color` = vivid fill
-  identity (also the solid fill); `-color-hover`/`-active` = darker steps; `-bg-subtle` = the one
-  tint (a `color-mix` of `-color`, so it follows it); `-text-color` = role as foreground on a
-  light surface; `--base-on-<role>-text-color` = readable text *on* the fill (derived: black or
-  white by APCA contrast, so it follows the fill). Derive from the
-  source token with `var()` / `color-mix()` — never paste its literal.
+- **Role color model** (primary/secondary/success/danger/warning/info): **every role has the same
+  seven tokens** — keep it that way when adding a role or a step. `-color` = vivid fill identity
+  (also the solid fill); `-color-hover`/`-active` = darker steps; `-bg-subtle`/`-bg-subtle-hover` =
+  the tint (a `color-mix` of `-color`, so it follows it); `-text-color` = role as foreground on a
+  surface (input for the status roles, derived for primary / secondary);
+  `--base-on-<role>-text-color` = readable text *on* the fill (derived: black or white by APCA
+  contrast, so it follows the fill). Disabled is not a role step: one `--base-disabled-opacity`
+  for everything. Derive from the source token with `var()` / `color-mix()` — never paste its literal.
 - **Names state their type (2.0.0):** a token ends in what it is — `-color` (any color value),
   `-bg` (background color), or the CSS shorthand it feeds (`-border`, `-outline`, `-box-shadow`),
   e.g. `--base-input-text-color`, not `--base-input-text`. Item states are `-bg` / `-text-color` /

@@ -5,6 +5,35 @@ All notable changes to `@keenmate/base-css-variables` are documented here. Forma
 
 ## [2.0.0-rc03] — 2026-10-20
 
+### Changed — breaking
+
+- **Item state `highlighted` is now `selected`; the checkbox state is `checked`.** "Highlighted"
+  read like hover or emphasis, and the word meant three things across the stack. The Explorer
+  model now reads: *focused* = the one cursor item, *selected* = the click / Ctrl / Shift-click
+  set (0..n), *checked* = the ticked checkbox (drawn by the checkbox only, no row tokens);
+  pointer hover stays `--base-hover-bg`. Renamed, no aliases: `--base-highlighted-bg` →
+  `--base-selected-bg`, `-bg-hover`, `-text-color`, `-outline` likewise. The checkbox icon
+  comments say *checked*. Mirrored in `@keenmate/pure-css` (`$base-selected-*`); web-multiselect
+  2.6.0-rc02 reads the new names; web-treeview and svelte-treeview follow (their CSS, and their
+  `selectedPaths` / `highlightedPaths` API).
+
+### Added
+
+- **Every role has the same seven tokens.** The role set had grown by request: primary had
+  `-color-active` and `-bg-subtle-hover`, secondary had only `-color-hover`, the status roles had no
+  pressed step — so a component drawing a pressed danger button had to invent one, and it would not
+  match pure-admin's. Now primary, secondary, success, danger, warning and info all have `-color`,
+  `-color-hover`, `-color-active`, `-bg-subtle`, `-bg-subtle-hover`, `-text-color` and
+  `--base-on-<role>-text-color`. New, all derived (a theme sets nothing more):
+  `--base-<success|danger|warning|info>-color-active` and `-bg-subtle-hover`,
+  `--base-secondary-color-active`, `--base-secondary-bg-subtle(-hover)`, and
+  `--base-primary-text-color` / `--base-secondary-text-color` — the fill 45% toward black (light) /
+  25% toward white (dark), ≥ 4.5:1 on the main surface by default. The status roles keep their
+  hand-set `-text-color`. Mirrored in `@keenmate/pure-css` (`$base-*`).
+- **`--base-disabled-opacity: 0.65`** — one fade for every disabled control, whatever its role
+  (pure-css `$opacity-disabled`). Disabled is not a role step, so there are no per-role disabled
+  colours.
+
 ### Changed
 
 - **Placeholders use text step 3.** `--base-input-placeholder-color` was `var(--base-text-color-4)`,

@@ -1,10 +1,10 @@
 import { test, expect, type Page, type Locator } from '@playwright/test';
 
 /**
- * Item-state contract: --base-outline-width, --base-highlighted-*, --base-focused-*.
+ * Item-state contract: --base-outline-width, --base-selected-*, --base-focused-*.
  *
- * Model (Windows Explorer): focused = the ONE cursor item; highlighted = the
- * Ctrl/Shift-click set; selected = checkbox-checked (checkbox only, no row
+ * Model (Windows Explorer): focused = the ONE cursor item; selected = the
+ * click / Ctrl / Shift-click set; checked = checkbox ticked (checkbox only, no row
  * tokens). These specs lock (1) the token defaults, (2) the reference consumer
  * in demo/item-states.html, and (3) that the real components render the SAME
  * look from the same tokens — including the inset ring tracking the width.
@@ -55,18 +55,19 @@ test.beforeEach(async ({ page }) => open(page));
 test.describe('token defaults', () => {
   test('ships the item-state tokens with the documented defaults', async ({ page }) => {
     expect(await rootVar(page, '--base-outline-width')).toBe('1px');
-    expect(await rootVar(page, '--base-highlighted-bg')).toMatch(/color-mix\(in srgb, #0ea5e9 10%, transparent\)/);
-    expect(await rootVar(page, '--base-highlighted-bg-hover')).toMatch(/color-mix\(in srgb, #0ea5e9 10%, transparent\)/);
-    expect(await rootVar(page, '--base-highlighted-text-color')).toBe('currentColor');
-    expect(await rootVar(page, '--base-highlighted-outline')).toBe('none');
+    expect(await rootVar(page, '--base-selected-bg')).toMatch(/color-mix\(in srgb, #0ea5e9 10%, transparent\)/);
+    expect(await rootVar(page, '--base-selected-bg-hover')).toMatch(/color-mix\(in srgb, #0ea5e9 10%, transparent\)/);
+    expect(await rootVar(page, '--base-selected-text-color')).toBe('currentColor');
+    expect(await rootVar(page, '--base-selected-outline')).toBe('none');
     expect(await rootVar(page, '--base-focused-bg')).toBe('transparent');
     expect(await rootVar(page, '--base-focused-text-color')).toBe('currentColor');
     expect(await rootVar(page, '--base-focused-outline')).toBe('1px solid #0ea5e9');
   });
 
-  test('old names are gone (pre-release + the 1.0.7 -ring / -text names)', async ({ page }) => {
+  test('old names are gone (pre-release, the 1.0.7 -ring / -text names, rc03 highlighted → selected)', async ({ page }) => {
     for (const old of [
-      '--base-selected-bg', '--base-selected-bg-hover', '--base-selected-color', '--base-selected-border',
+      '--base-highlighted-bg', '--base-highlighted-bg-hover', '--base-highlighted-text-color', '--base-highlighted-outline',
+      '--base-selected-color', '--base-selected-border',
       '--base-focused-color', '--base-focused-border', '--base-item-ring-width',
       '--base-highlighted-color', '--base-highlighted-border',
       '--base-ring-width', '--base-highlighted-ring', '--base-focused-ring',
@@ -81,9 +82,9 @@ test.describe('token defaults', () => {
     expect(await rootVar(page, '--base-focused-outline')).toBe('3px solid #0ea5e9');
   });
 
-  test('highlight tint follows a runtime --base-primary-color override', async ({ page }) => {
+  test('selection tint follows a runtime --base-primary-color override', async ({ page }) => {
     await setRootVar(page, '--base-primary-color', '#ff0000');
-    expect(await rootVar(page, '--base-highlighted-bg')).toMatch(/#ff0000 10%/);
+    expect(await rootVar(page, '--base-selected-bg')).toMatch(/#ff0000 10%/);
     expect(await rootVar(page, '--base-focused-outline')).toBe('1px solid #ff0000');
   });
 });
@@ -91,65 +92,65 @@ test.describe('token defaults', () => {
 test.describe('reference list — Explorer interaction model', () => {
   const state = (page: Page, key: string) => page.locator(`#ref-state [data-state="${key}"]`);
 
-  test('click focuses + highlights one item; Ctrl adds; Shift ranges from the anchor', async ({ page }) => {
+  test('click focuses + selects one item; Ctrl adds; Shift ranges from the anchor', async ({ page }) => {
     await refRow(page, 'Music').click();
     await expect(page.locator('.ref-item--focused')).toHaveCount(1);
     await expect(refRow(page, 'Music')).toHaveClass(/ref-item--focused/);
-    await expect(state(page, 'highlighted')).toHaveText('Music');
+    await expect(state(page, 'selected')).toHaveText('Music');
 
     await refRow(page, 'Videos').click({ modifiers: ['Control'] });
-    await expect(state(page, 'highlighted')).toHaveText('Music, Videos');
+    await expect(state(page, 'selected')).toHaveText('Music, Videos');
     await expect(refRow(page, 'Videos')).toHaveClass(/ref-item--focused/);
 
     await refRow(page, 'Downloads').click();
     await refRow(page, 'Projects').click({ modifiers: ['Shift'] });
-    await expect(state(page, 'highlighted')).toHaveText('Downloads, Music, Pictures, Projects');
+    await expect(state(page, 'selected')).toHaveText('Downloads, Music, Pictures, Projects');
     await expect(page.locator('.ref-item--focused')).toHaveCount(1);
   });
 
-  test('Ctrl+arrow moves focus without touching the highlighted set; Shift+arrow extends it', async ({ page }) => {
+  test('Ctrl+arrow moves focus without touching the selected set; Shift+arrow extends it', async ({ page }) => {
     await refRow(page, 'Music').click();
     await page.keyboard.press('Control+ArrowDown');
     await expect(refRow(page, 'Pictures')).toHaveClass(/ref-item--focused/);
-    await expect(refRow(page, 'Pictures')).not.toHaveClass(/ref-item--highlighted/);
-    await expect(state(page, 'highlighted')).toHaveText('Music');
+    await expect(refRow(page, 'Pictures')).not.toHaveClass(/ref-item--selected/);
+    await expect(state(page, 'selected')).toHaveText('Music');
 
     await page.keyboard.press('Shift+ArrowDown');
-    await expect(state(page, 'highlighted')).toHaveText('Music, Pictures, Projects');
+    await expect(state(page, 'selected')).toHaveText('Music, Pictures, Projects');
   });
 
-  test('without checkboxes, selected mirrors highlighted', async ({ page }) => {
+  test('without checkboxes, checked mirrors selected', async ({ page }) => {
     await refRow(page, 'Music').click();
     await refRow(page, 'Videos').click({ modifiers: ['Control'] });
-    await expect(state(page, 'selected')).toHaveText(/^Music, Videos\s+\(mirrors highlighted\)$/);
+    await expect(state(page, 'checked')).toHaveText(/^Music, Videos\s+\(mirrors selected\)$/);
   });
 
-  test('with checkboxes, checking changes SELECTED only — no row treatment', async ({ page }) => {
+  test('with checkboxes, checking changes the checked set only — no row treatment', async ({ page }) => {
     await page.locator('#ctl-checkboxes').check();
     await refRow(page, 'Music').click();
     await refRow(page, 'Videos').locator('[data-checkbox]').click();
 
-    await expect(state(page, 'selected')).toHaveText('Videos');
-    await expect(state(page, 'highlighted')).toHaveText('Music');
+    await expect(state(page, 'checked')).toHaveText('Videos');
+    await expect(state(page, 'selected')).toHaveText('Music');
     await expect(refRow(page, 'Videos')).toHaveAttribute('aria-checked', 'true');
-    await expect(refRow(page, 'Videos')).not.toHaveClass(/ref-item--highlighted/);
+    await expect(refRow(page, 'Videos')).not.toHaveClass(/ref-item--selected/);
 
-    // A checked-but-not-highlighted row has no tint (move focus off it first).
+    // A checked-but-not-selected row has no tint (move focus off it first).
     await refRow(page, 'Music').click();
     expect(await style(refRow(page, 'Videos'), 'background-color')).toBe('rgba(0, 0, 0, 0)');
   });
 });
 
 test.describe('reference list — rendering from the tokens', () => {
-  test('highlighted row paints --base-highlighted-bg; focused row an inset 1px ring', async ({ page }) => {
+  test('selected row paints --base-selected-bg; focused row an inset 1px ring', async ({ page }) => {
     await refRow(page, 'Music').click();
     await refRow(page, 'Videos').click({ modifiers: ['Control'] });
     await page.mouse.move(0, 0); // no hover tint
 
-    const highlightedOnly = refRow(page, 'Music');
-    const probe = await resolve(page, 'background-color', 'var(--base-highlighted-bg)');
-    expect(await style(highlightedOnly, 'background-color')).toBe(probe);
-    expect((await ring(highlightedOnly)).style).toBe('none');
+    const selectedOnly = refRow(page, 'Music');
+    const probe = await resolve(page, 'background-color', 'var(--base-selected-bg)');
+    expect(await style(selectedOnly, 'background-color')).toBe(probe);
+    expect((await ring(selectedOnly)).style).toBe('none');
 
     expect(await ring(refRow(page, 'Videos'))).toEqual({ width: 1, offset: -1, style: 'solid' });
   });
@@ -175,7 +176,7 @@ test.describe('reference list — rendering from the tokens', () => {
     const before = await box();
     await refRow(page, 'Music').click();
     await page.locator('#ctl-ring-width').fill('4');
-    await page.locator('#ctl-highlight-ring').check();
+    await page.locator('#ctl-selected-ring').check();
     expect(await box()).toEqual(before);
   });
 });
@@ -201,14 +202,14 @@ test.describe('web-treeview reads the same tokens', () => {
   const node = (page: Page, label: string) =>
     page.locator('#tree .wtv__node-content', { hasText: new RegExp(`^\\s*${label}\\s*$`) });
 
-  test('highlighted node matches the reference highlighted row', async ({ page }) => {
+  test('selected node matches the reference selected row', async ({ page }) => {
     await refRow(page, 'Music').click();
-    await refRow(page, 'Videos').click({ modifiers: ['Control'] }); // focus off Music → pure highlight
+    await refRow(page, 'Videos').click({ modifiers: ['Control'] }); // focus off Music → selected only
     await node(page, 'Music').click({ modifiers: ['Control'] });
     await node(page, 'Videos').click({ modifiers: ['Control'] });
     await page.mouse.move(0, 0);
 
-    await expect(node(page, 'Music')).toHaveClass(/wtv__node-content--highlighted/);
+    await expect(node(page, 'Music')).toHaveClass(/wtv__node-content--(highlighted|selected)/);
     expect(await style(node(page, 'Music'), 'background-color'))
       .toBe(await style(refRow(page, 'Music'), 'background-color'));
   });
@@ -237,7 +238,7 @@ test.describe('web-multiselect reads the same tokens', () => {
     await expect(ms(page).locator('.ms__dropdown')).toBeVisible();
   }
 
-  test('picked option paints the same tint as a highlighted reference row', async ({ page }) => {
+  test('picked option paints the same tint as a selected reference row', async ({ page }) => {
     await refRow(page, 'Music').click();
     await refRow(page, 'Videos').click({ modifiers: ['Control'] });
     await openDropdown(page);

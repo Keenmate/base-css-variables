@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>--base-* variables — the whole contract</title>
+<link rel="stylesheet" href="../base-variables.css">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 16px 20px 60px; font: 14px/1.45 var(--base-font-family); background: #f3f4f6; color: #1f2937; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  p.lead { margin: 0 0 12px; max-width: 1100px; color: #4b5563; }
+  code, .mono { font: 12px var(--base-font-family-mono); }
+
+  .bar { position: sticky; top: 0; z-index: 2; display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center;
+    background: #f3f4f6; padding: 8px 0 10px; border-bottom: 1px solid #d1d5db; margin-bottom: 8px; }
+  .bar input[type=search] { font: inherit; padding: 4px 8px; width: 260px; border: 1px solid #9ca3af; border-radius: 6px; }
+  .bar label { display: inline-flex; gap: 5px; align-items: center; font-size: 13px; }
+  .toc { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: 12.5px; }
+  .toc a { color: #2563eb; text-decoration: none; }
+  .counts { font-size: 12.5px; color: #4b5563; }
+
+  section { margin: 18px 0 6px; }
+  section h2 { font-size: 15px; margin: 0 0 2px; }
+  section h2 small { font-weight: 400; color: #6b7280; font-size: 12px; margin-left: 6px; }
+  section p.note { margin: 0 0 6px; font-size: 12.5px; color: #4b5563; max-width: 1100px; }
+
+  table { border-collapse: collapse; width: 100%; background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; }
+  th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .03em; color: #6b7280; padding: 6px 8px; background: #f9fafb; border-bottom: 1px solid #e5e7eb; }
+  td { padding: 5px 8px; border-top: 1px solid #f1f5f9; vertical-align: middle; font-size: 12.5px; }
+  td.name { white-space: nowrap; }
+  td.name code { font-size: 12.5px; color: #111827; }
+  .kind { display: inline-block; font-size: 10.5px; font-weight: 600; padding: 1px 6px; border-radius: 9px; }
+  .kind.input { background: #dbeafe; color: #1e40af; }
+  .kind.derived { background: #dcfce7; color: #166534; }
+  td.def { max-width: 420px; color: #374151; }
+  td.def code { white-space: pre-wrap; word-break: break-all; font-size: 11.5px; }
+  td.def details summary { cursor: pointer; color: #2563eb; font-size: 11.5px; }
+  td.cmt { color: #6b7280; max-width: 300px; }
+
+  /* the two mode columns resolve the tokens on their own scope */
+  td.mode { width: 190px; }
+  /* each mode column is the contract's own surface in that mode (data-theme on the cell) */
+  td.mode { background: var(--base-main-bg); color: var(--base-text-color-1); }
+  .val { display: flex; align-items: center; gap: 8px; min-height: 26px; }
+  .val .txt { font: 11px var(--base-font-family-mono); opacity: .85; word-break: break-all; }
+  .sw { width: 34px; height: 22px; border-radius: 4px; flex: none; position: relative; overflow: hidden;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 15%, transparent); }
+  .sw > i { position: absolute; inset: 0; }
+  .onfill { padding: 3px 10px; border-radius: 5px; font-weight: 600; font-size: 12px; flex: none; }
+  .shadow { width: 40px; height: 22px; border-radius: 4px; background: var(--base-main-bg); flex: none; }
+  .bordered { width: 40px; height: 22px; border-radius: 4px; flex: none; }
+  .icon { width: 20px; height: 20px; background: currentColor; flex: none;
+    -webkit-mask: var(--i) no-repeat center / contain; mask: var(--i) no-repeat center / contain; }
+  .len { height: 8px; background: currentColor; opacity: .55; border-radius: 2px; flex: none; }
+  .fontsample { font-size: 15px; }
+  tr.hidden, section.hidden { display: none; }
+</style>
+</head>
+<body>
+<h1>The <code>--base-*</code> contract — every variable</h1>
+<p class="lead">
+  Read live from <code>base-variables.css</code>. <span class="kind input">input</span> = set by hand in
+  <code>:root</code> (what a theme decides); <span class="kind derived">derived</span> = a formula over the inputs,
+  recalculated on <code>:root</code>, <code>[data-theme]</code> and <code>.base-scope</code>. The light and dark
+  columns show what the browser resolves in each mode.
+</p>
+
+<div class="bar">
+  <input type="search" id="q" placeholder="Filter by name, value or comment…">
+  <label><input type="checkbox" id="only-inputs"> inputs only</label>
+  <label><input type="checkbox" id="show-def" checked> definitions</label>
+  <span class="counts" id="counts"></span>
+  <div class="toc" id="toc"></div>
+</div>
+<div id="groups"></div>
+
+<!-- resolution scopes: the contract's derived block is declared on [data-theme], and the
+     [data-theme] mode blocks set color-scheme, so each probe resolves one mode -->
+<div data-theme="light" id="probe-light" style="position:absolute;left:-9999px"><div></div></div>
+<div data-theme="dark" id="probe-dark" style="position:absolute;left:-9999px"><div></div></div>
+
+<script>
+// ---- groups: matched in order, first match wins ----
+const ROLES = ['primary', 'secondary', 'success', 'danger', 'warning', 'info'];
+const GROUPS = [
+  ['Primary role', 'The brand / interactive color. Every role has the same seven tokens: fill, text color on a surface, text on the fill, hover / pressed steps, tint and its hover.', (n) => /^(primary-|on-primary-)/.test(n)],
+  ['Secondary role', 'The neutral role — the same seven tokens.', (n) => /^(secondary-|on-secondary-)/.test(n)],
+  ['Status roles', 'success / danger / warning / info — the same seven tokens; -text-color is an input here.', (n) => /^(on-)?(success|danger|warning|info)-/.test(n)],
+  ['Text', 'Text emphasis levels 1–4.', (n) => /^text-color-\d$/.test(n)],
+  ['Surfaces', 'The elevation ladder (page < subtle < main < elevated), the state overlays, disabled.', (n) => /^(page|subtle|main|elevated|hover|active|disabled|overlay)-bg$|^disabled-opacity$/.test(n)],
+  ['Item states', 'Selected (click / Ctrl / Shift set) and focused (cursor) items — list options, tree rows, grid rows.', (n) => /^(selected|focused)-|^outline-width$/.test(n)],
+  ['Borders', 'Divider color and the shared stroke width.', (n) => /^border(-width|-color)?$/.test(n)],
+  ['Input fields & checkbox', 'Field background, text, borders, focus halo, placeholder, icons; the checkbox.', (n) => /^(input-|checkbox-)/.test(n) && !/^input-size-/.test(n)],
+  ['Dropdown, tooltip', 'Popover surfaces.', (n) => /^(dropdown|tooltip)-/.test(n)],
+  ['Shadows', 'Shadow color and the elevation scale.', (n) => /^shadow-/.test(n)],
+  ['Typography', 'Families, the size scale (× --base-rem), weights, line heights.', (n) => /^(font-|line-height-|letter-|list-)/.test(n)],
+  ['Sizing & spacing', 'Unitless multipliers, combined as calc(var(--base-…) * var(--base-rem)).', (n) => /^(rem|border-radius-|input-size-|space-|icon-check-size)/.test(n)],
+  ['Motion', 'Durations and easings.', (n) => /^(duration|ease|transition)/.test(n)],
+  ['Z-index', 'Stacking tiers.', (n) => /^z-/.test(n)],
+  ['Icons', 'Lucide glyphs as data URIs, rendered with mask + currentColor.', (n) => /^icon-/.test(n)],
+  ['Palette', 'Nine categorical slots and the text on each.', (n) => /palette-/.test(n)],
+  ['Other', '', () => true],
+];
+
+// ---- how to preview a token ----
+function kindOf(n, def) {
+  if (/^icon-/.test(n) && !/size$/.test(n)) return 'icon';
+  if (/^on-.*-text-color$/.test(n)) return 'onfill';
+  if (/(^|-)(box-)?shadow(-sm|-md|-lg|-xl)?$/.test(n) && !/shadow-color/.test(n)) return 'shadow';
+  if (/-outline$/.test(n)) return 'outline';
+  if (/(^|-)border(-hover|-focus)?$/.test(n)) return 'border';
+  if (/(-color|-bg|-bg-hover|-bg-subtle|-subtle-hover|-color-hover|-color-active|-color-focus|^palette-\d)$/.test(n) || /^(text-color-\d|overlay-bg)$/.test(n)) return 'color';
+  if (/^font-family/.test(n)) return 'font';
+  if (/^(space-|border-radius-|input-size-|font-size-)/.test(n)) return 'len';
+  return 'text';
+}
+
+async function load() {
+  const css = await (await fetch('../base-variables.css', { cache: 'no-store' })).text();
+  const derivedAt = css.search(/:root,\s*\[data-theme\],\s*\.base-scope\s*\{/);
+  const modeAt = css.search(/\[data-theme="light"\]\s*\{/);
+  const tokens = [];
+  const seen = new Set();
+  const re = /^\s*(--base-[a-z0-9-]+)\s*:\s*([\s\S]*?);[ \t]*(\/\*([\s\S]*?)\*\/)?[ \t]*$/gm;
+  let m;
+  while ((m = re.exec(css))) {
+    if (m.index >= modeAt && modeAt > 0) continue;
+    const name = m[1];
+    if (seen.has(name)) continue;
+    seen.add(name);
+    tokens.push({ name, short: name.slice(7), def: m[2].trim().replace(/\s+/g, ' '), comment: (m[4] || '').trim().replace(/\s+/g, ' '), derived: m.index > derivedAt });
+  }
+  return tokens;
+}
+
+const probe = { light: document.querySelector('#probe-light > div'), dark: document.querySelector('#probe-dark > div') };
+function resolve(mode, name, prop) {
+  const el = probe[mode];
+  el.style.cssText = `${prop}: var(${name})`;
+  return getComputedStyle(el).getPropertyValue(prop);
+}
+
+// APCA |Lc| for the on-fill pairs
+const cv = document.createElement('canvas'); cv.width = cv.height = 1;
+const ctx = cv.getContext('2d', { willReadFrequently: true });
+const px = (c) => { ctx.clearRect(0, 0, 1, 1); ctx.fillStyle = c; ctx.fillRect(0, 0, 1, 1); return [...ctx.getImageData(0, 0, 1, 1).data].slice(0, 3); };
+const Ys = (c) => 0.2126729 * (c[0] / 255) ** 2.4 + 0.7151522 * (c[1] / 255) ** 2.4 + 0.0721750 * (c[2] / 255) ** 2.4;
+const cy = (y) => (y > 0.022 ? y : y + (0.022 - y) ** 1.414);
+function apca(t, b) { t = cy(Ys(t)); b = cy(Ys(b)); if (b > t) { const s = (b ** 0.56 - t ** 0.57) * 1.14; return s < 0.1 ? 0 : (s - 0.027) * 100; } const s = (b ** 0.65 - t ** 0.62) * 1.14; return s > -0.1 ? 0 : -(s + 0.027) * 100; }
+const hex = (c) => '#' + c.map((n) => n.toString(16).padStart(2, '0')).join('');
+
+function fillFor(short) {   // the fill an on-*-text-color sits on
+  const m = short.match(/^on-(.+)-text-color$/);
+  if (!m) return null;
+  return /^palette-\d$/.test(m[1]) ? `--base-${m[1]}` : `--base-${m[1]}-color`;
+}
+
+function preview(mode, t) {
+  const k = kindOf(t.short, t.def), n = t.name, esc = (s) => s.replace(/</g, '&lt;');
+  switch (k) {
+    case 'color': {
+      const v = resolve(mode, n, 'background-color');
+      return `<span class="sw"><i style="background:${v}"></i></span><span class="txt">${hex(px(v))}${/rgba|\/ 0?\.\d|, 0\.\d+\)$/.test(v) ? ' α' : ''}</span>`;
+    }
+    case 'onfill': {
+      const f = fillFor(t.short);
+      const fg = resolve(mode, n, 'color'), bg = resolve(mode, f, 'background-color');
+      const lc = apca(px(fg), px(bg));
+      return `<span class="onfill" style="background:${bg};color:${fg}">Aa</span><span class="txt">${px(fg)[0] > 128 ? 'white' : 'black'} · Lc ${lc.toFixed(0)}</span>`;
+    }
+    case 'shadow': return `<span class="shadow" style="box-shadow:var(${n})"></span><span class="txt">${esc(resolve(mode, n, 'box-shadow'))}</span>`;
+    case 'border': return `<span class="bordered" style="border:var(${n})"></span><span class="txt">${esc(resolve(mode, n, 'border-top'))}</span>`;
+    case 'outline': return `<span class="bordered" style="outline:var(${n});outline-offset:calc(-1 * var(--base-outline-width))"></span><span class="txt">${esc(resolve(mode, n, 'outline'))}</span>`;
+    case 'icon': return `<span class="icon" style="--i:var(${n})"></span>`;
+    case 'font': return `<span class="fontsample" style="font-family:var(${n})">Aa Bb 123</span>`;
+    case 'len': {
+      const raw = getComputedStyle(probe[mode]).getPropertyValue(n).trim();
+      const num = parseFloat(raw);
+      return `${isFinite(num) ? `<span class="len" style="width:${Math.min(num * 10, 120)}px"></span>` : ''}<span class="txt">${esc(raw)}</span>`;
+    }
+    default: {
+      probe[mode].style.cssText = '';
+      return `<span class="txt">${esc(getComputedStyle(probe[mode]).getPropertyValue(n).trim())}</span>`;
+    }
+  }
+}
+
+function defCell(t) {
+  const d = t.def.replace(/</g, '&lt;');
+  if (d.length <= 140) return `<code>${d}</code>`;
+  return `<details><summary>${d.slice(0, 90)}…</summary><code>${d}</code></details>`;
+}
+
+(async () => {
+  const tokens = await load();
+  const byGroup = GROUPS.map(([title, note, test]) => ({ title, note, test, items: [] }));
+  for (const t of tokens) byGroup.find((g) => g.test(t.short)).items.push(t);
+  // roles: role by role, each in the same order
+  const ORDER = ['color', 'text-color', 'on', 'color-hover', 'color-active', 'bg-subtle', 'bg-subtle-hover'];
+  const rank = (t) => {
+    const m = t.short.match(/^(on-)?(primary|secondary|success|danger|warning|info)-(.+)$/);
+    const part = m[1] ? 'on' : m[3];
+    return ROLES.indexOf(m[2]) * 10 + Math.max(0, ORDER.indexOf(part));
+  };
+  for (const title of ['Primary role', 'Secondary role', 'Status roles']) byGroup.find((g) => g.title === title).items.sort((a, b) => rank(a) - rank(b));
+  // palette: slot N, then the text on it
+  const pal = byGroup.find((g) => g.title === 'Palette');
+  pal.items.sort((a, b) => (+a.short.match(/\d+/)[0] * 2 + (a.short.startsWith('on-') ? 1 : 0)) - (+b.short.match(/\d+/)[0] * 2 + (b.short.startsWith('on-') ? 1 : 0)));
+
+  const root = document.getElementById('groups'), toc = document.getElementById('toc');
+  byGroup.filter((g) => g.items.length).forEach((g, gi) => {
+    const id = 'g' + gi;
+    const ins = g.items.filter((t) => !t.derived).length;
+    toc.insertAdjacentHTML('beforeend', `<a href="#${id}">${g.title} (${g.items.length})</a>`);
+    const rows = g.items.map((t) => `
+      <tr data-derived="${t.derived}" data-search="${(t.name + ' ' + t.def + ' ' + t.comment).toLowerCase().replace(/"/g, '')}">
+        <td class="name"><code>${t.name}</code></td>
+        <td><span class="kind ${t.derived ? 'derived' : 'input'}">${t.derived ? 'derived' : 'input'}</span></td>
+        <td class="mode light" data-theme="light"><div class="val">${preview('light', t)}</div></td>
+        <td class="mode dark" data-theme="dark"><div class="val">${preview('dark', t)}</div></td>
+        <td class="def">${defCell(t)}</td>
+        <td class="cmt">${t.comment.replace(/</g, '&lt;')}</td>
+      </tr>`).join('');
+    root.insertAdjacentHTML('beforeend', `
+      <section id="${id}">
+        <h2>${g.title}<small>${g.items.length} tokens · ${ins} input · ${g.items.length - ins} derived</small></h2>
+        ${g.note ? `<p class="note">${g.note}</p>` : ''}
+        <table><thead><tr><th>Token</th><th>Kind</th><th>Light</th><th>Dark</th><th class="defh">Definition</th><th>Comment</th></tr></thead>
+        <tbody>${rows}</tbody></table>
+      </section>`);
+  });
+  probe.light.style.cssText = probe.dark.style.cssText = '';
+
+  const total = tokens.length, inputs = tokens.filter((t) => !t.derived).length;
+  const update = () => {
+    const q = document.getElementById('q').value.trim().toLowerCase();
+    const onlyIn = document.getElementById('only-inputs').checked;
+    let shown = 0;
+    for (const sec of root.querySelectorAll('section')) {
+      let any = 0;
+      for (const tr of sec.querySelectorAll('tbody tr')) {
+        const ok = (!q || tr.dataset.search.includes(q)) && (!onlyIn || tr.dataset.derived === 'false');
+        tr.classList.toggle('hidden', !ok); if (ok) { any++; shown++; }
+      }
+      sec.classList.toggle('hidden', !any);
+    }
+    const showDef = document.getElementById('show-def').checked;
+    for (const c of root.querySelectorAll('td.def, th.defh')) c.style.display = showDef ? '' : 'none';
+    document.getElementById('counts').textContent = `${total} tokens (${inputs} inputs, ${total - inputs} derived)${shown !== total ? ` · showing ${shown}` : ''}`;
+  };
+  for (const id of ['q', 'only-inputs', 'show-def']) document.getElementById(id).addEventListener('input', update);
+  update();
+})();
+</script>
+</body>
+</html>

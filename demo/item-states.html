@@ -104,21 +104,21 @@
       outline-offset: calc(-1 * var(--base-outline-width));
     }
     .ref-item:hover { background: var(--base-hover-bg); }
-    .ref-item--highlighted {
-      background: var(--base-highlighted-bg);
-      color: var(--base-highlighted-text-color);
-      outline: var(--base-highlighted-outline);
+    .ref-item--selected {
+      background: var(--base-selected-bg);
+      color: var(--base-selected-text-color);
+      outline: var(--base-selected-outline);
     }
-    .ref-item--highlighted:hover { background: var(--base-highlighted-bg-hover); }
+    .ref-item--selected:hover { background: var(--base-selected-bg-hover); }
     .ref-item--focused {
       color: var(--base-focused-text-color);
-      outline: var(--base-focused-outline);         /* focus outline wins over the highlight outline */
+      outline: var(--base-focused-outline);         /* focus outline wins over the selection outline */
     }
-    .ref-item--focused:not(.ref-item--highlighted) { background: var(--base-focused-bg); }
+    .ref-item--focused:not(.ref-item--selected) { background: var(--base-focused-bg); }
 
     /* Checkbox — README "Checkbox render method": box, border and radius all via
-       calc, border-box, glyph masked over the full box, no transform. Checked is
-       the SELECTED state and lives on the checkbox only — no row treatment. */
+       calc, border-box, glyph masked over the full box, no transform. The checked
+       state lives on the checkbox only — no row treatment. */
     .ref-checkbox {
       --ref-checkbox-size: 1.6rem;
       --ref-checkbox-radius: 0.3rem;
@@ -152,24 +152,24 @@
   <h1>Item states</h1>
   <p>
     One shared look for list options, tree rows and grid rows. Every component on this page reads the
-    same <code>--base-highlighted-*</code> / <code>--base-focused-*</code> tokens, so the controls below
+    same <code>--base-selected-*</code> / <code>--base-focused-*</code> tokens, so the controls below
     re-theme all of them at once.
   </p>
 
   <section class="card">
     <h2>The model (Windows Explorer)</h2>
-    <p class="muted">A plain click makes an item <em>both</em> focused and highlighted, so it shows the tint
+    <p class="muted">A plain click makes an item <em>both</em> focused and selected, so it shows the tint
       <em>and</em> the solid focus ring. Ctrl+click a second item to see them apart: the tint stays, the ring moves.</p>
     <dl class="model">
       <dt>focused</dt>
       <dd>The <em>one</em> item the keyboard / mouse cursor is on. Arrows move it. Inset ring:
         <code>--base-focused-bg</code> / <code>-text-color</code> / <code>-outline</code>.</dd>
-      <dt>highlighted</dt>
-      <dd>The Ctrl/Shift-click (Shift+arrow) set, 0..n items. Accent tint:
-        <code>--base-highlighted-bg</code> / <code>-bg-hover</code> / <code>-text-color</code> / <code>-outline</code>.</dd>
       <dt>selected</dt>
+      <dd>The click / Ctrl / Shift-click (Shift+arrow) set, 0..n items. Accent tint:
+        <code>--base-selected-bg</code> / <code>-bg-hover</code> / <code>-text-color</code> / <code>-outline</code>.</dd>
+      <dt>checked</dt>
       <dd>The checkbox-<em>checked</em> items, shown by the checkbox only, so there are no row tokens.
-        With checkboxes off, highlighted <em>is</em> the selection.</dd>
+        With checkboxes off, checked mirrors selected.</dd>
     </dl>
   </section>
 
@@ -191,11 +191,11 @@
         <code>--base-border-radius-sm</code>
         <input type="range" id="ctl-radius" min="0" max="1.6" step="0.1" value="0.4">
         <output id="out-radius">0.4</output></label>
-      <label>Highlight tint
+      <label>Selected tint
         <input type="range" id="ctl-tint" min="0" max="40" step="1" value="10">
         <output id="out-tint">10%</output></label>
-      <label title="Sets --base-highlighted-outline (default none). Shown dashed here so it can't be confused with the solid focus outline.">
-        <input type="checkbox" id="ctl-highlight-ring"> Outline on highlighted <span class="muted">(dashed)</span></label>
+      <label title="Sets --base-selected-outline (default none). Shown dashed here so it can't be confused with the solid focus outline.">
+        <input type="checkbox" id="ctl-selected-ring"> Outline on selected <span class="muted">(dashed)</span></label>
       <label><input type="checkbox" id="ctl-focused-bg"> Tint focused row</label>
       <label><input type="checkbox" id="ctl-checkboxes"> Show checkboxes</label>
       <label class="wrong" title="Puts the width inside the shorthand instead of in --base-outline-width: the inset offset no longer matches and the ring spills outside the row.">
@@ -209,12 +209,12 @@
     <section class="card">
       <h2>Reference list</h2>
       <p class="muted">Plain HTML reading the tokens as the README specifies. Click, Ctrl+click, Shift+click;
-        ↑/↓ (Shift extends, Ctrl moves focus only), Home/End, Ctrl+Space toggles highlight, Space checks.</p>
+        ↑/↓ (Shift extends, Ctrl moves focus only), Home/End, Ctrl+Space toggles selection, Space checks.</p>
       <ul class="ref-list" id="ref-list" role="listbox" aria-multiselectable="true" tabindex="0" aria-label="Reference list"></ul>
       <div class="state" id="ref-state">
         <span>focused</span><span data-state="focused"></span>
-        <span>highlighted</span><span data-state="highlighted"></span>
         <span>selected</span><span data-state="selected"></span>
+        <span>checked</span><span data-state="checked"></span>
       </div>
     </section>
 
@@ -231,7 +231,7 @@
     <section class="card">
       <h2>web-multiselect</h2>
       <p class="muted">The local <code>../web-multiselect</code> build. Open it and arrow through the options:
-        picked options use the highlighted tint, and the cursor option gets the focused ring.</p>
+        picked options use the selected tint, and the cursor option gets the focused ring.</p>
       <div class="component-host">
         <p class="notice" id="ms-missing" hidden>
           web-multiselect build not found — run <code>npm run build</code> in <code>../web-multiselect</code>.</p>
@@ -261,7 +261,7 @@
   /* ---------------------------------------------------------------- tokens */
   const TOKENS = [
     '--base-border-radius-sm', '--base-outline-width',
-    '--base-highlighted-bg', '--base-highlighted-bg-hover', '--base-highlighted-text-color', '--base-highlighted-outline',
+    '--base-selected-bg', '--base-selected-bg-hover', '--base-selected-text-color', '--base-selected-outline',
     '--base-focused-bg', '--base-focused-text-color', '--base-focused-outline',
   ];
 
@@ -285,10 +285,10 @@
 
     const tint = Number($('ctl-tint').value);
     $('out-tint').textContent = `${tint}%`;
-    set('--base-highlighted-bg', tint === 10 ? null
+    set('--base-selected-bg', tint === 10 ? null
       : `color-mix(in srgb, var(--base-primary-color) ${tint}%, transparent)`);
 
-    set('--base-highlighted-outline', $('ctl-highlight-ring').checked
+    set('--base-selected-outline', $('ctl-selected-ring').checked
       ? 'var(--base-outline-width) dashed color-mix(in srgb, var(--base-primary-color) 60%, transparent)' : null);
     set('--base-focused-bg', $('ctl-focused-bg').checked ? 'var(--base-hover-bg)' : null);
     set('--base-focused-outline', $('ctl-wrong').checked ? '3px solid var(--base-primary-color)' : null);
@@ -312,14 +312,14 @@
     $('ctl-ring-width').value = 1;
     $('ctl-radius').value = 0.4;
     $('ctl-tint').value = 10;
-    for (const id of ['ctl-highlight-ring', 'ctl-focused-bg', 'ctl-checkboxes', 'ctl-wrong']) $(id).checked = false;
+    for (const id of ['ctl-selected-ring', 'ctl-focused-bg', 'ctl-checkboxes', 'ctl-wrong']) $(id).checked = false;
     applyControls();
   });
 
   /* -------------------------------------------------------- reference list */
   const ITEMS = ['Documents', 'Downloads', 'Music', 'Pictures', 'Projects', 'Reports', 'Videos'];
   const list = $('ref-list');
-  const ref = { focused: 0, anchor: 0, highlighted: new Set(), selected: new Set(), checkboxes: false };
+  const ref = { focused: 0, anchor: 0, selected: new Set(), checked: new Set(), checkboxes: false };
 
   list.innerHTML = ITEMS.map((label, i) =>
     `<li class="ref-item" role="option" id="ref-${i}" data-index="${i}">` +
@@ -329,23 +329,23 @@
   const range = (a, b) => Array.from({ length: Math.abs(a - b) + 1 }, (_, k) => Math.min(a, b) + k);
 
   function renderRef() {
-    // No checkboxes → highlighted IS the selection (svelte-treeview mirrors the two arrays).
-    const selected = ref.checkboxes ? ref.selected : ref.highlighted;
+    // No checkboxes → checked mirrors selected.
+    const checked = ref.checkboxes ? ref.checked : ref.selected;
     rows.forEach((row, i) => {
       row.classList.toggle('ref-item--focused', i === ref.focused);
-      row.classList.toggle('ref-item--highlighted', ref.highlighted.has(i));
-      row.setAttribute('aria-selected', String(ref.highlighted.has(i)));
-      row.querySelector('[data-checkbox]').classList.toggle('ref-checkbox--checked', ref.selected.has(i));
-      if (ref.checkboxes) row.setAttribute('aria-checked', String(ref.selected.has(i)));
+      row.classList.toggle('ref-item--selected', ref.selected.has(i));
+      row.setAttribute('aria-selected', String(ref.selected.has(i)));
+      row.querySelector('[data-checkbox]').classList.toggle('ref-checkbox--checked', ref.checked.has(i));
+      if (ref.checkboxes) row.setAttribute('aria-checked', String(ref.checked.has(i)));
       else row.removeAttribute('aria-checked');
     });
     list.classList.toggle('ref-list--checkboxes', ref.checkboxes);
     list.setAttribute('aria-activedescendant', `ref-${ref.focused}`);
     const names = (set) => [...set].sort((a, b) => a - b).map((i) => ITEMS[i]).join(', ') || '—';
     list.closest('section').querySelector('[data-state="focused"]').textContent = ITEMS[ref.focused];
-    list.closest('section').querySelector('[data-state="highlighted"]').textContent = names(ref.highlighted);
-    list.closest('section').querySelector('[data-state="selected"]').textContent =
-      names(selected) + (ref.checkboxes ? '' : '  (mirrors highlighted)');
+    list.closest('section').querySelector('[data-state="selected"]').textContent = names(ref.selected);
+    list.closest('section').querySelector('[data-state="checked"]').textContent =
+      names(checked) + (ref.checkboxes ? '' : '  (mirrors selected)');
   }
 
   list.addEventListener('click', (e) => {
@@ -354,18 +354,18 @@
     const i = Number(row.dataset.index);
     list.focus();
     if (e.target.closest('[data-checkbox]') && ref.checkboxes) {
-      // Checking only changes SELECTED; focus follows, highlight stays put.
-      ref.selected.has(i) ? ref.selected.delete(i) : ref.selected.add(i);
+      // Checking changes only the checked set; focus follows, the selection stays put.
+      ref.checked.has(i) ? ref.checked.delete(i) : ref.checked.add(i);
       ref.focused = i;
     } else if (e.shiftKey) {
       const span = range(ref.anchor, i);
-      ref.highlighted = new Set(e.ctrlKey || e.metaKey ? [...ref.highlighted, ...span] : span);
+      ref.selected = new Set(e.ctrlKey || e.metaKey ? [...ref.selected, ...span] : span);
       ref.focused = i;
     } else if (e.ctrlKey || e.metaKey) {
-      ref.highlighted.has(i) ? ref.highlighted.delete(i) : ref.highlighted.add(i);
+      ref.selected.has(i) ? ref.selected.delete(i) : ref.selected.add(i);
       ref.focused = ref.anchor = i;
     } else {
-      ref.highlighted = new Set([i]);
+      ref.selected = new Set([i]);
       ref.focused = ref.anchor = i;
     }
     renderRef();
@@ -377,17 +377,17 @@
     if (e.key in moves) {
       e.preventDefault();
       ref.focused = Math.max(0, Math.min(last, moves[e.key]));
-      if (e.shiftKey) ref.highlighted = new Set(range(ref.anchor, ref.focused));
-      else if (!(e.ctrlKey || e.metaKey)) { ref.highlighted = new Set([ref.focused]); ref.anchor = ref.focused; }
-      // Ctrl+arrow: focus moves alone, the highlighted set is untouched.
+      if (e.shiftKey) ref.selected = new Set(range(ref.anchor, ref.focused));
+      else if (!(e.ctrlKey || e.metaKey)) { ref.selected = new Set([ref.focused]); ref.anchor = ref.focused; }
+      // Ctrl+arrow: focus moves alone, the selected set is untouched.
     } else if (e.key === ' ') {
       e.preventDefault();
       const i = ref.focused;
       if (e.ctrlKey || e.metaKey || !ref.checkboxes) {
-        ref.highlighted.has(i) ? ref.highlighted.delete(i) : ref.highlighted.add(i);
+        ref.selected.has(i) ? ref.selected.delete(i) : ref.selected.add(i);
         ref.anchor = i;
       } else {
-        ref.selected.has(i) ? ref.selected.delete(i) : ref.selected.add(i);
+        ref.checked.has(i) ? ref.checked.delete(i) : ref.checked.add(i);
       }
     } else return;
     renderRef();
