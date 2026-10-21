@@ -12,19 +12,19 @@ that **cascade from these `--base-*` values**. Define the base layer once and ev
 component picks up a consistent, coordinated theme. Override a single `--base-*`
 variable and the change propagates everywhere.
 
+## What's New in 2.0.0-rc03
+
+- **Breaking — `highlighted` is now `selected`** — the item state for the click / Ctrl / Shift-click set is `--base-selected-bg` / `-bg-hover` / `-text-color` / `-outline` (were `--base-highlighted-*`), and the checkbox state is called *checked*. Focused = the cursor item, selected = the set, checked = the ticked checkbox (drawn by the checkbox only); pointer hover stays `--base-hover-bg`. No aliases.
+- **Roles — every role has the same seven tokens** — primary, secondary, success, danger, warning and info all have `-color`, `-color-hover`, `-color-active`, `-bg-subtle`, `-bg-subtle-hover`, `-text-color` and `--base-on-<role>-text-color`. New, all derived: the status roles' `-color-active` / `-bg-subtle-hover`, secondary's `-color-active` / `-bg-subtle(-hover)`, and `--base-primary-text-color` / `--base-secondary-text-color` (the fill toward black in light mode, toward white in dark). A pressed danger button now has one shared colour instead of one per consumer.
+- **Text on fills — black or white, picked by APCA** — the 15 `--base-on-<role>-text-color` / `--base-on-palette-N-text-color` tokens are derived from their fill instead of hand-set `#fff`, so a fill changed at runtime or in a `.base-scope` brings its text along. APCA (the WCAG 3 draft's model) reads better than the WCAG 2 ratio on bright mid-tones such as sky blue; no default or pure-admin theme fill is below Lc 45. Fills near the tie can still be hand-set.
+- **Fills — four defaults one shade darker** — danger `#dc2626`, palette 5 `#7c3aed`, palette 6 `#4f46e5`, palette 8 `#0369a1`, so their white text also passes WCAG 2 (4.8–6.3:1).
+- **Inputs — readable placeholders** — `--base-input-placeholder-color` is `--base-text-color-3` (was step 4, about 2.1–2.5:1), the same tone as the field's icons. Every placeholder gets darker.
+- **Disabled — one fade** — new `--base-disabled-opacity: 0.65` for every disabled control, whatever its role.
+
 ## What's New in 2.0.0-rc02
 
 - **Inputs — a focus halo of its own** — new `--base-input-shadow-color-focus` (5% of `--base-primary-color`) and `--base-input-box-shadow-focus` (`0 0 0 3px` of it) give the soft glow around a focused field its own tokens. It used to borrow the `--base-primary-bg-subtle` fill tint, which themes set much stronger (up to 25% in dark mode) and which made the halo heavy. Components with a different halo size compose their own `box-shadow` from the color token, so the tone stays the same.
 - **Controls — outlines stronger than the divider** — `--base-input-border-color` was `var(--base-border-color)`, the hairline for card and table edges (about 1.2–1.9:1), so inputs, checkboxes and outline buttons nearly disappeared in some themes. It is now `--base-text-color-1` mixed 45% (light) / 35% (dark) into `--base-main-bg` (about 2–3.4:1), and `--base-checkbox-border-color` follows it. `--base-border-color` stays the quiet divider. Every form's field outlines get visibly darker.
-
-## What's New in 2.0.0-rc01
-
-- **Contract — a few inputs, everything else derived** — only `--base-main-bg`, `--base-page-bg`, `--base-text-color-1`, the role colors and their text / on-fill colors, overlay, shadow color and palette are hand-set. Text levels 2–4, the `subtle` / `elevated` / `disabled` surfaces, `--base-border-color`, the `hover` / `active` overlays, role `-hover` / `-active` steps, tints, input / dropdown / tooltip tokens are formulas (`color-mix`, OKLCH relative colors), so a theme sets the inputs and the rest follows — in light and dark. Any derived token can still be set by hand. Needs relative color syntax (Chrome/Edge 119+, Safari 16.4+, Firefox 128+). See [Inputs and derived tokens](#inputs-and-derived-tokens).
-- **Contract — re-themed scopes recalculate** — the derived block is declared on `:root, [data-theme], .base-scope`, so setting inputs on such an element re-derives every dependent token inside it (a `var()` resolves where it's declared, not where it's used).
-- **Breaking — `accent` is now `primary`** — `--base-accent-color[-hover|-active]` → `--base-primary-color[-hover|-active]`, `--base-accent-color-light[-hover]` → `--base-primary-bg-subtle[-hover]`, `--base-text-color-on-accent` → `--base-on-primary-text-color`. One brand role, named like the rest of the role set. No aliases.
-- **Breaking — names state their type** — a token ends in `-color`, `-bg`, or the shorthand it feeds (`-border`, `-outline`): `--base-<role>-text` → `-text-color`, `--base-text-on-<role>` → `--base-on-<role>-text-color`, `--base-ring-width` / `*-ring` → `--base-outline-width` / `*-outline`, `--base-input-color` → `--base-input-text-color`, `--base-input-clear-*` → `--base-input-icon-*`. Palette slots are `--base-palette-1…9` (were `--base-color-N`). Full table in the CHANGELOG.
-- **Breaking — one tint per role, copies removed** — `--base-<role>-bg-subtle` (10% light / 20% dark of the role color) is the only role tint; `--base-<role>-bg`, `-bg-light`, `-text-light`, `-border` and the `--base-inverse-*` pair are gone.
-- **Shadows — one tone** — `--base-shadow-color` is mode-aware (15% black light / 40% dark) and every shadow derives from it, including `--base-dropdown-box-shadow`; pure-css, pure-admin and the Keenmate components now use it for all their shadows, so a component inside pure-admin matches its surroundings.
 
 ## Install
 
