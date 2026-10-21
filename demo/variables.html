@@ -76,8 +76,8 @@
 
 <!-- resolution scopes: the contract's derived block is declared on [data-theme], and the
      [data-theme] mode blocks set color-scheme, so each probe resolves one mode -->
-<div data-theme="light" id="probe-light" style="position:absolute;left:-9999px"><div></div></div>
-<div data-theme="dark" id="probe-dark" style="position:absolute;left:-9999px"><div></div></div>
+<div data-theme="light" id="probe-light" style="position:absolute;left:-9999px;color:var(--base-text-color-1)"><div></div></div>
+<div data-theme="dark" id="probe-dark" style="position:absolute;left:-9999px;color:var(--base-text-color-1)"><div></div></div>
 
 <script>
 // ---- groups: matched in order, first match wins ----
@@ -160,7 +160,10 @@ function preview(mode, t) {
   switch (k) {
     case 'color': {
       const v = resolve(mode, n, 'background-color');
-      return `<span class="sw"><i style="background:${v}"></i></span><span class="txt">${hex(px(v))}${/rgba|\/ 0?\.\d|, 0\.\d+\)$/.test(v) ? ' α' : ''}</span>`;
+      const txt = /^currentcolor$/i.test(t.def) ? `currentColor = ${hex(px(v))}`
+        : /^rgba\(0, 0, 0, 0\)$|^transparent$/.test(v) ? 'transparent'
+        : hex(px(v)) + (/rgba|\/ 0?\.\d|, 0\.\d+\)$/.test(v) ? ' α' : '');
+      return `<span class="sw"><i style="background:${v}"></i></span><span class="txt">${txt}</span>`;
     }
     case 'onfill': {
       const f = fillFor(t.short);
@@ -170,7 +173,10 @@ function preview(mode, t) {
     }
     case 'shadow': return `<span class="shadow" style="box-shadow:var(${n})"></span><span class="txt">${esc(resolve(mode, n, 'box-shadow'))}</span>`;
     case 'border': return `<span class="bordered" style="border:var(${n})"></span><span class="txt">${esc(resolve(mode, n, 'border-top'))}</span>`;
-    case 'outline': return `<span class="bordered" style="outline:var(${n});outline-offset:calc(-1 * var(--base-outline-width))"></span><span class="txt">${esc(resolve(mode, n, 'outline'))}</span>`;
+    case 'outline': {
+      const v = resolve(mode, n, 'outline');
+      return `<span class="bordered" style="outline:var(${n});outline-offset:calc(-1 * var(--base-outline-width))"></span><span class="txt">${/ none /.test(v) || v === 'none' ? 'none' : esc(v)}</span>`;
+    }
     case 'icon': return `<span class="icon" style="--i:var(${n})"></span>`;
     case 'font': return `<span class="fontsample" style="font-family:var(${n})">Aa Bb 123</span>`;
     case 'len': {
@@ -203,6 +209,9 @@ function defCell(t) {
     return ROLES.indexOf(m[2]) * 10 + Math.max(0, ORDER.indexOf(part));
   };
   for (const title of ['Primary role', 'Secondary role', 'Status roles']) byGroup.find((g) => g.title === title).items.sort((a, b) => rank(a) - rank(b));
+  // item states: width, then selected, then focused — bg, bg-hover, text, outline
+  const ITEM = ['outline-width', 'selected-bg', 'selected-bg-hover', 'selected-text-color', 'selected-outline', 'focused-bg', 'focused-text-color', 'focused-outline'];
+  byGroup.find((g) => g.title === 'Item states').items.sort((a, b) => ITEM.indexOf(a.short) - ITEM.indexOf(b.short));
   // palette: slot N, then the text on it
   const pal = byGroup.find((g) => g.title === 'Palette');
   pal.items.sort((a, b) => (+a.short.match(/\d+/)[0] * 2 + (a.short.startsWith('on-') ? 1 : 0)) - (+b.short.match(/\d+/)[0] * 2 + (b.short.startsWith('on-') ? 1 : 0)));
