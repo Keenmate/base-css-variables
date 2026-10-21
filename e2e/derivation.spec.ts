@@ -195,33 +195,39 @@ const pair = (page: Page, on: string, fill: string) =>
     return out;
   }, [on, fill]);
 
-const lum = (c: number[]) => {
-  const l = c.map((v) => { v /= 255; return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; });
-  return 0.2126 * l[0] + 0.7152 * l[1] + 0.0722 * l[2];
+/** APCA 0.0.98G-4g |Lc| of `text` on `bg` (sRGB bytes). */
+const apca = (text: number[], bg: number[]) => {
+  const Ys = (c: number[]) => 0.2126729 * (c[0] / 255) ** 2.4 + 0.7151522 * (c[1] / 255) ** 2.4 + 0.0721750 * (c[2] / 255) ** 2.4;
+  const clampY = (y: number) => (y > 0.022 ? y : y + (0.022 - y) ** 1.414);
+  const t = clampY(Ys(text)), b = clampY(Ys(bg));
+  if (b > t) { const s = (b ** 0.56 - t ** 0.57) * 1.14; return s < 0.1 ? 0 : (s - 0.027) * 100; }
+  const s = (b ** 0.65 - t ** 0.62) * 1.14;
+  return s > -0.1 ? 0 : -(s + 0.027) * 100;
 };
-const contrast = (a: number[], b: number[]) => {
-  const [x, y] = [lum(a), lum(b)];
-  return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05);
-};
+const WHITE = [255, 255, 255], BLACK = [0, 0, 0];
 
-test('on-fill text: black or white, whichever contrasts more, following the fill', async ({ page }) => {
+test('on-fill text: black or white, whichever reads better by APCA, following the fill', async ({ page }) => {
   await open(page);
-  // navy → white, yellow → black, red-500 → black (5.6 vs 3.8), the tie point's neighbours
-  for (const [fill, expected] of [['#1e3a8a', [255, 255, 255]], ['#fde047', [0, 0, 0]], ['#ef4444', [0, 0, 0]], ['#757575', [255, 255, 255]], ['#777777', [0, 0, 0]]] as const) {
+  // navy → white, yellow → black; sky blue and red-500 → white (WCAG 2 would pick black);
+  // amber → black; the greys either side of the APCA tie (Ys 0.342 ≈ #a3a3a3)
+  for (const [fill, expected] of [['#1e3a8a', WHITE], ['#fde047', BLACK], ['#0ea5e9', WHITE], ['#ef4444', WHITE],
+    ['#f59e0b', BLACK], ['#a0a0a0', WHITE], ['#a6a6a6', BLACK]] as const) {
     await setRoot(page, { '--base-primary-color': fill });
     const { text } = await pair(page, 'var(--base-on-primary-text-color)', 'var(--base-primary-color)');
     expect(text, fill).toEqual(expected);
   }
 });
 
-test('on-fill text: every role and palette fill reaches 4.5:1 by default, light and dark', async ({ page }) => {
+test('on-fill text: every default role and palette fill gets the better APCA pick, light and dark', async ({ page }) => {
   const roles = ['primary', 'secondary', 'success', 'danger', 'warning', 'info'].map((r) => [`--base-on-${r}-text-color`, `--base-${r}-color`]);
   const slots = [1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => [`--base-on-palette-${i}-text-color`, `--base-palette-${i}`]);
   for (const scheme of ['light', 'dark'] as const) {
     await open(page, scheme);
     for (const [on, fill] of [...roles, ...slots]) {
       const { text, fill: f } = await pair(page, `var(${on})`, `var(${fill})`);
-      expect(contrast(text, f), `${scheme} ${on}`).toBeGreaterThanOrEqual(4.5);
+      const best = Math.max(apca(WHITE, f), apca(BLACK, f));
+      expect(apca(text, f), `${scheme} ${on}`).toBeCloseTo(best, 5);
+      expect(best, `${scheme} ${on}`).toBeGreaterThanOrEqual(45);  // readable for bold / button-size text
     }
   }
 });

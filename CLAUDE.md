@@ -56,7 +56,8 @@ traces this end-to-end for the primary color — read it before touching token s
   non-color tokens. Every token calculated from another lives in the second block,
   `:root, [data-theme], .base-scope { … }` — formulas (`color-mix`, OKLCH relative colors), so a
   re-themed scope recalculates. A new derived token goes there, never as a pasted literal.
-  `demo/derived.html` compares the formulas against the compiled pure-admin themes.
+  `demo/derived.html` compares the formulas against the compiled pure-admin themes;
+  `demo/fill-states.html` shows text on fills (WCAG 2 vs APCA pick) and button hover / press states.
 - **Light/dark** is done with CSS `light-dark()`, driven by `color-scheme`. `:root` sets
   `color-scheme: light dark` (auto/OS). `[data-theme="light"|"dark"]` blocks force a mode on a
   subtree. Mode-invariant tokens (icons, spacing/shadow/motion/z-index scales, typography
@@ -70,7 +71,7 @@ traces this end-to-end for the primary color — read it before touching token s
   identity (also the solid fill); `-color-hover`/`-active` = darker steps; `-bg-subtle` = the one
   tint (a `color-mix` of `-color`, so it follows it); `-text-color` = role as foreground on a
   light surface; `--base-on-<role>-text-color` = readable text *on* the fill (derived: black or
-  white by WCAG luminance, so it follows the fill). Derive from the
+  white by APCA contrast, so it follows the fill). Derive from the
   source token with `var()` / `color-mix()` — never paste its literal.
 - **Names state their type (2.0.0):** a token ends in what it is — `-color` (any color value),
   `-bg` (background color), or the CSS shorthand it feeds (`-border`, `-outline`, `-box-shadow`),

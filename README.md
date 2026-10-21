@@ -370,8 +370,8 @@ written directly into `*-outline` won't move the inset offset, so the outline sp
 | `--base-text-color-2` | Secondary — muted labels, supporting text. *Derived:* text-color-1 75% into main-bg |
 | `--base-text-color-3` | Tertiary — icons, metadata, paths, placeholders, hints. *Derived:* 55% |
 | `--base-text-color-4` | Faint — disabled, decorative. *Derived:* 40% |
-| `--base-on-primary-text-color` | Text on the primary fill. *Derived:* black or white, whichever contrasts more with the fill (WCAG luminance, ≥ 4.58:1) |
-| `--base-on-secondary-text-color` | Readable text on the secondary fill. *Derived:* black or white, whichever contrasts more with the fill (WCAG luminance, ≥ 4.58:1) |
+| `--base-on-primary-text-color` | Text on the primary fill. *Derived:* black or white, whichever reads better on the fill by APCA (Lc ≥ 45 on every default fill); hand-set it for a fill near the tie |
+| `--base-on-secondary-text-color` | Readable text on the secondary fill. *Derived:* black or white, whichever reads better on the fill by APCA (Lc ≥ 45 on every default fill); hand-set it for a fill near the tie |
 
 ### Borders
 | Variable | Purpose |
@@ -419,7 +419,7 @@ Role ∈ `success` / `danger` / `warning` / `info`. Each role defines the full s
 | `--base-<role>-color-hover` | Role fill, hover. *Derived:* 15% black (light) / white (dark) |
 | `--base-<role>-bg-subtle` | Role tint for backgrounds (labels, toasts, invalid cells): `-color` mixed 10% (light) / 20% (dark) into transparent |
 | `--base-<role>-text-color` | **Input.** Role as **foreground** on the page surface (text / links) — dark shade in light mode, light shade in dark |
-| `--base-on-<role>-text-color` | Readable text **on** the role fill. *Derived:* black or white, whichever contrasts more with the fill (WCAG luminance, ≥ 4.58:1) |
+| `--base-on-<role>-text-color` | Readable text **on** the role fill. *Derived:* black or white, whichever reads better on the fill by APCA (Lc ≥ 45 on every default fill); hand-set it for a fill near the tie |
 
 ### Typography
 | Variable | Purpose |
@@ -520,7 +520,7 @@ categorical color (charts, tags, avatars).
 | Variable | Purpose |
 |----------|---------|
 | `--base-palette-1 … 9` | **Input.** Palette slots 1–9 (amber, pink, emerald, sky, violet, indigo, slate, corporate-blue, dark-slate) |
-| `--base-on-palette-1-text-color … 9` | Readable text on each slot. *Derived:* black or white, whichever contrasts more with the fill (WCAG luminance, ≥ 4.58:1) |
+| `--base-on-palette-1-text-color … 9` | Readable text on each slot. *Derived:* black or white, whichever reads better on the fill by APCA (Lc ≥ 45 on every default fill); hand-set it for a fill near the tie |
 
 > **Unitless multipliers:** font sizes, radii, input heights and the spacing scale
 > are stored as plain numbers and combined by components against `--base-rem` — e.g.
@@ -534,6 +534,8 @@ categorical color (charts, tags, avatars).
   *Not yet updated for 2.0* — it still emits the 1.x names.
 - `demo/derived.html` in the [GitHub repo](https://github.com/Keenmate/base-css-variables) (not in the npm package; `npm run demo`) — compares the derived formulas against
   the compiled pure-admin themes, with live input pickers and formula knobs.
+- `demo/fill-states.html` (same place) — text on fills (WCAG 2 vs APCA pick, with both scores),
+  hover / press options for buttons, and how a theme overrides a button component's state tokens.
 
 ## License
 

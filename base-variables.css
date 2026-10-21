@@ -325,27 +325,33 @@
   --base-active-bg: light-dark(color-mix(in oklch, oklch(from var(--base-main-bg) calc(l - 0.45) c h) 24%, transparent), color-mix(in oklch, oklch(from var(--base-main-bg) calc(l + 0.45) c h) 48%, transparent));  /* Active/pressed state (overlay) */
   --base-disabled-bg: light-dark(oklch(from var(--base-main-bg) calc(l - 0.024) c h), oklch(from var(--base-main-bg) calc(l + 0.048) c h));  /* Disabled surface (inert tone) */
 
-  /* TEXT ON FILLS — black or white, whichever has more contrast with the fill
-   * (WCAG luminance; every fill gets at least 4.58:1). The inner color() keeps only
-   * the fill's luminance (xyz-d65 y, as a neutral grey); its OKLab lightness is
-   * cbrt(y), and 0.5636 = cbrt(0.1791), the luminance where black and white tie.
-   * The 1e9 step makes it a hard switch. Follows the fill at runtime; set a plain
-   * value to hand-pick one. */
-  --base-on-primary-text-color: oklch(from color(from var(--base-primary-color) xyz-d65 calc(y * 0.9505) y calc(y * 1.089)) clamp(0, (0.5636 - l) * 1e9, 1) 0 0);
-  --base-on-secondary-text-color: oklch(from color(from var(--base-secondary-color) xyz-d65 calc(y * 0.9505) y calc(y * 1.089)) clamp(0, (0.5636 - l) * 1e9, 1) 0 0);
-  --base-on-success-text-color: oklch(from color(from var(--base-success-color) xyz-d65 calc(y * 0.9505) y calc(y * 1.089)) clamp(0, (0.5636 - l) * 1e9, 1) 0 0);
-  --base-on-danger-text-color: oklch(from color(from var(--base-danger-color) xyz-d65 calc(y * 0.9505) y calc(y * 1.089)) clamp(0, (0.5636 - l) * 1e9, 1) 0 0);
-  --base-on-warning-text-color: oklch(from color(from var(--base-warning-color) xyz-d65 calc(y * 0.9505) y calc(y * 1.089)) clamp(0, (0.5636 - l) * 1e9, 1) 0 0);
-  --base-on-info-text-color: oklch(from color(from var(--base-info-color) xyz-d65 calc(y * 0.9505) y calc(y * 1.089)) clamp(0, (0.5636 - l) * 1e9, 1) 0 0);
-  --base-on-palette-1-text-color: oklch(from color(from var(--base-palette-1) xyz-d65 calc(y * 0.9505) y calc(y * 1.089)) clamp(0, (0.5636 - l) * 1e9, 1) 0 0);
-  --base-on-palette-2-text-color: oklch(from color(from var(--base-palette-2) xyz-d65 calc(y * 0.9505) y calc(y * 1.089)) clamp(0, (0.5636 - l) * 1e9, 1) 0 0);
-  --base-on-palette-3-text-color: oklch(from color(from var(--base-palette-3) xyz-d65 calc(y * 0.9505) y calc(y * 1.089)) clamp(0, (0.5636 - l) * 1e9, 1) 0 0);
-  --base-on-palette-4-text-color: oklch(from color(from var(--base-palette-4) xyz-d65 calc(y * 0.9505) y calc(y * 1.089)) clamp(0, (0.5636 - l) * 1e9, 1) 0 0);
-  --base-on-palette-5-text-color: oklch(from color(from var(--base-palette-5) xyz-d65 calc(y * 0.9505) y calc(y * 1.089)) clamp(0, (0.5636 - l) * 1e9, 1) 0 0);
-  --base-on-palette-6-text-color: oklch(from color(from var(--base-palette-6) xyz-d65 calc(y * 0.9505) y calc(y * 1.089)) clamp(0, (0.5636 - l) * 1e9, 1) 0 0);
-  --base-on-palette-7-text-color: oklch(from color(from var(--base-palette-7) xyz-d65 calc(y * 0.9505) y calc(y * 1.089)) clamp(0, (0.5636 - l) * 1e9, 1) 0 0);
-  --base-on-palette-8-text-color: oklch(from color(from var(--base-palette-8) xyz-d65 calc(y * 0.9505) y calc(y * 1.089)) clamp(0, (0.5636 - l) * 1e9, 1) 0 0);
-  --base-on-palette-9-text-color: oklch(from color(from var(--base-palette-9) xyz-d65 calc(y * 0.9505) y calc(y * 1.089)) clamp(0, (0.5636 - l) * 1e9, 1) 0 0);
+  /* TEXT ON FILLS — black or white, whichever reads better on the fill, by APCA
+   * (the perceptual contrast model of the WCAG 3 draft; WCAG 2's ratio favours black on
+   * bright saturated mid-tones such as sky blue and pink, where white reads better).
+   *   inner color():  the fill's brightness, 0 (black) … 1 (white), put in its red channel:
+   *                   0.21·R + 0.72·G + 0.07·B — how much each channel adds to brightness —
+   *                   where each channel is c^2.4 (stored value → light), written as
+   *                   c²·(0.4 + 0.82c − 0.22c²) because Firefox has no pow() on channels.
+   *   outer color():  0.34 = the brightness where black and white text score the same.
+   *                   clamp(0, (0.34 − r) × 1e9, 1) is an if(): darker → 1, brighter → 0,
+   *                   used for R, G and B, so the result is pure white or pure black.
+   * Rounded to 2 digits: matches exact APCA except where black and white differ by < 1 Lc.
+   * Follows the fill at runtime; set a plain value to hand-pick one (a fill near the tie). */
+  --base-on-primary-text-color: color(from color(from var(--base-primary-color) srgb calc(0.21 * r * r * (0.4 + r * (0.82 - 0.22 * r)) + 0.72 * g * g * (0.4 + g * (0.82 - 0.22 * g)) + 0.07 * b * b * (0.4 + b * (0.82 - 0.22 * b))) 0 0) srgb clamp(0, (0.34 - r) * 1e9, 1) clamp(0, (0.34 - r) * 1e9, 1) clamp(0, (0.34 - r) * 1e9, 1));
+  --base-on-secondary-text-color: color(from color(from var(--base-secondary-color) srgb calc(0.21 * r * r * (0.4 + r * (0.82 - 0.22 * r)) + 0.72 * g * g * (0.4 + g * (0.82 - 0.22 * g)) + 0.07 * b * b * (0.4 + b * (0.82 - 0.22 * b))) 0 0) srgb clamp(0, (0.34 - r) * 1e9, 1) clamp(0, (0.34 - r) * 1e9, 1) clamp(0, (0.34 - r) * 1e9, 1));
+  --base-on-success-text-color: color(from color(from var(--base-success-color) srgb calc(0.21 * r * r * (0.4 + r * (0.82 - 0.22 * r)) + 0.72 * g * g * (0.4 + g * (0.82 - 0.22 * g)) + 0.07 * b * b * (0.4 + b * (0.82 - 0.22 * b))) 0 0) srgb clamp(0, (0.34 - r) * 1e9, 1) clamp(0, (0.34 - r) * 1e9, 1) clamp(0, (0.34 - r) * 1e9, 1));
+  --base-on-danger-text-color: color(from color(from var(--base-danger-color) srgb calc(0.21 * r * r * (0.4 + r * (0.82 - 0.22 * r)) + 0.72 * g * g * (0.4 + g * (0.82 - 0.22 * g)) + 0.07 * b * b * (0.4 + b * (0.82 - 0.22 * b))) 0 0) srgb clamp(0, (0.34 - r) * 1e9, 1) clamp(0, (0.34 - r) * 1e9, 1) clamp(0, (0.34 - r) * 1e9, 1));
+  --base-on-warning-text-color: color(from color(from var(--base-warning-color) srgb calc(0.21 * r * r * (0.4 + r * (0.82 - 0.22 * r)) + 0.72 * g * g * (0.4 + g * (0.82 - 0.22 * g)) + 0.07 * b * b * (0.4 + b * (0.82 - 0.22 * b))) 0 0) srgb clamp(0, (0.34 - r) * 1e9, 1) clamp(0, (0.34 - r) * 1e9, 1) clamp(0, (0.34 - r) * 1e9, 1));
+  --base-on-info-text-color: color(from color(from var(--base-info-color) srgb calc(0.21 * r * r * (0.4 + r * (0.82 - 0.22 * r)) + 0.72 * g * g * (0.4 + g * (0.82 - 0.22 * g)) + 0.07 * b * b * (0.4 + b * (0.82 - 0.22 * b))) 0 0) srgb clamp(0, (0.34 - r) * 1e9, 1) clamp(0, (0.34 - r) * 1e9, 1) clamp(0, (0.34 - r) * 1e9, 1));
+  --base-on-palette-1-text-color: color(from color(from var(--base-palette-1) srgb calc(0.21 * r * r * (0.4 + r * (0.82 - 0.22 * r)) + 0.72 * g * g * (0.4 + g * (0.82 - 0.22 * g)) + 0.07 * b * b * (0.4 + b * (0.82 - 0.22 * b))) 0 0) srgb clamp(0, (0.34 - r) * 1e9, 1) clamp(0, (0.34 - r) * 1e9, 1) clamp(0, (0.34 - r) * 1e9, 1));
+  --base-on-palette-2-text-color: color(from color(from var(--base-palette-2) srgb calc(0.21 * r * r * (0.4 + r * (0.82 - 0.22 * r)) + 0.72 * g * g * (0.4 + g * (0.82 - 0.22 * g)) + 0.07 * b * b * (0.4 + b * (0.82 - 0.22 * b))) 0 0) srgb clamp(0, (0.34 - r) * 1e9, 1) clamp(0, (0.34 - r) * 1e9, 1) clamp(0, (0.34 - r) * 1e9, 1));
+  --base-on-palette-3-text-color: color(from color(from var(--base-palette-3) srgb calc(0.21 * r * r * (0.4 + r * (0.82 - 0.22 * r)) + 0.72 * g * g * (0.4 + g * (0.82 - 0.22 * g)) + 0.07 * b * b * (0.4 + b * (0.82 - 0.22 * b))) 0 0) srgb clamp(0, (0.34 - r) * 1e9, 1) clamp(0, (0.34 - r) * 1e9, 1) clamp(0, (0.34 - r) * 1e9, 1));
+  --base-on-palette-4-text-color: color(from color(from var(--base-palette-4) srgb calc(0.21 * r * r * (0.4 + r * (0.82 - 0.22 * r)) + 0.72 * g * g * (0.4 + g * (0.82 - 0.22 * g)) + 0.07 * b * b * (0.4 + b * (0.82 - 0.22 * b))) 0 0) srgb clamp(0, (0.34 - r) * 1e9, 1) clamp(0, (0.34 - r) * 1e9, 1) clamp(0, (0.34 - r) * 1e9, 1));
+  --base-on-palette-5-text-color: color(from color(from var(--base-palette-5) srgb calc(0.21 * r * r * (0.4 + r * (0.82 - 0.22 * r)) + 0.72 * g * g * (0.4 + g * (0.82 - 0.22 * g)) + 0.07 * b * b * (0.4 + b * (0.82 - 0.22 * b))) 0 0) srgb clamp(0, (0.34 - r) * 1e9, 1) clamp(0, (0.34 - r) * 1e9, 1) clamp(0, (0.34 - r) * 1e9, 1));
+  --base-on-palette-6-text-color: color(from color(from var(--base-palette-6) srgb calc(0.21 * r * r * (0.4 + r * (0.82 - 0.22 * r)) + 0.72 * g * g * (0.4 + g * (0.82 - 0.22 * g)) + 0.07 * b * b * (0.4 + b * (0.82 - 0.22 * b))) 0 0) srgb clamp(0, (0.34 - r) * 1e9, 1) clamp(0, (0.34 - r) * 1e9, 1) clamp(0, (0.34 - r) * 1e9, 1));
+  --base-on-palette-7-text-color: color(from color(from var(--base-palette-7) srgb calc(0.21 * r * r * (0.4 + r * (0.82 - 0.22 * r)) + 0.72 * g * g * (0.4 + g * (0.82 - 0.22 * g)) + 0.07 * b * b * (0.4 + b * (0.82 - 0.22 * b))) 0 0) srgb clamp(0, (0.34 - r) * 1e9, 1) clamp(0, (0.34 - r) * 1e9, 1) clamp(0, (0.34 - r) * 1e9, 1));
+  --base-on-palette-8-text-color: color(from color(from var(--base-palette-8) srgb calc(0.21 * r * r * (0.4 + r * (0.82 - 0.22 * r)) + 0.72 * g * g * (0.4 + g * (0.82 - 0.22 * g)) + 0.07 * b * b * (0.4 + b * (0.82 - 0.22 * b))) 0 0) srgb clamp(0, (0.34 - r) * 1e9, 1) clamp(0, (0.34 - r) * 1e9, 1) clamp(0, (0.34 - r) * 1e9, 1));
+  --base-on-palette-9-text-color: color(from color(from var(--base-palette-9) srgb calc(0.21 * r * r * (0.4 + r * (0.82 - 0.22 * r)) + 0.72 * g * g * (0.4 + g * (0.82 - 0.22 * g)) + 0.07 * b * b * (0.4 + b * (0.82 - 0.22 * b))) 0 0) srgb clamp(0, (0.34 - r) * 1e9, 1) clamp(0, (0.34 - r) * 1e9, 1) clamp(0, (0.34 - r) * 1e9, 1));
 
   /* PRIMARY / SECONDARY — hover/active steps (darker in light mode, lighter in dark) + tints */
   --base-primary-color-hover: light-dark(color-mix(in srgb, black 15%, var(--base-primary-color)), color-mix(in srgb, white 15%, var(--base-primary-color)));

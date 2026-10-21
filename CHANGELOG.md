@@ -14,22 +14,27 @@ All notable changes to `@keenmate/base-css-variables` are documented here. Forma
   lighter than typed text. Step 4 is now described as "disabled, decorative" and step 3 takes
   placeholders and hints. Visible change: every placeholder gets darker. Mirrored in
   `@keenmate/pure-css` (`$base-input-placeholder-color`).
-- **Text on fills is derived: black or white, whichever contrasts more.** The 15
+- **Text on fills is derived: black or white, whichever reads better by APCA.** The 15
   `--base-on-<role>-text-color` / `--base-on-palette-N-text-color` tokens were hand-set inputs,
-  almost all `#ffffff`, and most fills are bright (sky blue, emerald, amber, cyan, pink): across the
-  contract and the 16 pure-admin themes, 171 of 510 text/fill pairs were below 4.5:1 (amber
-  warning 2.1:1). They now derive from their fill in the derived block, by WCAG relative luminance
-  (`oklch(from color(from <fill> xyz-d65 …) …)`, a hard switch at the black/white tie point), so
-  every pair reaches at least 4.58:1, in every theme and mode, and a fill changed at runtime or in
-  a `.base-scope` brings its text along. Set a plain value to hand-pick one. Visible change: most
-  bright fills get black text — in the default, primary, success, danger, warning, info and
-  palette 1–4; secondary, danger and palette 5–9 keep white. Mirrored in `@keenmate/pure-css`.
-- **Four default fills one shade darker, so they keep white text:** danger `#ef4444` → `#dc2626`,
-  palette 5 violet `#8b5cf6` → `#7c3aed`, palette 6 indigo `#6366f1` → `#4f46e5`, palette 8
-  Corporate blue `#0284c7` → `#0369a1` (white 4.8 / 5.7 / 6.3 / 5.9:1). With the derived text they
-  would otherwise get black text, which reads oddly on red and blue. Themes keep their own fills.
-  Hover / active fills keep the base fill's text colour, so a fill near the tie point can drop
-  below 4.5:1 while hovered or pressed.
+  almost all `#ffffff`, and most fills are bright (sky blue, emerald, amber, cyan, pink): white on
+  amber was 2.1:1. They now derive from their fill in the derived block, so a fill changed at
+  runtime or in a `.base-scope` brings its text along. The pick uses APCA (the perceptual contrast
+  model of the WCAG 3 draft), not the WCAG 2 ratio: WCAG 2 favours black on bright saturated
+  mid-tones such as sky blue and pink, where white reads better. Across the contract and the 16
+  pure-admin themes (510 text/fill pairs) no pair is below Lc 45 any more (today 8, a WCAG 2 pick
+  would leave 68); the trade-off is that 141 pairs stay below the WCAG 2 ratio of 4.5:1 (today
+  155). It is computed in CSS — APCA's luminance, with `c^2.4` as a polynomial because Firefox has
+  no `pow()` on colour channels, constants rounded to 2 digits — and matches exact APCA except
+  where black and white differ by less than 1 Lc. Fills near the tie point (default success, info: within 5 Lc) can be hand-set
+  with a plain value. Visible change in the default: success, warning, info and palette 1 / 3 get
+  black text; primary, secondary, danger and palette 2 / 4–9 keep white. Mirrored in
+  `@keenmate/pure-css`.
+- **Four default fills one shade darker,** so their white text also passes the WCAG 2 ratio:
+  danger `#ef4444` → `#dc2626`, palette 5 violet `#8b5cf6` → `#7c3aed`, palette 6 indigo
+  `#6366f1` → `#4f46e5`, palette 8 Corporate blue `#0284c7` → `#0369a1` (white 4.8 / 5.7 / 6.3 /
+  5.9:1, Lc 77–86). Themes keep their own fills.
+- Hover / active fills keep the resting fill's text colour, so a fill near the tie point can read
+  weaker while hovered or pressed (see `demo/fill-states.html`).
 
 ## [2.0.0-rc02] — 2026-10-16 [PUBLISHED]
 

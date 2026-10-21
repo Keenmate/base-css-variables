@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Text on fills — WCAG 2 vs APCA, hover / pressed states</title>
+<link rel="stylesheet" href="../base-variables.css">
+<!-- The black/white pick formulas are generated into this block (see buildPickCss below). -->
+<style id="pick-css"></style>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 16px 20px 60px;
+    font: 14px/1.45 var(--base-font-family);
+    background: var(--page-bg); color: var(--page-text);
+    --page-bg: var(--base-main-bg); --page-text: var(--base-text-color-1);
+  }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  h2 { font-size: 16px; margin: 26px 0 4px; }
+  p.lead { margin: 0 0 12px; max-width: 1150px; opacity: .85; }
+  code { font: 12px var(--base-font-family-mono); }
+
+  .controls { display: flex; flex-wrap: wrap; gap: 8px 22px; align-items: center; padding: 10px 12px; margin-bottom: 14px;
+    border: 1px solid color-mix(in srgb, var(--page-text) 25%, transparent); border-radius: 8px; font-size: 13px;
+    position: sticky; top: 0; z-index: 1; background: var(--page-bg); }
+  .controls label { display: inline-flex; gap: 6px; align-items: center; }
+  .controls select, .controls input[type=number] { font: inherit; }
+  .controls input[type=number] { width: 52px; }
+  .summary { font-size: 12.5px; }
+
+  table { border-collapse: collapse; width: 100%; max-width: 1300px; }
+  th { text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: .03em; opacity: .75; padding: 4px 8px 8px; vertical-align: bottom; }
+  th small { display: block; text-transform: none; letter-spacing: 0; font-weight: 400; opacity: .9; }
+  td { padding: 9px 8px; border-top: 1px solid color-mix(in srgb, var(--page-text) 15%, transparent); vertical-align: middle; }
+  td.role { font-weight: 600; width: 110px; }
+  td.role small { display: block; font: 11px var(--base-font-family-mono); font-weight: 400; opacity: .7; }
+  .cell { display: flex; gap: 12px; align-items: center; }
+  .strip { display: flex; gap: 4px; }
+  .verdict { font-size: 12px; opacity: .85; }
+
+  /* ---- the button model ----------------------------------------------------
+   * --fill = the role fill. The pick CSS (generated) defines --on / --on-h / --on-a:
+   * black or white for the rest / today's-hover / today's-pressed fill, by WCAG 2
+   * or APCA depending on the .pick-* class on an ancestor. */
+  .btn {
+    --mode-hover: light-dark(color-mix(in srgb, black var(--step), var(--fill)), color-mix(in srgb, white var(--step), var(--fill)));
+    --mode-active: light-dark(color-mix(in srgb, black var(--step2), var(--fill)), color-mix(in srgb, white var(--step2), var(--fill)));
+    --away: oklch(from var(--on) calc(1 - l) 0 0);
+    --away-hover: color-mix(in srgb, var(--away) var(--step), var(--fill));
+    --away-active: color-mix(in srgb, var(--away) var(--step2), var(--fill));
+
+    font: 600 14px var(--base-font-family); border: 0; border-radius: 6px; padding: 8px 14px; min-width: 92px;
+    background: var(--fill); color: var(--on);
+    transition: background-color .15s, color .15s;
+  }
+  .btn.live { cursor: pointer; }
+  .btn.chip { display: inline-block; vertical-align: middle; font-size: 12px; padding: 4px 8px; min-width: 76px; text-align: center; cursor: default; line-height: 1.25; }
+  .btn.chip b { display: block; font-size: 10.5px; font-weight: 600; white-space: nowrap; }
+  .btn.chip b .fail { text-decoration: underline wavy; }
+  .btn.chip b .weak { text-decoration: underline dotted; }
+
+  .v-today.live:hover, .v-today.st-hover { background: var(--mode-hover); }
+  .v-today.live:active, .v-today.st-active { background: var(--mode-active); }
+  .v-o1.live:hover, .v-o1.st-hover { background: var(--mode-hover); color: var(--on-h); }
+  .v-o1.live:active, .v-o1.st-active { background: var(--mode-active); color: var(--on-a); }
+  .v-o2.live:hover, .v-o2.st-hover { background: var(--away-hover); }
+  .v-o2.live:active, .v-o2.st-active { background: var(--away-active); }
+
+  .cmp .btn { min-width: 108px; }
+  /* section 3: two button components, each with its own tokens defaulting to the contract */
+  .tok .btn { background: var(--b-bg); color: var(--b-text); border: 1px solid var(--b-border); }
+  .tok .btn.live:hover, .tok .btn.st-hover { background: var(--b-bg-hover); color: var(--b-text-hover); border-color: var(--b-border-hover); }
+  .tok .btn.live:active, .tok .btn.st-active { background: var(--b-bg-active); color: var(--b-text-active); border-color: var(--b-border-active); }
+  .override { display: grid; grid-template-columns: minmax(0, 600px) minmax(0, 1fr); gap: 14px; max-width: 1300px; margin: 6px 0 10px; }
+  .override textarea { width: 100%; min-height: 150px; font: 12px/1.45 var(--base-font-family-mono); padding: 8px;
+    background: color-mix(in srgb, var(--page-text) 6%, var(--page-bg)); color: var(--page-text);
+    border: 1px solid color-mix(in srgb, var(--page-text) 30%, transparent); border-radius: 6px; }
+  .override pre { margin: 0; font: 12px/1.45 var(--base-font-family-mono); white-space: pre-wrap; opacity: .85; }
+  .override .hint { font-size: 12.5px; opacity: .85; }
+  .presets { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+  .presets button { font: 12px var(--base-font-family); padding: 2px 8px; cursor: pointer; }
+</style>
+</head>
+<body>
+<h1>Text on fills — WCAG 2 vs APCA, and hover / pressed states</h1>
+<p class="lead">
+  A button's text is black or white, whichever contrasts more with its fill. "More" depends on the model:
+  <b>WCAG 2</b> (the contrast ratio audits check today, pass = 4.5:1) or <b>APCA</b> (the perceptual model
+  being developed for WCAG 3, scored as Lc; about 60 for body-size text, 45 for large or bold text).
+  WCAG 2 is known to favour black on bright saturated colours; APCA usually prefers white there.
+  Every chip shows both scores: <span style="text-decoration:underline wavy">wavy</span> = below WCAG 4.5:1,
+  <span style="text-decoration:underline dotted">dotted</span> = below APCA Lc 60.
+</p>
+
+<div class="controls">
+  <label>Theme <select id="theme"></select></label>
+  <label>Mode <select id="mode"><option value="light">light</option><option value="dark">dark</option></select></label>
+  <label>Pick text by <select id="pick"><option value="apca">APCA (the contract)</option><option value="wcag">WCAG 2</option></select></label>
+  <label>Hover step <input id="step" type="number" min="0" max="50" value="15">%</label>
+  <label>Pressed step <input id="step2" type="number" min="0" max="60" value="30">%</label>
+  <label>Custom fill <input id="custom" type="color" value="#0ea5e9"></label>
+</div>
+
+<h2>1 · WCAG 2 pick vs APCA pick (resting fill)</h2>
+<p class="lead">The same fill twice: text picked by WCAG 2, then by APCA. Where they differ, compare the two
+  buttons by eye. <span class="summary" id="cmp-summary"></span></p>
+<table class="cmp">
+  <thead><tr><th>Fill</th><th>Picked by WCAG 2</th><th>Picked by APCA</th><th>Verdict</th></tr></thead>
+  <tbody id="cmp-rows"></tbody>
+</table>
+
+<h2>2 · Hover and pressed — today vs option 1 vs option 2</h2>
+<p class="lead">Text picked by the model chosen above (<b id="pick-name"></b>). Hover and press the live buttons;
+  the strip freezes rest / hover / pressed. <span class="summary" id="summary"></span></p>
+<table class="states">
+  <thead>
+    <tr>
+      <th>Role</th>
+      <th>Today<small>One text colour; the fill gets darker in light mode, lighter in dark mode.</small></th>
+      <th>Option 1 — text per state<small>Same fills as today; the text is re-picked for each state, so it can flip.</small></th>
+      <th>Option 2 — fill moves away from the text<small>The text never changes; black text → the fill gets lighter, white text → darker.</small></th>
+    </tr>
+  </thead>
+  <tbody id="rows"></tbody>
+</table>
+
+<h2>3 · The agreed model — contract colours, button states in each component</h2>
+<p class="lead">The contract supplies only the role colours (<code>--base-&lt;role&gt;-color</code> and
+  <code>--base-on-&lt;role&gt;-text-color</code>, picked by APCA). Each button component has its own state
+  tokens with the agreed defaults: the text stays, the fill moves away from the text on hover / press, the
+  border follows the fill. Two components are shown: a pure-admin button (<code>--pa-btn-&lt;role&gt;-*</code>)
+  and another component's button (<code>--ms-btn-&lt;role&gt;-*</code>). With no overrides they look the same,
+  because both default to the contract. The editor below is a theme: anything you set there applies to the
+  page, like a theme stylesheet.</p>
+<div class="override">
+  <div>
+    <textarea id="tok-css" spellcheck="false"></textarea>
+    <div class="hint">Try a preset, or write your own declarations:
+      <div class="presets">
+        <button type="button" data-preset="none">No overrides (defaults)</button>
+        <button type="button" data-preset="flip">Flip danger — pure-admin only</button>
+        <button type="button" data-preset="flipboth">Flip danger — both components</button>
+        <button type="button" data-preset="role">Re-colour danger in the contract</button>
+      </div></div>
+  </div>
+  <pre>/* contract (inputs; text on fill is derived) */
+--base-&lt;role&gt;-color
+--base-on-&lt;role&gt;-text-color      black / white by APCA
+
+/* each button component's own tokens, defaults: */
+--pa-btn-&lt;role&gt;-bg            var(--base-&lt;role&gt;-color)
+--pa-btn-&lt;role&gt;-text          var(--base-on-&lt;role&gt;-text-color)
+--pa-btn-&lt;role&gt;-bg-hover      bg + 15% of the text's opposite
+--pa-btn-&lt;role&gt;-bg-active     bg + 30% of the text's opposite
+--pa-btn-&lt;role&gt;-text-hover / -text-active    = text
+--pa-btn-&lt;role&gt;-border / -border-hover / -border-active
+                               = bg / bg-hover / bg-active
+(--ms-btn-&lt;role&gt;-* : the same, in another component)</pre>
+</div>
+<table class="tok">
+  <thead><tr><th>Role</th><th>pure-admin button<small>--pa-btn-&lt;role&gt;-*</small></th>
+    <th>Another component's button<small>--ms-btn-&lt;role&gt;-*</small></th></tr></thead>
+  <tbody id="tok-rows"></tbody>
+</table>
+
+<p class="legend">
+  Section 2: today's step is the contract's <code>--base-&lt;role&gt;-color-hover</code> / <code>-active</code>
+  (15% / 30% black in light mode, white in dark mode); pressed is shown for every role, though the contract
+  defines <code>-active</code> only for primary. Section 3 is the agreed model: those contract steps stay as
+  shared colours, and each button component owns its hover / press tokens. The APCA pick is computed in CSS
+  from APCA's luminance (<code>x<sup>2.4</sup></code> as a polynomial — Firefox doesn't allow
+  <code>pow()</code> on colour channels); it matches exact APCA except where black and white differ by less
+  than 1 Lc.
+</p>
+
+<script>
+const THEMES = {"audi":{"light":{"bg":"#ffffff","text":"#212529","primary":"#ff0000","secondary":"#6c757d","success":"#00cc44","danger":"#ff0000","warning":"#ff6600","info":"#0099ff"},"dark":{"bg":"#1a1a1a","text":"#ffffff","primary":"#ff0000","secondary":"#6c757d","success":"#00cc44","danger":"#ff0000","warning":"#ff6600","info":"#0099ff"}},"ayu":{"light":{"bg":"#ffffff","text":"#575f66","primary":"#f29718","secondary":"#6c757d","success":"#aad94c","danger":"#f07178","warning":"#ff8f40","info":"#39bae6"},"dark":{"bg":"#242936","text":"#cccac2","primary":"#e6b450","secondary":"#6c757d","success":"#aad94c","danger":"#f07178","warning":"#ff8f40","info":"#39bae6"}},"cafeindustrial":{"light":{"bg":"#fffcf8","text":"#3d3428","primary":"#b87d24","secondary":"#6c757d","success":"#4a9e5c","danger":"#c94444","warning":"#e8a83c","info":"#3a8fa0"},"dark":{"bg":"#1e1a15","text":"#e8e0d4","primary":"#d4952b","secondary":"#6c757d","success":"#4a9e5c","danger":"#c94444","warning":"#e8a83c","info":"#3a8fa0"}},"cobalt2":{"light":{"bg":"#193549","text":"#ffffff","primary":"#ffc600","secondary":"#6c757d","success":"#a5ff90","danger":"#ff628c","warning":"#ff9d00","info":"#9effff"},"dark":{"bg":"#193549","text":"#ffffff","primary":"#ffc600","secondary":"#6c757d","success":"#a5ff90","danger":"#ff628c","warning":"#ff9d00","info":"#9effff"}},"corporate":{"light":{"bg":"#ffffff","text":"#334155","primary":"#0ea5e9","secondary":"#6c757d","success":"#10b981","danger":"#ef4444","warning":"#f59e0b","info":"#06b6d4"},"dark":{"bg":"#1e293b","text":"#f1f5f9","primary":"#0ea5e9","secondary":"#6c757d","success":"#10b981","danger":"#ef4444","warning":"#f59e0b","info":"#06b6d4"}},"dark":{"light":{"bg":"#ffffff","text":"#1e293b","primary":"#4dabf7","secondary":"#6c757d","success":"#059669","danger":"#dc2626","warning":"#d97706","info":"#0891b2"},"dark":{"bg":"#2a2a2a","text":"#ffffff","primary":"#4dabf7","secondary":"#6c757d","success":"#059669","danger":"#dc2626","warning":"#d97706","info":"#0891b2"}},"darkmatter":{"light":{"bg":"#1b232c","text":"#aec2e0","primary":"#4cbbff","secondary":"#6c757d","success":"#95cc5e","danger":"#ff5370","warning":"#ffe792","info":"#6ee2ff"},"dark":{"bg":"#1b232c","text":"#aec2e0","primary":"#4cbbff","secondary":"#6c757d","success":"#95cc5e","danger":"#ff5370","warning":"#ffe792","info":"#6ee2ff"}},"dracula":{"light":{"bg":"#2d2f3d","text":"#f8f8f2","primary":"#bd93f9","secondary":"#6c757d","success":"#50fa7b","danger":"#ff5555","warning":"#ffb86c","info":"#8be9fd"},"dark":{"bg":"#2d2f3d","text":"#f8f8f2","primary":"#bd93f9","secondary":"#6c757d","success":"#50fa7b","danger":"#ff5555","warning":"#ffb86c","info":"#8be9fd"}},"express":{"light":{"bg":"#ffffff","text":"#333333","primary":"#d40511","secondary":"#6c757d","success":"#10b981","danger":"#98040c","warning":"#f59e0b","info":"#06b6d4"},"dark":{"bg":"#242424","text":"#ffffff","primary":"#ffcc00","secondary":"#6c757d","success":"#10b981","danger":"#98040c","warning":"#f59e0b","info":"#06b6d4"}},"gruvbox":{"light":{"bg":"#f1efdf","text":"#3c3836","primary":"#d65d0e","secondary":"#6c757d","success":"#b8bb26","danger":"#fb4934","warning":"#fabd2f","info":"#83a598"},"dark":{"bg":"#3c3836","text":"#ebdbb2","primary":"#fe8019","secondary":"#6c757d","success":"#b8bb26","danger":"#fb4934","warning":"#fabd2f","info":"#83a598"}},"minimal":{"light":{"bg":"#ffffff","text":"#333333","primary":"#555555","secondary":"#6c757d","success":"#28a745","danger":"#dc3545","warning":"#ffc107","info":"#17a2b8"},"dark":{"bg":"#242424","text":"#e8e8e8","primary":"#e8e8e8","secondary":"#6c757d","success":"#28a745","danger":"#dc3545","warning":"#ffc107","info":"#17a2b8"}},"nato":{"light":{"bg":"#ffffff","text":"#1f2a44","primary":"#118acb","secondary":"#6c757d","success":"#2e8540","danger":"#c8102e","warning":"#f5b700","info":"#118acb"},"dark":{"bg":"#102b54","text":"#e6edf7","primary":"#118acb","secondary":"#6c757d","success":"#2e8540","danger":"#c8102e","warning":"#f5b700","info":"#118acb"}},"night-owl":{"light":{"bg":"#0b2236","text":"#d6deeb","primary":"#82aaff","secondary":"#6c757d","success":"#addb67","danger":"#ef5350","warning":"#ffcb8b","info":"#7fdbca"},"dark":{"bg":"#0b2236","text":"#d6deeb","primary":"#82aaff","secondary":"#6c757d","success":"#addb67","danger":"#ef5350","warning":"#ffcb8b","info":"#7fdbca"}},"one-dark":{"light":{"bg":"#282c34","text":"#abb2bf","primary":"#61afef","secondary":"#6c757d","success":"#98c379","danger":"#e06c75","warning":"#e5c07b","info":"#56b6c2"},"dark":{"bg":"#282c34","text":"#abb2bf","primary":"#61afef","secondary":"#6c757d","success":"#98c379","danger":"#e06c75","warning":"#e5c07b","info":"#56b6c2"}},"sentinel":{"light":{"bg":"#ffffff","text":"#23272e","primary":"#c01b2b","secondary":"#6c757d","success":"#2f8f4e","danger":"#dc2626","warning":"#d97706","info":"#2563eb"},"dark":{"bg":"#1e2228","text":"#eceef1","primary":"#c01b2b","secondary":"#6c757d","success":"#2f8f4e","danger":"#dc2626","warning":"#d97706","info":"#2563eb"}},"tokyo-night":{"light":{"bg":"#1e1f2b","text":"#a9b1d6","primary":"#7dcfff","secondary":"#6c757d","success":"#9ece6a","danger":"#ff5370","warning":"#e0af68","info":"#2ac3de"},"dark":{"bg":"#1e1f2b","text":"#a9b1d6","primary":"#7dcfff","secondary":"#6c757d","success":"#9ece6a","danger":"#ff5370","warning":"#e0af68","info":"#2ac3de"}}};
+const ROLES = ['primary', 'secondary', 'success', 'danger', 'warning', 'info'];
+const VARIANTS = ['v-today', 'v-o1', 'v-o2'];
+const $ = (id) => document.getElementById(id);
+
+// ---- black/white pick formulas -------------------------------------------
+// WCAG 2: the fill's luminance (xyz-d65 y) as a neutral grey; its OKLab L = cbrt(y);
+//         0.5636 = cbrt(0.1791), where black and white have equal contrast ratios.
+// APCA:   APCA's own luminance Ys = Σ k·c^2.4 over the sRGB-encoded channels, put into a grey
+//         as its sRGB-encoded value; its OKLab L = cbrt(lin(Ys)); 0.4575 = that at Ys 0.34196,
+//         where |Lc| on black text equals |Lc| on white.
+const P = (c) => `${c} * ${c} * (0.4 + ${c} * (0.82 - 0.22 * ${c}))`;   // ≈ c^2.4
+const YS = `0.21 * ${P('r')} + 0.72 * ${P('g')} + 0.07 * ${P('b')}`;
+const K = 'clamp(0, (0.34 - r) * 1e9, 1)';
+const PICK = {
+  wcag: (v) => `oklch(from color(from ${v} xyz-d65 calc(y * 0.9505) y calc(y * 1.089)) clamp(0, (0.5636 - l) * 1e9, 1) 0 0)`,
+  apca: (v) => `color(from color(from ${v} srgb calc(${YS}) 0 0) srgb ${K} ${K} ${K})`,   // = the contract's formula
+};
+$('pick-css').textContent = Object.entries(PICK).map(([k, f]) =>
+  `.pick-${k} .btn { --on: ${f('var(--fill)')}; --on-h: ${f('var(--mode-hover)')}; --on-a: ${f('var(--mode-active)')}; }`).join('\n');
+
+// ---- theme list ----
+const sel = $('theme');
+sel.add(new Option('contract default (Corporate)', ''));
+for (const t of Object.keys(THEMES).sort()) sel.add(new Option(t, t));
+
+// ---- section 1: WCAG vs APCA on every fill ----
+const FILLS = [...ROLES.map((r) => ({ key: r, label: r, token: `--base-${r}-color` })),
+  ...[1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => ({ key: 'palette-' + i, label: 'palette ' + i, token: `--base-palette-${i}` })),
+  { key: 'custom', label: 'custom' }];
+const cmpRows = $('cmp-rows');
+for (const f of FILLS) {
+  const tr = document.createElement('tr'); tr.dataset.key = f.key;
+  const name = f.label[0].toUpperCase() + f.label.slice(1);
+  tr.innerHTML = `<td class="role">${f.label}<small class="hex"></small></td>
+    <td class="pick-wcag"><span class="btn chip big">${name}<b></b></span></td>
+    <td class="pick-apca"><span class="btn chip big">${name}<b></b></span></td>
+    <td class="verdict"></td>`;
+  cmpRows.appendChild(tr);
+}
+
+// ---- section 2: states ----
+const rows = $('rows');
+for (const role of [...ROLES, 'custom']) {
+  const tr = document.createElement('tr'); tr.dataset.key = role;
+  tr.innerHTML = `<td class="role">${role}<small class="hex"></small></td>` + VARIANTS.map((cls) => `
+    <td><div class="cell">
+      <button class="btn live ${cls}">${role[0].toUpperCase() + role.slice(1)}</button>
+      <div class="strip">
+        <span class="btn chip ${cls}">rest<b></b></span>
+        <span class="btn chip ${cls} st-hover">hover<b></b></span>
+        <span class="btn chip ${cls} st-active">pressed<b></b></span>
+      </div></div></td>`).join('');
+  rows.appendChild(tr);
+}
+
+// ---- measuring: WCAG 2 ratio and APCA Lc from the painted colours ----
+const cv = document.createElement('canvas'); cv.width = cv.height = 1;
+const ctx = cv.getContext('2d', { willReadFrequently: true });
+const px = (c) => { ctx.clearRect(0, 0, 1, 1); ctx.fillStyle = '#000'; ctx.fillStyle = c; ctx.fillRect(0, 0, 1, 1); return [...ctx.getImageData(0, 0, 1, 1).data].slice(0, 3); };
+const lin = (v) => { v /= 255; return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; };
+const Yw = ([r, g, b]) => 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
+const wcag = (a, b) => (Math.max(Yw(a), Yw(b)) + 0.05) / (Math.min(Yw(a), Yw(b)) + 0.05);
+const Ys = ([r, g, b]) => 0.2126729 * (r / 255) ** 2.4 + 0.7151522 * (g / 255) ** 2.4 + 0.0721750 * (b / 255) ** 2.4;
+const clampY = (y) => (y > 0.022 ? y : y + (0.022 - y) ** 1.414);
+function apca(text, bg) {   // APCA 0.0.98G-4g, returns |Lc|
+  const t = clampY(Ys(text)), b = clampY(Ys(bg));
+  if (b > t) { const s = (b ** 0.56 - t ** 0.57) * 1.14; return s < 0.1 ? 0 : (s - 0.027) * 100; }
+  const s = (b ** 0.65 - t ** 0.62) * 1.14; return s > -0.1 ? 0 : -(s + 0.027) * 100;
+}
+const hex = (c) => '#' + c.map((n) => n.toString(16).padStart(2, '0')).join('');
+function score(chip) {
+  const cs = getComputedStyle(chip), t = px(cs.color), f = px(cs.backgroundColor);
+  const r = wcag(t, f), lc = apca(t, f);
+  chip.querySelector('b').innerHTML = `<span class="${r < 4.5 ? 'fail' : ''}">${r.toFixed(2)}</span> · <span class="${lc < 60 ? 'weak' : ''}">Lc ${lc.toFixed(0)}</span>`;
+  return { r, lc, white: t[0] > 128, fill: f };
+}
+
+function apply() {
+  const theme = sel.value, mode = $('mode').value, t = theme ? THEMES[theme][mode] : null;
+  document.body.style.colorScheme = mode;
+  document.body.style.setProperty('--step', $('step').value + '%');
+  document.body.style.setProperty('--step2', $('step2').value + '%');
+  document.body.style.setProperty('--page-bg', t ? t.bg : 'var(--base-main-bg)');
+  document.body.style.setProperty('--page-text', t ? t.text : 'var(--base-text-color-1)');
+  $('rows').parentElement.className = 'states pick-' + $('pick').value;
+  $('pick-name').textContent = $('pick').value === 'apca' ? 'APCA' : 'WCAG 2';
+  const fillFor = (key) => {
+    if (key === 'custom') return $('custom').value;
+    const f = FILLS.find((x) => x.key === key);
+    return t && t[key] ? t[key] : `var(${f.token})`;   // themes give role fills; palette comes from the contract
+  };
+  for (const tr of [...cmpRows.children, ...rows.children]) tr.style.setProperty('--fill', fillFor(tr.dataset.key));
+  requestAnimationFrame(() => setTimeout(measure, 200));
+}
+
+function measure() {
+  let differ = 0, wFail = 0, aFail = 0;
+  for (const tr of cmpRows.children) {
+    const [w, a] = [...tr.querySelectorAll('.chip')].map(score);
+    tr.querySelector('.hex').textContent = hex(w.fill);
+    const same = w.white === a.white;
+    if (!same) differ++;
+    if (tr.dataset.key !== 'custom') { if (w.r < 4.5) wFail++; if (a.r < 4.5) aFail++; }
+    tr.querySelector('.verdict').textContent = same ? 'same pick' :
+      `differ — APCA picks ${a.white ? 'white' : 'black'} (Lc ${a.lc.toFixed(0)} vs ${w.lc.toFixed(0)}), ` +
+      `WCAG ratio ${a.r.toFixed(2)} vs ${w.r.toFixed(2)}`;
+  }
+  $('cmp-summary').innerHTML = `Picks differ on <b>${differ}</b> fill(s). Below WCAG 4.5:1 (15 fills): WCAG pick <b>${wFail}</b> · APCA pick <b>${aFail}</b>.`;
+
+  const fails = { 'v-today': 0, 'v-o1': 0, 'v-o2': 0 };
+  for (const tr of rows.children) {
+    tr.querySelector('.hex').textContent = hex(px(getComputedStyle(tr.querySelector('.chip')).backgroundColor));
+    for (const chip of tr.querySelectorAll('.chip')) {
+      const s = score(chip);
+      const failed = $('pick').value === 'apca' ? s.lc < 60 : s.r < 4.5;
+      if (failed && tr.dataset.key !== 'custom') fails[VARIANTS.find((v) => chip.classList.contains(v))]++;
+    }
+  }
+  $('summary').innerHTML = `Failing (${$('pick').value === 'apca' ? 'APCA Lc < 60' : 'WCAG < 4.5:1'}, 6 roles × 3 states): ` +
+    `today <b>${fails['v-today']}</b> · option 1 <b>${fails['v-o1']}</b> · option 2 <b>${fails['v-o2']}</b>`;
+}
+
+// ---- section 3: the agreed model ----
+const PRESETS = {
+  none: `/* no overrides — both components use their defaults */`,
+  flip: `/* a theme flips pure-admin's danger button on hover / press.
+   Only pure-admin reads --pa-btn-*, so the other component does not follow. */
+--pa-btn-danger-bg-hover: var(--base-main-bg);
+--pa-btn-danger-text-hover: var(--base-danger-color);
+--pa-btn-danger-border-hover: var(--base-danger-color);
+--pa-btn-danger-bg-active: var(--base-main-bg);
+--pa-btn-danger-text-active: var(--base-danger-color-hover);
+--pa-btn-danger-border-active: var(--base-danger-color-hover);`,
+  flipboth: `/* the same flip, repeated for the second component —
+   what a theme has to do for a custom design (rare) */
+--pa-btn-danger-bg-hover: var(--base-main-bg);
+--pa-btn-danger-text-hover: var(--base-danger-color);
+--pa-btn-danger-border-hover: var(--base-danger-color);
+--pa-btn-danger-bg-active: var(--base-main-bg);
+--pa-btn-danger-text-active: var(--base-danger-color-hover);
+--pa-btn-danger-border-active: var(--base-danger-color-hover);
+--ms-btn-danger-bg-hover: var(--base-main-bg);
+--ms-btn-danger-text-hover: var(--base-danger-color);
+--ms-btn-danger-border-hover: var(--base-danger-color);
+--ms-btn-danger-bg-active: var(--base-main-bg);
+--ms-btn-danger-text-active: var(--base-danger-color-hover);
+--ms-btn-danger-border-active: var(--base-danger-color-hover);`,
+  role: `/* a theme changes a contract INPUT — every component follows,
+   including the text on the fill (re-picked by APCA) */
+--base-danger-color: #fda4af;   /* a light rose: the text is re-picked as black */`,
+};
+$('tok-css').value = PRESETS.flip;
+const away = (text, bg, step) => `color-mix(in srgb, oklch(from ${text} calc(1 - l) 0 0) var(${step}), ${bg})`;
+const btnTokens = (prefix, r) => `
+    --${prefix}-${r}-bg: var(--base-${r}-color);
+    --${prefix}-${r}-text: var(--base-on-${r}-text-color);
+    --${prefix}-${r}-bg-hover: ${away(`var(--${prefix}-${r}-text)`, `var(--${prefix}-${r}-bg)`, '--step')};
+    --${prefix}-${r}-bg-active: ${away(`var(--${prefix}-${r}-text)`, `var(--${prefix}-${r}-bg)`, '--step2')};
+    --${prefix}-${r}-text-hover: var(--${prefix}-${r}-text);
+    --${prefix}-${r}-text-active: var(--${prefix}-${r}-text);
+    --${prefix}-${r}-border: var(--${prefix}-${r}-bg);
+    --${prefix}-${r}-border-hover: var(--${prefix}-${r}-bg-hover);
+    --${prefix}-${r}-border-active: var(--${prefix}-${r}-bg-active);`;
+const alias = (prefix, r) => ['bg', 'text', 'bg-hover', 'bg-active', 'text-hover', 'text-active', 'border', 'border-hover', 'border-active']
+  .map((k) => `--b-${k}: var(--${prefix}-${r}-${k});`).join(' ');
+const tokStyle = document.createElement('style');
+// Component defaults are declared on the component element (the cell), like :host in a shadow root,
+// so a theme's override set on an ancestor (the row) would be shadowed — themes set them on the row's
+// cells through the same specificity as a consumer stylesheet: we apply the editor text to each cell.
+tokStyle.textContent = ROLES.map((r) => `
+  .tok tr[data-role="${r}"] td.pa {${btnTokens('pa-btn', r)} }
+  .tok tr[data-role="${r}"] td.ms {${btnTokens('ms-btn', r)} }
+  .tok tr[data-role="${r}"] td.pa .btn { ${alias('pa-btn', r)} }
+  .tok tr[data-role="${r}"] td.ms .btn { ${alias('ms-btn', r)} }`).join('');
+document.head.appendChild(tokStyle);
+const tokRows = $('tok-rows');
+const cellHtml = (label) => `<div class="cell"><button class="btn live">${label}</button><div class="strip">
+  <span class="btn chip">rest<b></b></span><span class="btn chip st-hover">hover<b></b></span><span class="btn chip st-active">pressed<b></b></span></div></div>`;
+for (const role of ROLES) {
+  const tr = document.createElement('tr');
+  tr.dataset.role = role;
+  tr.className = 'base-scope';   // contract tokens (text on fills) recalculate here when a theme re-sets an input
+  const label = role[0].toUpperCase() + role.slice(1);
+  tr.innerHTML = `<td class="role">${role}<small class="hex"></small></td><td class="pa">${cellHtml(label)}</td><td class="ms">${cellHtml(label)}</td>`;
+  tokRows.appendChild(tr);
+}
+function applyTok() {
+  const theme = sel.value, t = theme ? THEMES[theme][$('mode').value] : null;
+  const user = $('tok-css').value;
+  // split the theme text: contract inputs (--base-*) go on the row (the scope that derives),
+  // component tokens go on the component cells (where the component declares its defaults)
+  const decls = user.replace(/\/\*[\s\S]*?\*\//g, '').split(';').map((d) => d.trim()).filter(Boolean);
+  const base = decls.filter((d) => d.startsWith('--base-')).join('; ');
+  const comp = decls.filter((d) => !d.startsWith('--base-')).join('; ');
+  for (const tr of tokRows.children) {
+    const role = tr.dataset.role;
+    tr.style.cssText = (t ? `--base-${role}-color: ${t[role]}; --base-main-bg: ${t.bg};` : '') + base;
+    for (const td of tr.querySelectorAll('td.pa, td.ms')) td.style.cssText = comp;
+  }
+  requestAnimationFrame(() => setTimeout(() => {
+    for (const tr of tokRows.children) {
+      const res = [...tr.querySelectorAll('.chip')].map(score);
+      tr.querySelector('.hex').textContent = hex(res[0].fill);
+    }
+  }, 200));
+}
+$('tok-css').addEventListener('input', applyTok);
+for (const b of document.querySelectorAll('.presets button')) b.addEventListener('click', () => { $('tok-css').value = PRESETS[b.dataset.preset]; applyTok(); });
+for (const id of ['theme', 'mode', 'step', 'step2']) $(id).addEventListener('input', applyTok);
+
+for (const id of ['theme', 'mode', 'pick', 'step', 'step2', 'custom']) $(id).addEventListener('input', apply);
+apply();
+applyTok();
+</script>
+</body>
+</html>
