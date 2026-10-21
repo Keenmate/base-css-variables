@@ -58,6 +58,13 @@ traces this end-to-end for the primary color — read it before touching token s
   re-themed scope recalculates. A new derived token goes there, never as a pasted literal.
   `demo/derived.html` compares the formulas against the compiled pure-admin themes;
   `demo/fill-states.html` shows text on fills (WCAG 2 vs APCA pick) and button hover / press states.
+- **What belongs here (three categories):** INPUTS = what a theme decides (keep few);
+  DERIVED = shared formulas for anything more than one consumer asks (hover / active steps,
+  tints, text levels, text on fills…) — free to grow, a theme never sets them; COMPONENT tokens =
+  one component's design choices (button state fill / text / border, variants) — they stay in the
+  component (`--pa-btn-*`, `--drp-button-apply-*`) and default to the contract. Promote a
+  component token into the contract (as a derived default) when a second consumer draws the same
+  thing. Don't add per-state button tokens here. README "What belongs in the contract".
 - **Light/dark** is done with CSS `light-dark()`, driven by `color-scheme`. `:root` sets
   `color-scheme: light dark` (auto/OS). `[data-theme="light"|"dark"]` blocks force a mode on a
   subtree. Mode-invariant tokens (icons, spacing/shadow/motion/z-index scales, typography

@@ -185,8 +185,8 @@ The colors come in two kinds:
 - **Inputs** — set by hand: `--base-main-bg`, `--base-page-bg`, `--base-text-color-1`,
   the role colors (`--base-primary-color`, `--base-secondary-color`,
   `--base-success/-danger/-warning/-info-color`), the role text colors
-  (`--base-<role>-text-color`), the "text on a fill" colors (`--base-on-*-text-color`),
-  `--base-overlay-bg`, `--base-shadow-color` and the palette.
+  (`--base-<role>-text-color`), `--base-overlay-bg`, `--base-shadow-color` and the palette.
+  About 28 colors in all — that's what a theme decides.
 - **Derived** — calculated from the inputs, so changing an input moves them all:
   - text levels 2–4 = `--base-text-color-1` mixed into `--base-main-bg` (75 / 55 / 40%);
   - surfaces (`subtle`, `elevated`, `disabled`, `border-color`) = the background's own hue
@@ -195,6 +195,8 @@ The colors come in two kinds:
   - `hover` / `active` = translucent overlays of that hue, so they show on any surface;
   - role `-hover` / `-active` = the role color mixed with black (light) / white (dark);
   - tints (`-bg-subtle`, `--base-highlighted-bg`) = the role color at 10% (light) / 20% (dark);
+  - text on a fill (`--base-on-<role>-text-color`, `--base-on-palette-N-text-color`) = black or
+    white, whichever reads better on the fill by APCA;
   - input, dropdown, tooltip, border shorthands and shadows reuse the tokens above.
 
 **Any derived token can still be hand-set** — a plain value simply replaces its formula:
@@ -221,6 +223,26 @@ input on a descendant. The derived block is therefore also declared on `[data-th
 ```
 
 (Without the hook, a subtree override behaves like a plain value: only the tokens you set change.)
+
+### What belongs in the contract
+
+Consistency comes from consumers reading the same token: if pure-admin and a component both
+draw "danger, hovered", they agree only when both read one `--base-*` name. So the contract is
+kept slim in its **inputs**, not in its token count:
+
+1. **Inputs** — what a theme genuinely decides (the colors above, plus the size, type and motion
+   scales). Kept small; every new input is work for every theme.
+2. **Derived tokens** — shared formulas for any question more than one consumer asks: hover /
+   active steps, tints, text levels, surfaces, text on fills, input and dropdown colors. They can
+   grow when needed — a theme never has to set them.
+3. **Component tokens** — one component's design choices (a button's hover / press fill, text
+   and border, an outline variant) live in that component (`--pa-btn-*`,
+   `--drp-button-apply-*`, …) and default to 1 and 2. A theme overrides them only for a custom
+   look, per component.
+
+When a second consumer starts drawing the same thing, its token moves into the contract as a
+derived default, so one override reaches both. Consumers *read* the derived tokens rather than
+re-deriving or hand-picking their own values — a parallel copy is what breaks consistency.
 
 ### Light / dark mode
 
