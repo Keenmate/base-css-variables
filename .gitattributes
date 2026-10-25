@@ -1,0 +1,2 @@
+# The shipped CLI must keep LF: a CRLF shebang (`node`) fails on Linux / macOS.
+bin/*.mjs text eol=lf
