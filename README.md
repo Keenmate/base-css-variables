@@ -12,6 +12,11 @@ that **cascade from these `--base-*` values**. Define the base layer once and ev
 component picks up a consistent, coordinated theme. Override a single `--base-*`
 variable and the change propagates everywhere.
 
+## What's New in 2.0.0-rc04
+
+- **Tooling — `base-contract-check` for components** — the package now ships a check that a component runs in its build (as a devDependency: `npx base-contract-check src`). It reports `--base-*` reads the contract doesn't have, with the new name for renamed ones (C1), input fallbacks that differ from the contract default such as `var(--base-main-bg, #1a1a1a)` (C2), and derived tokens with a literal fallback such as `var(--base-primary-color-hover, #2563eb)` instead of the contract formula on the component's own accent (C3). Deliberate differences go in the component's `contract-check.json` with a reason. No token changes.
+- **Tooling — `renames.json`** — every removed or renamed `--base-*` name since 1.x with its replacement and the version, e.g. `--base-highlighted-bg` → `--base-selected-bg` (2.0.0-rc03). The check uses it for its hints; it ships with the package.
+
 ## What's New in 2.0.0-rc03
 
 - **Breaking — `highlighted` is now `selected`** — the item state for the click / Ctrl / Shift-click set is `--base-selected-bg` / `-bg-hover` / `-text-color` / `-outline` (were `--base-highlighted-*`), and the checkbox state is called *checked*. Focused = the cursor item, selected = the set, checked = the ticked checkbox (drawn by the checkbox only); pointer hover stays `--base-hover-bg`. No aliases.
@@ -20,11 +25,6 @@ variable and the change propagates everywhere.
 - **Fills — four defaults one shade darker** — danger `#dc2626`, palette 5 `#7c3aed`, palette 6 `#4f46e5`, palette 8 `#0369a1`, so their white text also passes WCAG 2 (4.8–6.3:1).
 - **Inputs — readable placeholders** — `--base-input-placeholder-color` is `--base-text-color-3` (was step 4, about 2.1–2.5:1), the same tone as the field's icons. Every placeholder gets darker.
 - **Disabled — one fade** — new `--base-disabled-opacity: 0.65` for every disabled control, whatever its role.
-
-## What's New in 2.0.0-rc02
-
-- **Inputs — a focus halo of its own** — new `--base-input-shadow-color-focus` (5% of `--base-primary-color`) and `--base-input-box-shadow-focus` (`0 0 0 3px` of it) give the soft glow around a focused field its own tokens. It used to borrow the `--base-primary-bg-subtle` fill tint, which themes set much stronger (up to 25% in dark mode) and which made the halo heavy. Components with a different halo size compose their own `box-shadow` from the color token, so the tone stays the same.
-- **Controls — outlines stronger than the divider** — `--base-input-border-color` was `var(--base-border-color)`, the hairline for card and table edges (about 1.2–1.9:1), so inputs, checkboxes and outline buttons nearly disappeared in some themes. It is now `--base-text-color-1` mixed 45% (light) / 35% (dark) into `--base-main-bg` (about 2–3.4:1), and `--base-checkbox-border-color` follows it. `--base-border-color` stays the quiet divider. Every form's field outlines get visibly darker.
 
 ## Install
 
