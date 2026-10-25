@@ -1,0 +1,41 @@
+{
+  "$comment": "Removed / renamed --base-* tokens. base-contract-check uses this to say what to use instead. `to: null` = removed without a replacement name; `note` explains. <role> = success, danger, warning, info; N = 1..9.",
+  "renames": [
+    { "from": "--base-highlighted-bg", "to": "--base-selected-bg", "since": "2.0.0-rc03" },
+    { "from": "--base-highlighted-bg-hover", "to": "--base-selected-bg-hover", "since": "2.0.0-rc03" },
+    { "from": "--base-highlighted-text-color", "to": "--base-selected-text-color", "since": "2.0.0-rc03" },
+    { "from": "--base-highlighted-outline", "to": "--base-selected-outline", "since": "2.0.0-rc03" },
+
+    { "from": "--base-highlighted-ring", "to": "--base-selected-outline", "since": "2.0.0" },
+    { "from": "--base-highlighted-text", "to": "--base-selected-text-color", "since": "2.0.0" },
+    { "from": "--base-focused-ring", "to": "--base-focused-outline", "since": "2.0.0" },
+    { "from": "--base-focused-text", "to": "--base-focused-text-color", "since": "2.0.0" },
+    { "from": "--base-ring-width", "to": "--base-outline-width", "since": "2.0.0" },
+
+    { "from": "--base-accent-color", "to": "--base-primary-color", "since": "2.0.0" },
+    { "from": "--base-accent-color-hover", "to": "--base-primary-color-hover", "since": "2.0.0" },
+    { "from": "--base-accent-color-active", "to": "--base-primary-color-active", "since": "2.0.0" },
+    { "from": "--base-accent-color-light", "to": "--base-primary-bg-subtle", "since": "2.0.0" },
+    { "from": "--base-accent-color-light-hover", "to": "--base-primary-bg-subtle-hover", "since": "2.0.0" },
+    { "from": "--base-primary-color-light", "to": "--base-primary-bg-subtle", "since": "2.0.0" },
+    { "from": "--base-primary-color-light-hover", "to": "--base-primary-bg-subtle-hover", "since": "2.0.0" },
+    { "from": "--base-text-color-on-accent", "to": "--base-on-primary-text-color", "since": "2.0.0" },
+    { "from": "--base-text-on-primary", "to": "--base-on-primary-text-color", "since": "2.0.0" },
+    { "from": "--base-text-on-secondary", "to": "--base-on-secondary-text-color", "since": "2.0.0" },
+    { "from": "--base-text-on-<role>", "to": "--base-on-<role>-text-color", "since": "2.0.0" },
+    { "from": "--base-<role>-text", "to": "--base-<role>-text-color", "since": "2.0.0" },
+    { "from": "--base-<role>-bg-light", "to": "--base-<role>-bg-subtle", "since": "2.0.0" },
+    { "from": "--base-<role>-bg", "to": "--base-<role>-color", "since": "2.0.0", "note": "was a pasted copy of -color" },
+    { "from": "--base-<role>-text-light", "to": null, "since": "2.0.0", "note": "removed (unused)" },
+    { "from": "--base-<role>-border", "to": null, "since": "2.0.0", "note": "removed (unused) — use a component border token" },
+    { "from": "--base-color-N", "to": "--base-palette-N", "since": "2.0.0" },
+    { "from": "--base-color-N-text", "to": "--base-on-palette-N-text-color", "since": "2.0.0" },
+    { "from": "--base-input-color", "to": "--base-input-text-color", "since": "2.0.0" },
+    { "from": "--base-input-clear-color", "to": "--base-input-icon-color", "since": "2.0.0" },
+    { "from": "--base-input-clear-bg-hover", "to": "--base-input-icon-bg-hover", "since": "2.0.0" },
+    { "from": "--base-tooltip-color", "to": "--base-tooltip-text-color", "since": "2.0.0" },
+    { "from": "--base-inverse-bg", "to": "--base-tooltip-bg", "since": "2.0.0", "note": "removed; the tooltip has its own pair" },
+    { "from": "--base-inverse-text-color", "to": "--base-tooltip-text-color", "since": "2.0.0", "note": "removed; the tooltip has its own pair" },
+    { "from": "--base-text-inverted", "to": "--base-tooltip-text-color", "since": "2.0.0", "note": "removed; the tooltip has its own pair" }
+  ]
+}

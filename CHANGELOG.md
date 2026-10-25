@@ -3,6 +3,24 @@
 All notable changes to `@keenmate/base-css-variables` are documented here. Format based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.0.0-rc04] — 2026-10-25
+
+### Added
+
+- **`base-contract-check` — a component checks itself against the contract.** Components read
+  `var(--base-*, fallback)`, so a renamed token or a drifted fallback failed silently (e.g.
+  web-multiselect's sky accent with the old `#2563eb` hover, primary-as-text falling back to the
+  raw accent). The package now ships `bin/check-contract.mjs` (`npx base-contract-check src`),
+  meant as a component **devDependency**, run in its build. Rules: C1 every `--base-*` read
+  exists (renamed / removed names say what to use); C2 an input's fallback equals the contract
+  default, per mode; C3 a derived token's fallback is a formula on the component's own tokens,
+  not a literal. Component-token fallbacks are followed to their declaration; deliberate
+  differences go in the component's `contract-check.json` with a reason. Also importable as
+  `@keenmate/base-css-variables/check`. README → "Checking a component against the contract".
+- **`renames.json`** — every removed / renamed `--base-*` name since 1.x with its replacement
+  and version (shipped; read by the check).
+- Unit tests for the check (`npm run test:check`, `node:test`; part of `npm test`).
+
 ## [2.0.0-rc03] — 2026-10-20 [PUBLISHED]
 
 ### Changed — breaking

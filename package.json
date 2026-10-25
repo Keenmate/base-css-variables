@@ -1,6 +1,6 @@
 {
   "name": "@keenmate/base-css-variables",
-  "version": "2.0.0-rc03",
+  "version": "2.0.0-rc04",
   "description": "Shared base layer of CSS custom properties (--base-*) for Keenmate web components",
   "license": "MIT",
   "author": "Keenmate s.r.o.",
@@ -17,19 +17,27 @@
   ],
   "type": "module",
   "style": "./base-variables.css",
+  "bin": {
+    "base-contract-check": "bin/check-contract.mjs"
+  },
   "exports": {
     ".": "./base-variables.css",
-    "./base-variables.css": "./base-variables.css"
+    "./base-variables.css": "./base-variables.css",
+    "./check": "./bin/check-contract.mjs",
+    "./renames.json": "./renames.json"
   },
   "files": [
     "base-variables.css",
+    "bin/check-contract.mjs",
+    "renames.json",
     "README.md",
     "CHANGELOG.md",
     "LICENSE"
   ],
   "scripts": {
     "demo": "node demo/serve.mjs",
-    "test": "npm run test:e2e",
+    "test": "npm run test:check && npm run test:e2e",
+    "test:check": "node --test test/check-contract.test.mjs",
     "test:e2e": "playwright test",
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:install": "playwright install chromium"

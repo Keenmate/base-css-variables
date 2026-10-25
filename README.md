@@ -261,6 +261,59 @@ so they follow the active `color-scheme`.
 
   or set `color-scheme: light | dark` on any element.
 
+## Checking a component against the contract
+
+Components read the contract with inline fallbacks — `var(--base-primary-color, #0ea5e9)` — so
+nothing fails when a component reads a renamed token or carries a fallback that drifted from the
+contract: the fallback quietly takes over. The package ships a check for that. A component adds
+the package as a **devDependency** (never a runtime one: components read `--base-*`, the page
+defines it) and runs it in its build:
+
+```bash
+npm i -D @keenmate/base-css-variables
+npx base-contract-check src        # paths default to src; exit 1 on findings
+```
+
+```json
+"scripts": { "check:contract": "base-contract-check src" }
+```
+
+| Rule | Checks |
+|---|---|
+| **C1** | every `--base-*` read exists in the contract; a renamed or removed name says what to use (`renames.json`) |
+| **C2** | the fallback of an **input** token equals the contract default, per mode (`light-dark()`) |
+| **C3** | the fallback of a **derived** token is a formula on the component's own tokens, not a literal |
+
+C3 is the one that keeps a component consistent on its own. A literal hover such as
+`var(--base-primary-color-hover, #2563eb)` fits only the default accent; an app that sets the
+component's accent without the contract keeps the old hover. Write the contract formula on the
+component's own token instead:
+
+```css
+--xx-accent-color-hover: var(--base-primary-color-hover,
+  light-dark(color-mix(in srgb, black 15%, var(--xx-accent-color)),
+             color-mix(in srgb, white 15%, var(--xx-accent-color))));
+```
+
+A fallback that is a component token is followed to its declaration, so
+`var(--base-primary-text-color, var(--xx-accent-color))` counts as the literal accent (primary
+used as text — too light). A derived token that is an alias in the contract
+(`--base-input-bg: var(--base-main-bg)`) passes when the fallback chain reads the aliased token.
+
+Deliberate differences go in `contract-check.json` next to `package.json`, each with a reason:
+
+```json
+{ "allow": [
+  { "token": "--base-z-tooltip", "rule": "C2", "reason": "must sit above the host app's modals" },
+  { "token": "--base-icon-calendar", "rule": "C1", "file": "variables.css", "reason": "proposed token, read ahead" }
+] }
+```
+
+Options: `--report` (list, exit 0 — for adopting), `--json`, `--config <file>`,
+`--contract <base-variables.css>`. Scans `.css .scss .ts .js .mjs .svelte`, comments stripped,
+`node_modules` / `dist` skipped. The same check is importable: `import { check } from
+'@keenmate/base-css-variables/check'`.
+
 ## Checkbox render method
 
 Every Keenmate component that draws a checkbox (multiselect options, tree nodes,

@@ -10,8 +10,17 @@ components (web-multiselect `--ms-*`, web-daterangepicker `--drp-*`, web-grid `-
 web-treeview, …) and by `@keenmate/pure-css` / `@keenmate/pure-admin-core`.
 
 There is no build, lint, or bundle step. Editing the CSS *is* the work; publishing is
-`npm publish`. The package ships only `base-variables.css` + `README.md` + `CHANGELOG.md`
-+ `LICENSE` (see the `files` field) — the demo and tests below are repo-only.
+`npm publish`. The package ships `base-variables.css` + `README.md` + `CHANGELOG.md`
++ `LICENSE`, plus the component check `bin/check-contract.mjs` + `renames.json` (see the `files`
+field) — the demo and tests below are repo-only.
+
+**Component check (shipped):** `bin/check-contract.mjs` (`npx base-contract-check src`) is run by
+components (devDependency) in their build: C1 unknown `--base-*` reads, C2 input fallbacks ≠
+contract default, C3 derived fallbacks that are literals instead of formulas. It parses
+`base-variables.css` itself — no second token list. **When you rename or remove a token, add it
+to `renames.json`** (old → new, version) so the check tells components what to use. Unit tests:
+`npm run test:check` (`test/check-contract.test.mjs`, `node:test`). Plan and rationale:
+`docs/plan-contract-check.md`.
 
 **Demo + e2e (repo-only, dev-time):** `npm run demo` serves `demo/item-states.html` via the
 zero-dependency `demo/serve.mjs` on :12510. The server also mounts the *local* builds of the
