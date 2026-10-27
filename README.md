@@ -12,19 +12,16 @@ that **cascade from these `--base-*` values**. Define the base layer once and ev
 component picks up a consistent, coordinated theme. Override a single `--base-*`
 variable and the change propagates everywhere.
 
+## What's New in 2.0.0-rc05
+
+- **Default primary — blue-500 `#3b82f6`** — `--base-primary-color` was Corporate's sky `#0ea5e9`, which read too light as text and on its own tint; its derived text (`--base-primary-text-color`) turned teal-grey. Everything derived from the primary follows: hover / active, tints, selected / focused item states, the input focus border and halo. White stays the text on the fill. The rest of the default theme stays Corporate; pure-css 2.0.0-rc05 mirrors the default.
+- **Tooling — `contractParity()` e2e helper** — `@keenmate/base-css-variables/testing/parity` renders a component standalone and with the contract, in light and dark plus a custom-accent pass, and compares every color token. It catches formula fallbacks that differ from the contract's, which the static check can't see (e.g. a 10% tint where the contract is 10% light / 20% dark).
+- **Tooling — stricter `base-contract-check`** — a fallback for a contract alias (`--base-selected-bg: var(--base-primary-bg-subtle)`) must go through the aliased token. The check no longer exits 0 without checking when run through a symlink (`npm link`, pnpm), and compares numbers by value.
+
 ## What's New in 2.0.0-rc04
 
 - **Tooling — `base-contract-check` for components** — the package now ships a check that a component runs in its build (as a devDependency: `npx base-contract-check src`). It reports `--base-*` reads the contract doesn't have, with the new name for renamed ones (C1), input fallbacks that differ from the contract default such as `var(--base-main-bg, #1a1a1a)` (C2), and derived tokens with a literal fallback such as `var(--base-primary-color-hover, #2563eb)` instead of the contract formula on the component's own accent (C3). Deliberate differences go in the component's `contract-check.json` with a reason. No token changes.
 - **Tooling — `renames.json`** — every removed or renamed `--base-*` name since 1.x with its replacement and the version, e.g. `--base-highlighted-bg` → `--base-selected-bg` (2.0.0-rc03). The check uses it for its hints; it ships with the package.
-
-## What's New in 2.0.0-rc03
-
-- **Breaking — `highlighted` is now `selected`** — the item state for the click / Ctrl / Shift-click set is `--base-selected-bg` / `-bg-hover` / `-text-color` / `-outline` (were `--base-highlighted-*`), and the checkbox state is called *checked*. Focused = the cursor item, selected = the set, checked = the ticked checkbox (drawn by the checkbox only); pointer hover stays `--base-hover-bg`. No aliases.
-- **Roles — every role has the same seven tokens** — primary, secondary, success, danger, warning and info all have `-color`, `-color-hover`, `-color-active`, `-bg-subtle`, `-bg-subtle-hover`, `-text-color` and `--base-on-<role>-text-color`. New, all derived: the status roles' `-color-active` / `-bg-subtle-hover`, secondary's `-color-active` / `-bg-subtle(-hover)`, and `--base-primary-text-color` / `--base-secondary-text-color` (the fill toward black in light mode, toward white in dark). A pressed danger button now has one shared colour instead of one per consumer.
-- **Text on fills — black or white, picked by APCA** — the 15 `--base-on-<role>-text-color` / `--base-on-palette-N-text-color` tokens are derived from their fill instead of hand-set `#fff`, so a fill changed at runtime or in a `.base-scope` brings its text along. APCA (the WCAG 3 draft's model) reads better than the WCAG 2 ratio on bright mid-tones such as sky blue; no default or pure-admin theme fill is below Lc 45. Fills near the tie can still be hand-set.
-- **Fills — four defaults one shade darker** — danger `#dc2626`, palette 5 `#7c3aed`, palette 6 `#4f46e5`, palette 8 `#0369a1`, so their white text also passes WCAG 2 (4.8–6.3:1).
-- **Inputs — readable placeholders** — `--base-input-placeholder-color` is `--base-text-color-3` (was step 4, about 2.1–2.5:1), the same tone as the field's icons. Every placeholder gets darker.
-- **Disabled — one fade** — new `--base-disabled-opacity: 0.65` for every disabled control, whatever its role.
 
 ## Install
 
@@ -129,18 +126,18 @@ The `--pc-*` / `--pa-*` tokens are wired as `var(--base-*, <fallback>)`, so over
 Traced end-to-end for the primary color:
 
 ```
-LAYER 0  contract (THIS file, CSS)       :root { --base-primary-color: #0ea5e9 }
+LAYER 0  contract (THIS file, CSS)       :root { --base-primary-color: #3b82f6 }
             │  pure-css mirrors the list into SCSS
-LAYER 1  pure-css source (SCSS)          $base-primary-color: #0ea5e9 !default;   ◀─ a THEME overrides here
+LAYER 1  pure-css source (SCSS)          $base-primary-color: #3b82f6 !default;   ◀─ a THEME overrides here
             │  derive
 LAYER 2  pure-css framework var (SCSS)   $primary-color: $base-primary-color;       (serves only as the build fallback)
             │  emit (two mixins)
-LAYER 3  pure-css emit  ──▶ CSS          --base-primary-color: #0ea5e9;                         ◀─ RAIL A · the knob
-                                         --pc-primary-color: var(--base-primary-color, #0ea5e9)  ◀─ RAIL B · pure-admin's token
+LAYER 3  pure-css emit  ──▶ CSS          --base-primary-color: #3b82f6;                         ◀─ RAIL A · the knob
+                                         --pc-primary-color: var(--base-primary-color, #3b82f6)  ◀─ RAIL B · pure-admin's token
                                          --pc-primary-bg-subtle: var(--base-primary-bg-subtle, …)
                                          --pc-link-color: var(--pc-primary-color), …
             │
-LAYER 4  pure-admin-core (CSS)           --pa-btn-primary-bg: var(--base-primary-color, #0ea5e9), …
+LAYER 4  pure-admin-core (CSS)           --pa-btn-primary-bg: var(--base-primary-color, #3b82f6), …
             │
 LAYER 5  consumers
             pure-admin components         background: var(--pa-btn-primary-bg);
@@ -263,7 +260,7 @@ so they follow the active `color-scheme`.
 
 ## Checking a component against the contract
 
-Components read the contract with inline fallbacks — `var(--base-primary-color, #0ea5e9)` — so
+Components read the contract with inline fallbacks — `var(--base-primary-color, #3b82f6)` — so
 nothing fails when a component reads a renamed token or carries a fallback that drifted from the
 contract: the fallback quietly takes over. The package ships a check for that. A component adds
 the package as a **devDependency** (never a runtime one: components read `--base-*`, the page
@@ -313,6 +310,35 @@ Options: `--report` (list, exit 0 — for adopting), `--json`, `--config <file>`
 `--contract <base-variables.css>`. Scans `.css .scss .ts .js .mjs .svelte`, comments stripped,
 `node_modules` / `dist` skipped. The same check is importable: `import { check } from
 '@keenmate/base-css-variables/check'`.
+
+### Parity test (e2e)
+
+The static check reads the CSS; it can't tell whether a *formula* fallback gives the same color
+as the contract (a 10% tint where the contract is 10% light / 20% dark, an own hover mix
+instead of the contract's overlay). The package ships a Playwright helper that renders the
+component and compares:
+
+```ts
+import { contractParity } from '@keenmate/base-css-variables/testing/parity';
+
+test('standalone colors match the contract', async ({ page }) => {
+  const diffs = await contractParity(page, {
+    url: '/test/contract-parity.html',   // one plain instance
+    selector: '#parity',
+    prefix: 'ms',                         // compares every color-valued --ms-* token
+    accentToken: '--ms-accent-color',     // enables the accent pass
+    allow: { '--ms-option-title-color-selected': 'reason' },
+  });
+  expect(diffs).toEqual([]);
+});
+```
+
+It loads the page standalone and with `base-variables.css` injected, in light and dark, and
+resolves each token on a probe inside the shadow root. The **accent pass** sets
+`--ms-accent-color: #16a34a` standalone and `--base-primary-color: #16a34a` with the contract,
+so a literal fallback that only fits the default accent (a fixed hover) fails. Non-color tokens
+and tokens that resolve to `currentColor` are skipped; channels may differ by 2 / 255. No
+Playwright dependency — pass your `page`.
 
 ## Checkbox render method
 

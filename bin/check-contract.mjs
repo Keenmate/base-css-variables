@@ -11,7 +11,7 @@
  *
  * A fallback that is a component token (`var(--ms-accent-color)`) is followed to
  * its declaration, so `var(--base-primary-text-color, var(--ms-accent-color))`
- * is judged by what --ms-accent-color is standalone (#0ea5e9 → a literal).
+ * is judged by what --ms-accent-color is standalone (#3b82f6 → a literal).
  *
  * Usage:  base-contract-check [paths…] [--config contract-check.json]
  *                             [--contract base-variables.css] [--report] [--json]
@@ -22,7 +22,7 @@
  *   { "allow": [ { "token": "--base-icon-calendar", "rule": "C1", "reason": "…" } ] }
  * `rule` and `file` (substring of the path) are optional; `reason` is required.
  */
-import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
+import { readFileSync, readdirSync, statSync, existsSync, realpathSync } from 'node:fs';
 import { join, dirname, relative, extname, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -143,10 +143,9 @@ export function normalize(v) {
     .toLowerCase()
     .replace(/#([0-9a-f])([0-9a-f])([0-9a-f])([0-9a-f])?\b/g, (_, r, g, b, a) => `#${r}${r}${g}${g}${b}${b}${a ? a + a : ''}`)
     .replace(/\b(white|black)\b/g, (w) => NAMED[w])
-    .replace(/(\d*\.?\d+)ms\b/g, (_, n) => `${parseFloat(n) / 1000}s`)
-    .replace(/(^|[^\w.#-])0+(\.\d)/g, '$1$2')
-    .replace(/(\.\d*?)0+\b/g, '$1')
-    .replace(/(\d)\.(?!\d)/g, '$1');
+    .replace(/(?<![#\w.])(\d*\.\d+|\d+)ms\b/g, (_, n) => `${parseFloat(n) / 1000}s`)
+    // Numbers as parsed values (0.40 = .4, 0.0 = 0), not inside hex colors or identifiers.
+    .replace(/(?<![#\w.])(\d*\.\d+|\d+\.?)(?![\d])/g, (n) => String(parseFloat(n)));
 }
 
 /** SVG data URLs as plain markup, so `;utf8,<svg …>` and `,%3Csvg …%3E` compare equal. */
@@ -187,6 +186,19 @@ export function standalone(v, locals, depth = 0, reads = new Set()) {
 }
 
 const isLiteral = (v) => !/var\(/.test(v);
+
+/** The tokens `name` aliases in the contract, nearest first (`a: var(b)`, `b: var(c)` → [b, c]). */
+function aliasChain(tokens, name) {
+  const out = [];
+  let t = tokens.get(name);
+  while (t && out.length < 8) {
+    const a = bareVar(t.value);
+    if (!a || a.fallback) break;
+    out.push(a.name);
+    t = tokens.get(a.name);
+  }
+  return out;
+}
 
 // ---------------------------------------------------------------- check
 
@@ -257,6 +269,14 @@ export function check({ paths = ['src'], contract = DEFAULT_CONTRACT, renames = 
           ? `the contract aliases ${alias.name} — fall back to the component token that reads it`
           : `use the contract formula on the component's own tokens: ${short(t.value, 140)}`;
         findings.push({ rule: 'C3', ...at, message: `${r.name} is derived, fallback is the literal ${short(sa)}${via} — ${fix}` });
+      } else {
+        // A formula fallback for a contract alias must still go through the aliased token
+        // (or one it aliases in turn): `--base-selected-bg: var(--base-primary-bg-subtle)`
+        // with a fallback of its own 10% mix drifts as soon as the tint changes (dark = 20%).
+        const chain = aliasChain(tokens, r.name);
+        if (chain.length && !chain.some((n) => via_.has(n))) {
+          findings.push({ rule: 'C3', ...at, message: `${r.name} aliases ${chain[0]} in the contract, but the fallback ${short(r.fallback, 60)} doesn't read it — fall back to the component token that reads ${chain[0]}` });
+        }
       }
     }
   }
@@ -298,4 +318,7 @@ function main(argv) {
   return res.findings.length && !opt.report ? 1 : 0;
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) process.exitCode = main(process.argv.slice(2));
+// Run as a CLI when invoked directly — also through a symlink (npm link, a folder install,
+// pnpm), where argv[1] is the link and import.meta.url the real file.
+const invoked = (() => { try { return pathToFileURL(realpathSync(process.argv[1] ?? '')).href; } catch { return ''; } })();
+if (import.meta.url === invoked) process.exitCode = main(process.argv.slice(2));

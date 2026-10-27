@@ -55,13 +55,13 @@ test.beforeEach(async ({ page }) => open(page));
 test.describe('token defaults', () => {
   test('ships the item-state tokens with the documented defaults', async ({ page }) => {
     expect(await rootVar(page, '--base-outline-width')).toBe('1px');
-    expect(await rootVar(page, '--base-selected-bg')).toMatch(/color-mix\(in srgb, #0ea5e9 10%, transparent\)/);
-    expect(await rootVar(page, '--base-selected-bg-hover')).toMatch(/color-mix\(in srgb, #0ea5e9 10%, transparent\)/);
+    expect(await rootVar(page, '--base-selected-bg')).toMatch(/color-mix\(in srgb, #3b82f6 10%, transparent\)/);
+    expect(await rootVar(page, '--base-selected-bg-hover')).toMatch(/color-mix\(in srgb, #3b82f6 10%, transparent\)/);
     expect(await rootVar(page, '--base-selected-text-color')).toBe('currentColor');
     expect(await rootVar(page, '--base-selected-outline')).toBe('none');
     expect(await rootVar(page, '--base-focused-bg')).toBe('transparent');
     expect(await rootVar(page, '--base-focused-text-color')).toBe('currentColor');
-    expect(await rootVar(page, '--base-focused-outline')).toBe('1px solid #0ea5e9');
+    expect(await rootVar(page, '--base-focused-outline')).toBe('1px solid #3b82f6');
   });
 
   test('old names are gone (pre-release, the 1.0.7 -ring / -text names, rc03 highlighted → selected)', async ({ page }) => {
@@ -79,7 +79,7 @@ test.describe('token defaults', () => {
 
   test('--base-focused-outline composes from --base-outline-width', async ({ page }) => {
     await setRootVar(page, '--base-outline-width', '3px');
-    expect(await rootVar(page, '--base-focused-outline')).toBe('3px solid #0ea5e9');
+    expect(await rootVar(page, '--base-focused-outline')).toBe('3px solid #3b82f6');
   });
 
   test('selection tint follows a runtime --base-primary-color override', async ({ page }) => {

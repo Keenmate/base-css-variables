@@ -12,8 +12,9 @@
  * mirrors this token list into SCSS (`$base-*`) — adding theme derivation and the
  * `.pc-mode-*` class model — but must not add tokens this file lacks. Keep in sync.
  *
- * DEFAULT THEME = pure-admin "Corporate" (professional blue/slate): primary sky-blue
- * #0ea5e9, slate text/surfaces, cyan info. The INPUTS (:root) are Corporate's light /
+ * DEFAULT THEME = pure-admin "Corporate" (professional blue/slate) with a blue-500
+ * primary (#3b82f6 — Corporate's sky #0ea5e9 is too light for text and its own tint),
+ * slate text/surfaces, cyan info. The INPUTS (:root) are Corporate's light /
  * dark values paired via CSS `light-dark()`; everything else is DERIVED from them in
  * the second block (formulas — see its header). Activation:
  *   - Automatic: follows the OS setting via `color-scheme: light dark` below.
@@ -28,11 +29,11 @@
   color-scheme: light dark;
 
   /* ======================================================================
-   * PRIMARY ROLE — Corporate brand blue (kept across modes). The brand /
+   * PRIMARY ROLE — blue-500 (kept across modes). The brand /
    * interactive color: primary buttons, focus, selection, checked state, links.
    * Hover / active / tints / text color / text on the fill are derived (below).
    * ==================================================================== */
-  --base-primary-color: #0ea5e9;
+  --base-primary-color: #3b82f6;
 
   /* ======================================================================
    * SECONDARY ROLE (neutral grey)

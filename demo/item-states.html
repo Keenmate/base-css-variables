@@ -183,7 +183,7 @@
           <option value="dark">dark</option>
         </select>
       </label>
-      <label>Accent <input type="color" id="ctl-accent" value="#0ea5e9"></label>
+      <label>Accent <input type="color" id="ctl-accent" value="#3b82f6"></label>
       <label><code>--base-outline-width</code>
         <input type="range" id="ctl-ring-width" min="1" max="4" step="1" value="1">
         <output id="out-ring-width">1px</output></label>
@@ -273,7 +273,7 @@
     theme ? root.setAttribute('data-theme', theme) : root.removeAttribute('data-theme');
 
     const accent = $('ctl-accent').value;
-    set('--base-primary-color', accent.toLowerCase() === '#0ea5e9' ? null : accent);
+    set('--base-primary-color', accent.toLowerCase() === '#3b82f6' ? null : accent);
 
     const width = Number($('ctl-ring-width').value);
     $('out-ring-width').textContent = `${width}px`;
@@ -308,7 +308,7 @@
   $('controls').addEventListener('change', applyControls);
   $('ctl-reset').addEventListener('click', () => {
     $('ctl-theme').value = '';
-    $('ctl-accent').value = '#0ea5e9';
+    $('ctl-accent').value = '#3b82f6';
     $('ctl-ring-width').value = 1;
     $('ctl-radius').value = 0.4;
     $('ctl-tint').value = 10;

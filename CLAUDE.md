@@ -19,8 +19,10 @@ components (devDependency) in their build: C1 unknown `--base-*` reads, C2 input
 contract default, C3 derived fallbacks that are literals instead of formulas. It parses
 `base-variables.css` itself — no second token list. **When you rename or remove a token, add it
 to `renames.json`** (old → new, version) so the check tells components what to use. Unit tests:
-`npm run test:check` (`test/check-contract.test.mjs`, `node:test`). Plan and rationale:
-`docs/plan-contract-check.md`.
+`npm run test:check` (`test/check-contract.test.mjs`, `node:test`). Its runtime twin, also
+shipped: `testing/parity.mjs` (`contractParity(page, …)`) — components call it from their own
+Playwright e2e to compare every color token standalone vs. with the contract (light / dark, plus
+an accent-override pass). Plan and rationale: `docs/plan-contract-check.md`.
 
 **Demo + e2e (repo-only, dev-time):** `npm run demo` serves `demo/item-states.html` via the
 zero-dependency `demo/serve.mjs` on :12510. The server also mounts the *local* builds of the
@@ -58,7 +60,8 @@ traces this end-to-end for the primary color — read it before touching token s
 
 ## Token conventions (follow the existing patterns)
 
-- **Default theme is pure-admin "Corporate"** (sky-blue `#0ea5e9` primary, slate surfaces, cyan info).
+- **Default theme is pure-admin "Corporate"** (slate surfaces, cyan info) **with a blue-500 primary
+  `#3b82f6`** (since 2.0.0-rc05; Corporate's sky `#0ea5e9` read too light as text and on its own tint).
   Light values = Corporate light mode, dark = Corporate dark mode.
 - **Inputs vs derived (2.0.0):** `:root` holds the hand-set INPUTS (main/page bg, text-color-1,
   role colors, role text colors, overlay, shadow color, palette) plus the

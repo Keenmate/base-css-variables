@@ -1,6 +1,6 @@
 {
   "name": "@keenmate/base-css-variables",
-  "version": "2.0.0-rc04",
+  "version": "2.0.0-rc05",
   "description": "Shared base layer of CSS custom properties (--base-*) for Keenmate web components",
   "license": "MIT",
   "author": "Keenmate s.r.o.",
@@ -24,12 +24,14 @@
     ".": "./base-variables.css",
     "./base-variables.css": "./base-variables.css",
     "./check": "./bin/check-contract.mjs",
-    "./renames.json": "./renames.json"
+    "./renames.json": "./renames.json",
+    "./testing/parity": "./testing/parity.mjs"
   },
   "files": [
     "base-variables.css",
     "bin/check-contract.mjs",
     "renames.json",
+    "testing/parity.mjs",
     "README.md",
     "CHANGELOG.md",
     "LICENSE"

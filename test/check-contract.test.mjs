@@ -1,7 +1,7 @@
 // Unit tests for bin/check-contract.mjs (node:test, no browser). Run: npm run test:check
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, writeFileSync, mkdirSync, rmSync, readFileSync } from 'node:fs';
+import { mkdtempSync, writeFileSync, mkdirSync, rmSync, readFileSync, symlinkSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { execFileSync } from 'node:child_process';
@@ -54,7 +54,7 @@ test('normalize: hex, named colours, numbers, time units, quotes, svg encoding',
 
 test('clean component: no findings', () => {
   const res = run(`:host {
-    --xx-accent-color: var(--base-primary-color, #0ea5e9);
+    --xx-accent-color: var(--base-primary-color, #3b82f6);
     --xx-accent-color-hover: var(--base-primary-color-hover,
       light-dark(color-mix(in srgb, black 15%, var(--xx-accent-color)), color-mix(in srgb, white 15%, var(--xx-accent-color))));
     --xx-main-bg: var(--base-main-bg, light-dark(#ffffff, #1e293b));
@@ -76,29 +76,29 @@ test('C1: unknown token, with the rename hint', () => {
 
 test('C2: input fallback must equal the contract default, per mode', () => {
   const res = run(`:host {
-    --a: var(--base-primary-color, #3b82f6);
+    --a: var(--base-primary-color, #0ea5e9);
     --b: var(--base-main-bg, light-dark(#fff, #1a1a1a));
     --c: var(--base-shadow-color, rgba(0, 0, 0, 0.15));
-    --d: var(--base-primary-color, #0EA5E9);
+    --d: var(--base-primary-color, #3B82F6);
   }`);
   assert.deepEqual(rules(res), ['C2 --base-primary-color', 'C2 --base-main-bg', 'C2 --base-shadow-color']);
 });
 
 test('C2: follows component tokens to the literal (and says via)', () => {
-  const res = run(`:host { --xx-accent: #3b82f6; --a: var(--base-primary-color, var(--xx-accent)); }`);
+  const res = run(`:host { --xx-accent: #0ea5e9; --a: var(--base-primary-color, var(--xx-accent)); }`);
   assert.deepEqual(rules(res), ['C2 --base-primary-color']);
   assert.match(res.findings[0].message, /via var\(--xx-accent\)/);
 });
 
 test('C3: derived token with a literal fallback (direct or via a component token)', () => {
   const res = run(`:host {
-    --xx-accent-color: var(--base-primary-color, #0ea5e9);
+    --xx-accent-color: var(--base-primary-color, #3b82f6);
     --a: var(--base-primary-color-hover, #2563eb);
     --b: var(--base-primary-text-color, var(--xx-accent-color));
     --c: var(--base-on-primary-text-color, #fff);
   }`);
   assert.deepEqual(rules(res), ['C3 --base-primary-color-hover', 'C3 --base-primary-text-color', 'C3 --base-on-primary-text-color']);
-  assert.match(res.findings[1].message, /literal #0ea5e9 \(via var\(--xx-accent-color\)\)/);
+  assert.match(res.findings[1].message, /literal #3b82f6 \(via var\(--xx-accent-color\)\)/);
 });
 
 test('C3: an alias is followed when the chain reads the aliased token', () => {
@@ -114,7 +114,7 @@ test('C3: an alias is followed when the chain reads the aliased token', () => {
 });
 
 test('comments are ignored; TS line comments too, URLs in strings are not', () => {
-  const css = run(`/* var(--base-nope, 1) */ a { b: var(--base-primary-color, #0ea5e9); }`);
+  const css = run(`/* var(--base-nope, 1) */ a { b: var(--base-primary-color, #3b82f6); }`);
   assert.deepEqual(rules(css), []);
   const ts = run(`// var(--base-nope)\nconst u = 'https://x.y/var(--base-gone)';\n`, { ext: 'ts' });
   assert.deepEqual(rules(ts), ['C1 --base-gone']);
@@ -163,4 +163,42 @@ test('renames.json: every old name is gone, every new name exists', async () => 
     assert.ok(!t.has(from), `${from} is still in the contract`);
     if (to) assert.ok(t.has(to), `${from} → ${to}: ${to} is not in the contract`);
   }
+});
+
+test('C3: a formula fallback for an alias must go through the aliased token', () => {
+  const bad = run(`:host {
+    --xx-accent: var(--base-primary-color, #3b82f6);
+    --a: var(--base-selected-bg, color-mix(in srgb, var(--xx-accent) 10%, transparent));
+  }`);
+  assert.deepEqual(rules(bad), ['C3 --base-selected-bg']);
+  assert.match(bad.findings[0].message, /aliases --base-primary-bg-subtle/);
+  const ok = run(`:host {
+    --xx-accent: var(--base-primary-color, #3b82f6);
+    --xx-tint: var(--base-primary-bg-subtle, light-dark(color-mix(in srgb, var(--xx-accent) 10%, transparent), color-mix(in srgb, var(--xx-accent) 20%, transparent)));
+    --a: var(--base-selected-bg, var(--xx-tint));
+    --b: var(--base-selected-bg-hover, var(--a));
+  }`);
+  assert.deepEqual(rules(ok), []); // -hover → selected-bg → primary-bg-subtle: any link of the chain counts
+});
+
+test('CLI runs when invoked through a symlink (npm link / folder install)', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'bcc-'));
+  try {
+    mkdirSync(join(dir, 'src'));
+    writeFileSync(join(dir, 'src', 'x.css'), 'a { b: var(--base-nope); }');
+    const link = join(dir, 'check-link.mjs');
+    try { symlinkSync(BIN, link); } catch { return; } // no symlink permission (Windows without dev mode)
+    let status = 0;
+    try { execFileSync(process.execPath, [link], { cwd: dir, stdio: 'pipe' }); } catch (e) { status = e.status; }
+    assert.equal(status, 1);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('normalize: numbers compare as values (0.0 = 0, 0.40 = .4), hex and identifiers untouched', () => {
+  assert.equal(normalize('cubic-bezier(0.4, 0.0, 0.2, 1)'), normalize('cubic-bezier(0.4, 0, 0.2, 1)'));
+  assert.equal(normalize('rgba(0,0,0,.40)'), normalize('rgba(0, 0, 0, 0.4)'));
+  assert.equal(normalize('#1e293b'), '#1e293b');
+  assert.notEqual(normalize('1.5'), normalize('15'));
 });

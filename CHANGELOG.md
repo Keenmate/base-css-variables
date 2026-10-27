@@ -3,6 +3,39 @@
 All notable changes to `@keenmate/base-css-variables` are documented here. Format based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.0.0-rc05] — 2026-10-27 [PUBLISHED]
+
+### Added
+
+- **`testing/parity.mjs` — the contract parity e2e helper** (`import { contractParity } from
+  '@keenmate/base-css-variables/testing/parity'`). For a Playwright `page`, renders a
+  component's test page standalone and with the contract, in light and dark, and compares every
+  color-valued `--<prefix>-*` token; an accent pass checks that the derived fallbacks follow a
+  standalone accent override. Catches what the static check can't: formula fallbacks that
+  differ from the contract's (first run: web-multiselect's selected tint was 10% in dark mode
+  instead of 20%, web-treeview's hover / active were its own mixes). README → "Parity test".
+
+### Changed
+
+- **Default primary is blue-500 `#3b82f6`** (was Corporate's sky `#0ea5e9`). Sky read too light
+  as text and on its own tint, and its derived text (`--base-primary-text-color`) turned
+  teal-grey; blue keeps a clear hue in every step. White stays the text on the fill (APCA).
+  Everything derived from `--base-primary-color` follows (hover / active, tints, selected /
+  focused item states, input focus border and halo). The rest of the default theme stays
+  Corporate. pure-css mirrors the default (`$base-primary-color`); components' standalone
+  fallbacks follow it (`base-contract-check` C2 flags the old value).
+- **C3 also checks formula fallbacks of contract aliases:** a token the contract defines as an
+  alias (`--base-selected-bg: var(--base-primary-bg-subtle)`) must fall back through the aliased
+  token (or one it aliases in turn); a formula of its own drifts when the target changes.
+
+### Fixed
+
+- **`base-contract-check` did nothing when run through a symlink** (`npm link`, a folder
+  install, pnpm): the "run as CLI" guard compared the link path with the real file, so it
+  exited 0 without checking. It resolves the real path now.
+- **The check compared numbers as text:** `cubic-bezier(0.4, 0.0, 0.2, 1)` and `(0.4, 0, …)` were
+  reported as different. Numbers now compare by value.
+
 ## [2.0.0-rc04] — 2026-10-25 [PUBLISHED]
 
 ### Added
