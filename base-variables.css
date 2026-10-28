@@ -199,7 +199,10 @@
    * ==================================================================== */
 
   /* ======================================================================
-   * MOTION — durations + easings
+   * MOTION — durations + easings. Components use only these four speeds
+   * (short = snappy) and these easings. Motion off: --base-duration-*: 0s
+   * (page-wide) or the component's own --<prefix>-transition-*: 0s.
+   * prefers-reduced-motion sets the durations to 0s (block below :root).
    * ==================================================================== */
   --base-duration-fast: 0.1s;
   --base-duration-normal: 0.15s;
@@ -297,6 +300,16 @@
   --base-palette-7: #64748b;  /* Slate */
   --base-palette-8: #0369a1;  /* Corporate blue (700 — white text 5.9:1) */
   --base-palette-9: #334155;  /* Dark slate */
+}
+
+/* Reduced motion: no transitions / animations from the contract's durations. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --base-duration-fast: 0s;
+    --base-duration-normal: 0s;
+    --base-duration-medium: 0s;
+    --base-duration-slow: 0s;
+  }
 }
 
 /* ===========================================================================

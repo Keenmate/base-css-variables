@@ -3,6 +3,16 @@
 All notable changes to `@keenmate/base-css-variables` are documented here. Format based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.0.0-rc06] — 2026-10-29
+
+### Added
+
+- **Reduced motion:** under `prefers-reduced-motion: reduce` the four `--base-duration-*`
+  tokens are `0s`, so everything timed by the contract stops animating. Turning motion off
+  otherwise is CSS only: `--base-duration-*: 0s` page-wide, or a component's own
+  `--<prefix>-transition-*: 0s`. Components use only the four speeds and the `--base-ease-*`
+  easings (README → Motion).
+
 ## [2.0.0-rc05] — 2026-10-27 [PUBLISHED]
 
 ### Added

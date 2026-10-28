@@ -237,6 +237,15 @@ const apca = (text: number[], bg: number[]) => {
 };
 const WHITE = [255, 255, 255], BLACK = [0, 0, 0];
 
+test('reduced motion: the four durations are 0s; otherwise 0.1s / 0.15s / 0.25s / 0.3s', async ({ page }) => {
+  const read = () => page.evaluate(() => ['fast', 'normal', 'medium', 'slow']
+    .map((d) => getComputedStyle(document.documentElement).getPropertyValue(`--base-duration-${d}`).trim()));
+  await open(page);
+  expect(await read()).toEqual(['0.1s', '0.15s', '0.25s', '0.3s']);
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  expect(await read()).toEqual(['0s', '0s', '0s', '0s']);
+});
+
 test('on-fill text: black or white, whichever reads better by APCA, following the fill', async ({ page }) => {
   await open(page);
   // navy → white, yellow → black; sky blue and red-500 → white (WCAG 2 would pick black);

@@ -82,6 +82,9 @@ traces this end-to-end for the primary color — read it before touching token s
   `color-scheme: light dark` (auto/OS). `[data-theme="light"|"dark"]` blocks force a mode on a
   subtree. Mode-invariant tokens (icons, spacing/shadow/motion/z-index scales, typography
   multipliers, brand palette slots) are plain single values, not `light-dark()`.
+- **Motion:** components use only the four `--base-duration-*` speeds and the `--base-ease-*`
+  easings (no one-off durations; snappy over animated). Motion off is CSS only (`0s`), never an
+  attribute; `prefers-reduced-motion` sets the durations to `0s` in its own `@media` block.
 - **Unitless multipliers:** font sizes, radii, input heights, and the spacing scale are stored as
   bare numbers, combined by consumers as `calc(var(--base-…) * var(--base-rem))` (`--base-rem: 1rem`).
   Keep new sizing tokens unitless to match.

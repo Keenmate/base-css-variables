@@ -571,9 +571,18 @@ Colored from `--base-shadow-color` so shadows theme with the surface.
 | `--base-shadow-lg` | Large elevation shadow. *Derived:* `0 4px 12px` |
 
 ### Motion
+Components use only these four speeds and these easings — every transition and animation duration
+goes through a component variable that chains here (`--ms-transition-fast:
+var(--base-duration-fast, 0.1s)`). Short and snappy is the house style.
+
+- **Motion off, page-wide:** set `--base-duration-fast / normal / medium / slow: 0s`.
+- **Motion off, one component:** set its `--<prefix>-transition-*: 0s`.
+- **`prefers-reduced-motion: reduce`** sets the four durations to `0s` (and each component does
+  the same for its own variables, so it holds without the contract too).
+
 | Variable | Purpose |
 |----------|---------|
-| `--base-duration-fast / normal / medium / slow` | Transition durations (0.1s → 0.3s) |
+| `--base-duration-fast / normal / medium / slow` | Transition durations (0.1s / 0.15s / 0.25s / 0.3s; `0s` under reduced motion) |
 | `--base-ease-standard` | Standard easing `cubic-bezier(0.4, 0, 0.2, 1)` |
 | `--base-ease-out` | Ease-out `cubic-bezier(0, 0, 0.2, 1)` |
 | `--base-ease-in` | Ease-in `cubic-bezier(0.4, 0, 1, 1)` |
