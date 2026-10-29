@@ -194,6 +194,10 @@
   --base-space-xl: 3.2;
   --base-space-2xl: 4.8;
 
+  /* Tree indent per level (treeviews, grid tree column, multiselect tree):
+   * calc(var(--base-tree-indent) * var(--base-rem)) — 16px at 10px rem base */
+  --base-tree-indent: 1.6;
+
   /* ======================================================================
    * ELEVATION / SHADOW SCALE — colour from --base-shadow-color so it themes
    * ==================================================================== */
@@ -211,6 +215,10 @@
   --base-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
   --base-ease-out: cubic-bezier(0, 0, 0.2, 1);
   --base-ease-in: cubic-bezier(0.4, 0, 1, 1);
+  /* Programmatic scrolling (scroll into view, wheel / rolling pickers). CSS
+   * `scroll-behavior` value; JS reads it and passes it as `behavior` to
+   * scrollTo / scrollIntoView ('smooth' | 'auto'). `auto` = instant. */
+  --base-scroll-behavior: smooth;
 
   /* ======================================================================
    * LOADER — one loading indicator for the app and every component. Drawn
@@ -328,6 +336,7 @@
     --base-duration-normal: 0s;
     --base-duration-medium: 0s;
     --base-duration-slow: 0s;
+    --base-scroll-behavior: auto;
     --base-loader-duration: 1.5s;  /* the loader slows, never stops: it says "still working" */
   }
 }

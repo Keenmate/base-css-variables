@@ -278,7 +278,7 @@ npx base-contract-check src        # paths default to src; exit 1 on findings
 | Rule | Checks |
 |---|---|
 | **C1** | every `--base-*` read exists in the contract; a renamed or removed name says what to use (`renames.json`) |
-| **C2** | the fallback of an **input** token equals the contract default, per mode (`light-dark()`) |
+| **C2** | the fallback of an **input** token equals the contract default, per mode (`light-dark()`); inside `@media (prefers-reduced-motion: reduce)` it equals the contract's reduced value (`var(--base-loader-duration, 1.5s)`, `var(--base-duration-fast, 0s)`) |
 | **C3** | the fallback of a **derived** token is a formula on the component's own tokens, not a literal |
 
 C3 is the one that keeps a component consistent on its own. A literal hover such as
@@ -560,6 +560,7 @@ Unitless multipliers, combined as `calc(var(--base-space-*) * var(--base-rem))`.
 | Variable | Purpose |
 |----------|---------|
 | `--base-space-xs / sm / md / base / lg / xl / 2xl` | Spacing scale steps (0.4 → 4.8) |
+| `--base-tree-indent` | Indent per tree level (`1.6` = 16px at 10px rem base) — treeviews, grid tree column, multiselect tree; a consumer multiplies by the level itself |
 
 ### Elevation / shadow scale
 Colored from `--base-shadow-color` so shadows theme with the surface.
@@ -575,7 +576,8 @@ Components use only these four speeds and these easings — every transition and
 goes through a component variable that chains here (`--ms-transition-fast:
 var(--base-duration-fast, 0.1s)`). Short and snappy is the house style.
 
-- **Motion off, page-wide:** set `--base-duration-fast / normal / medium / slow: 0s`.
+- **Motion off, page-wide:** set `--base-duration-fast / normal / medium / slow: 0s` (and
+  `--base-scroll-behavior: auto`).
 - **Motion off, one component:** set its `--<prefix>-transition-*: 0s`.
 - **`prefers-reduced-motion: reduce`** sets the four durations to `0s` (and each component does
   the same for its own variables, so it holds without the contract too). The loader slows
@@ -587,6 +589,7 @@ var(--base-duration-fast, 0.1s)`). Short and snappy is the house style.
 | `--base-ease-standard` | Standard easing `cubic-bezier(0.4, 0, 0.2, 1)` |
 | `--base-ease-out` | Ease-out `cubic-bezier(0, 0, 0.2, 1)` |
 | `--base-ease-in` | Ease-in `cubic-bezier(0.4, 0, 1, 1)` |
+| `--base-scroll-behavior` | Programmatic scrolling — `smooth`; `auto` (instant) under reduced motion. CSS `scroll-behavior`, or read in JS and passed as `behavior` to `scrollTo` / `scrollIntoView` |
 
 ### Loader
 One loading indicator for the app and every component, changed in one place. Shadow DOM lets only

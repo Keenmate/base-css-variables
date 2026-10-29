@@ -4,7 +4,9 @@
  * the contract (the base-variables.css shipped next to this script).
  *
  *   C1  every --base-* read exists in the contract (renames.json says what to use)
- *   C2  the fallback of an INPUT token equals the contract default (per mode)
+ *   C2  the fallback of an INPUT token equals the contract default (per mode). Inside
+ *       an `@media` block the contract also sets (`prefers-reduced-motion: reduce` →
+ *       --base-loader-duration: 1.5s), the fallback must equal that block's value instead
  *   C3  the fallback of a DERIVED token is a formula, not a literal: a literal only
  *       matches the default accent, so an app that sets the component's accent
  *       without the contract keeps the old hover / tint / text
@@ -92,25 +94,55 @@ export function scanDecls(text) {
   return out;
 }
 
+/** Comparable form of a media query: lower case, no spaces (`(prefers-reduced-motion:reduce)`). */
+const normalizeQuery = (q) => q.toLowerCase().replace(/\s+/g, '');
+
+/** Every `@media <query> { … }` in `text` → [{ query (normalized), start, end }] (offsets of the braces). */
+export function mediaBlocks(text) {
+  const out = [];
+  const re = /@media\s+([^{;]+)\{/g;
+  let m;
+  while ((m = re.exec(text))) {
+    const start = m.index + m[0].length - 1;
+    let depth = 0, end = text.length;
+    for (let i = start; i < text.length; i++) {
+      if (text[i] === '{') depth++;
+      else if (text[i] === '}' && --depth === 0) { end = i; break; }
+    }
+    out.push({ query: normalizeQuery(m[1]), start, end });
+  }
+  return out;
+}
+
 /**
- * The contract: name → { kind: 'input' | 'derived', value }. Inputs are the
+ * The contract: name → { kind: 'input' | 'derived', value, media? }. Inputs are the
  * literal values in the first `:root { … }` block; derived = the
  * `:root, [data-theme], .base-scope { … }` block (or any value with a var()).
+ * A value set again inside `@media <query> { :root { … } }` is kept as
+ * `media: Map(query → value)`; the default stays the one outside.
  */
 export function parseContract(cssText) {
   const css = stripComments(cssText);
+  const media = mediaBlocks(css);
   const tokens = new Map();
   const blockRe = /([^{}]+)\{([^{}]*)\}/g;
+  const pending = [];
   let m;
   while ((m = blockRe.exec(css))) {
     const selector = m[1].trim().replace(/\s+/g, ' ');
     const derivedBlock = /\.base-scope/.test(selector);
+    const inMedia = media.find((b) => m.index > b.start && m.index < b.end);
     for (const d of scanDecls(m[2])) {
       if (!d.name.startsWith('--base-')) continue;
+      if (inMedia) { pending.push([d.name, inMedia.query, d.value]); continue; }
       if (tokens.has(d.name) && !derivedBlock) continue;
       const kind = derivedBlock || /var\(/.test(d.value) ? 'derived' : 'input';
-      tokens.set(d.name, { kind, value: d.value });
+      tokens.set(d.name, { ...tokens.get(d.name), kind, value: d.value });
     }
+  }
+  for (const [name, query, value] of pending) {
+    const t = tokens.get(name);
+    if (t) (t.media ??= new Map()).set(query, value);
   }
   return tokens;
 }
@@ -240,6 +272,7 @@ export function check({ paths = ['src'], contract = DEFAULT_CONTRACT, renames = 
   const findings = [];
   let reads = 0;
   for (const { file, text } of sources) {
+    const media = mediaBlocks(text);
     for (const r of scanVars(text, '--base-')) {
       reads++;
       const at = { token: r.name, file: relative(cwd, file).replaceAll('\\', '/'), ...lineCol(text, r.index) };
@@ -255,9 +288,13 @@ export function check({ paths = ['src'], contract = DEFAULT_CONTRACT, renames = 
       if (sa == null) continue; // resolves to an undeclared token: nothing to compare
       if (t.kind === 'input') {
         if (!isLiteral(sa)) continue; // computed standalone — Phase 2 (parity test) compares it
-        if (normalize(sa) !== normalize(t.value)) {
+        // Read inside an @media block the contract also sets this token in → that block's value.
+        const block = t.media && media.filter((b) => r.index > b.start && r.index < b.end && t.media.has(b.query)).pop();
+        const expected = block ? t.media.get(block.query) : t.value;
+        if (normalize(sa) !== normalize(expected)) {
           const via = normalize(sa) !== normalize(r.fallback) ? ` (via ${short(r.fallback, 40)})` : '';
-          findings.push({ rule: 'C2', ...at, message: `${r.name} fallback ${short(sa)}${via} ≠ contract default ${short(t.value)}` });
+          const where = block ? ` under @media ${block.query}` : '';
+          findings.push({ rule: 'C2', ...at, message: `${r.name} fallback ${short(sa)}${via} ≠ contract default${where} ${short(expected)}` });
         }
       } else if (isLiteral(sa)) {
         // A contract alias (`--base-input-bg: var(--base-main-bg)`) is followed when the

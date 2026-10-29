@@ -241,9 +241,12 @@ test('reduced motion: the four durations are 0s; otherwise 0.1s / 0.15s / 0.25s 
   const read = () => page.evaluate(() => ['fast', 'normal', 'medium', 'slow']
     .map((d) => getComputedStyle(document.documentElement).getPropertyValue(`--base-duration-${d}`).trim()));
   await open(page);
+  const scroll = () => page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--base-scroll-behavior').trim());
   expect(await read()).toEqual(['0.1s', '0.15s', '0.25s', '0.3s']);
+  expect(await scroll()).toBe('smooth');
   await page.emulateMedia({ reducedMotion: 'reduce' });
   expect(await read()).toEqual(['0s', '0s', '0s', '0s']);
+  expect(await scroll()).toBe('auto');
 });
 
 test('on-fill text: black or white, whichever reads better by APCA, following the fill', async ({ page }) => {

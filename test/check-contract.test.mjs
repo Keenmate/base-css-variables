@@ -23,9 +23,9 @@ function run(css, { allow = [], ext = 'css' } = {}) {
 }
 const rules = (res) => res.findings.map((f) => `${f.rule} ${f.token}`);
 
-test('parses the contract: 187 tokens, inputs and derived', () => {
+test('parses the contract: 189 tokens, inputs and derived', () => {
   const t = parseContract(readFileSync(DEFAULT_CONTRACT, 'utf8'));
-  assert.equal(t.size, 187);
+  assert.equal(t.size, 189);
   assert.equal(t.get('--base-loader-duration').value, '0.8s'); // not the reduced-motion 1.5s
   assert.equal(t.get('--base-primary-color').kind, 'input');
   assert.equal(t.get('--base-primary-color-hover').kind, 'derived');
@@ -83,6 +83,23 @@ test('C2: input fallback must equal the contract default, per mode', () => {
     --d: var(--base-primary-color, #3B82F6);
   }`);
   assert.deepEqual(rules(res), ['C2 --base-primary-color', 'C2 --base-main-bg', 'C2 --base-shadow-color']);
+});
+
+test('C2: inside @media (prefers-reduced-motion: reduce) the fallback is the reduced value', () => {
+  const t = parseContract(readFileSync(DEFAULT_CONTRACT, 'utf8'));
+  assert.equal(t.get('--base-loader-duration').media.get('(prefers-reduced-motion:reduce)'), '1.5s');
+  assert.equal(t.get('--base-duration-fast').media.get('(prefers-reduced-motion:reduce)'), '0s');
+  const ok = run(`:host { --x-loader-duration: var(--base-loader-duration, 0.8s); --x-transition-fast: var(--base-duration-fast, 100ms); }
+@media (prefers-reduced-motion: reduce) {
+  :host { --x-loader-duration: var(--base-loader-duration, 1.5s); --x-transition-fast: var(--base-duration-fast, 0s); }
+}`);
+  assert.deepEqual(rules(ok), []);
+  // the reduced value outside the block, the normal value inside it: both wrong
+  const bad = run(`:host { --x-loader-duration: var(--base-loader-duration, 1.5s); }
+@media (prefers-reduced-motion:reduce) { :host { --x-loader-duration: var(--base-loader-duration, 0.8s); } }
+@media (min-width: 600px) { :host { --x-loader-duration: var(--base-loader-duration, 1.5s); } }`);
+  assert.deepEqual(rules(bad), ['C2 --base-loader-duration', 'C2 --base-loader-duration', 'C2 --base-loader-duration']);
+  assert.match(bad.findings[1].message, /under @media \(prefers-reduced-motion:reduce\) 1\.5s/);
 });
 
 test('C2: follows component tokens to the literal (and says via)', () => {

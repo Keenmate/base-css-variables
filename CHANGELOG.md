@@ -18,6 +18,17 @@ All notable changes to `@keenmate/base-css-variables` are documented here. Forma
   wave (CSS and SMIL inside the SVG), the shadow-root swap and reduced motion in Chromium,
   Firefox and WebKit.
 
+- **`--base-tree-indent: 1.6`** — indent per tree level (16px at 10px rem base), unitless like the
+  spacing scale. One value for web-treeview / svelte-treeview (`--*-indent-size`), the web-grid
+  tree column (`--wg-tree-indent`, 20px today) and the web-multiselect tree (12px today).
+- **`--base-scroll-behavior`** — programmatic scrolling (scroll into view, wheel / rolling
+  pickers): `smooth`, `auto` (instant) under reduced motion. Used as CSS `scroll-behavior`, or read
+  in JS and passed as `behavior` to `scrollTo` / `scrollIntoView` (web-daterangepicker, web-grid,
+  web-multiselect, both treeviews).
+- **`base-contract-check` knows reduced motion:** a read inside `@media (prefers-reduced-motion:
+  reduce)` must fall back to the contract's value in that block (`var(--base-loader-duration,
+  1.5s)`, `var(--base-duration-fast, 0s)`); outside it, the normal default. Before, the reduced
+  fallback was a C2 error.
 - **Reduced motion:** under `prefers-reduced-motion: reduce` the four `--base-duration-*`
   tokens are `0s`, so everything timed by the contract stops animating. Turning motion off
   otherwise is CSS only: `--base-duration-*: 0s` page-wide, or a component's own
