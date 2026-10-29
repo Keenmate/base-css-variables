@@ -7,7 +7,7 @@
 # demo + e2e suite (demo/, e2e/ — never shipped).
 #
 # Usage:
-#   make setup          Install dev deps + Playwright chromium, build the demo's components
+#   make setup          Install dev deps + Playwright browsers, build the demo's components
 #   make install        Install dev dependencies (Playwright)
 #   make build          Build the SIBLING components the demo loads (../web-treeview,
 #                       ../web-multiselect) — this package itself has nothing to build
@@ -55,7 +55,7 @@ help:
 	@echo "  (no build — base-variables.css is authored directly and shipped as-is)"
 	@echo ""
 	@echo "  Demo / e2e (repo-only, never shipped):"
-	@echo "    make setup          - Install dev deps + chromium, build the demo's components"
+	@echo "    make setup          - Install dev deps + browsers, build the demo's components"
 	@echo "    make install        - Install dev dependencies (Playwright)"
 	@echo "    make build          - Build ../web-treeview + ../web-multiselect for the demo"
 	@echo "    make dev            - Serve the demo on http://localhost:12510"

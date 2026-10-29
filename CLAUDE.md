@@ -31,7 +31,7 @@ shows real components reading this checkout's tokens. `npm run test:e2e` (Playwr
 `e2e/`) locks the item-state contract against the reference list *and* both components, and
 the derivation contract (inputs → derived, `.base-scope`, removed names);
 component specs skip when a sibling build is missing — run `npm run build` in those repos
-first. One-time: `npm run test:e2e:install`. Makefile wrappers: `make setup` (deps + chromium +
+first. One-time: `npm run test:e2e:install` (chromium, firefox, webkit). Makefile wrappers: `make setup` (deps + browsers +
 sibling builds), `make build` (rebuilds the two sibling components — *not* this package),
 `make dev`, `make test`, `make test-headed`.
 
@@ -82,6 +82,10 @@ traces this end-to-end for the primary color — read it before touching token s
   `color-scheme: light dark` (auto/OS). `[data-theme="light"|"dark"]` blocks force a mode on a
   subtree. Mode-invariant tokens (icons, spacing/shadow/motion/z-index scales, typography
   multipliers, brand palette slots) are plain single values, not `light-dark()`.
+- **Loader:** one loader for the app and every component — `--base-loader-icon / -rotate /
+  -duration / -size`, drawn as a mask + rotate animation (README → Loader). Its duration is the
+  one exception to the four speeds and slows (never stops) under reduced motion. `e2e/loader.spec.ts`
+  runs in Chromium, Firefox and WebKit (the only spec in the firefox / webkit projects).
 - **Motion:** components use only the four `--base-duration-*` speeds and the `--base-ease-*`
   easings (no one-off durations; snappy over animated). Motion off is CSS only (`0s`), never an
   attribute; `prefers-reduced-motion` sets the durations to `0s` in its own `@media` block.

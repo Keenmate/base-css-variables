@@ -578,7 +578,8 @@ var(--base-duration-fast, 0.1s)`). Short and snappy is the house style.
 - **Motion off, page-wide:** set `--base-duration-fast / normal / medium / slow: 0s`.
 - **Motion off, one component:** set its `--<prefix>-transition-*: 0s`.
 - **`prefers-reduced-motion: reduce`** sets the four durations to `0s` (and each component does
-  the same for its own variables, so it holds without the contract too).
+  the same for its own variables, so it holds without the contract too). The loader slows
+  instead (see Loader).
 
 | Variable | Purpose |
 |----------|---------|
@@ -586,6 +587,41 @@ var(--base-duration-fast, 0.1s)`). Short and snappy is the house style.
 | `--base-ease-standard` | Standard easing `cubic-bezier(0.4, 0, 0.2, 1)` |
 | `--base-ease-out` | Ease-out `cubic-bezier(0, 0, 0.2, 1)` |
 | `--base-ease-in` | Ease-in `cubic-bezier(0.4, 0, 1, 1)` |
+
+### Loader
+One loading indicator for the app and every component, changed in one place. Shadow DOM lets only
+custom properties in, so the loader is four tokens, and every consumer draws it with the same lines
+(a component reads them through its own `--<prefix>-loader-*`, which fall back to these):
+
+```css
+.x-loader {
+  inline-size: var(--x-loader-size);
+  block-size: var(--x-loader-size);
+  mask: var(--x-loader-icon) center / contain no-repeat;
+  background: currentColor;
+  animation: x-loader-spin var(--x-loader-duration) linear infinite;
+}
+@keyframes x-loader-spin { to { transform: rotate(var(--x-loader-rotate)); } }
+```
+
+- **Swap the shape:** set `--base-loader-icon` to another SVG. A shape that should spin keeps
+  `--base-loader-rotate: 1turn`; an SVG that animates itself (CSS or SMIL inside it, e.g. a
+  travelling sine wave) sets `--base-loader-rotate: 0`. Both work as a mask in Chromium, Firefox
+  and WebKit (`e2e/loader.spec.ts`, `demo/loader.html`).
+- **One colour:** the icon is a mask painted with `currentColor`. Multi-colour loaders need
+  markup, not a token.
+- **Reduced motion:** the loader is the one loop that keeps moving — it slows to `1.5s` per turn
+  instead of stopping (a stopped loader reads as frozen). An SVG that animates itself keeps its own
+  timing: it doesn't read `--base-loader-duration`, and a `@media (prefers-reduced-motion)` rule
+  inside the SVG was not applied under Playwright's emulation in any engine, so don't rely on it.
+- **CSP:** the data-URI mask falls under `img-src`, like the icons.
+
+| Variable | Purpose |
+|----------|---------|
+| `--base-loader-icon` | The shape — mask image (default: Lucide loader-circle arc) |
+| `--base-loader-rotate` | Turn per cycle (`1turn`; `0` for an SVG that animates itself) |
+| `--base-loader-duration` | One cycle (`0.8s`; `1.5s` under reduced motion). The one exception to the four motion speeds |
+| `--base-loader-size` | Width and height (`1.25em` — scales with the text it sits in) |
 
 ### Z-index scale
 Generic stacking tiers for overlay coordination.

@@ -7,6 +7,17 @@ All notable changes to `@keenmate/base-css-variables` are documented here. Forma
 
 ### Added
 
+- **Loader tokens — one loader for the app and every component:** `--base-loader-icon` (the
+  shape, a mask image; default the Lucide loader-circle arc), `--base-loader-rotate` (`1turn`;
+  `0` for an SVG that animates itself), `--base-loader-duration` (`0.8s`) and
+  `--base-loader-size` (`1.25em`). Every consumer draws it the same way — a mask painted with
+  `currentColor` plus a rotate animation — so a theme swaps the loader in one token, and it
+  reaches inside shadow roots. Under reduced motion the loader slows to `1.5s` instead of
+  stopping; its duration is the one exception to the four motion speeds. README → Loader;
+  `demo/loader.html`; `e2e/loader.spec.ts` checks the default spinner, a self-animating sine
+  wave (CSS and SMIL inside the SVG), the shadow-root swap and reduced motion in Chromium,
+  Firefox and WebKit.
+
 - **Reduced motion:** under `prefers-reduced-motion: reduce` the four `--base-duration-*`
   tokens are `0s`, so everything timed by the contract stops animating. Turning motion off
   otherwise is CSS only: `--base-duration-*: 0s` page-wide, or a component's own

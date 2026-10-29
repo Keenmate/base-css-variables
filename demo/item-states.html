@@ -220,11 +220,11 @@
 
     <section class="card">
       <h2>web-treeview</h2>
-      <p class="muted">The local <code>../web-treeview</code> build, <code>selection-mode="multi"</code>.</p>
+      <p class="muted">The local <code>../web-treeview</code> build, <code>selection-mode="multiple"</code>.</p>
       <div class="component-host">
         <p class="notice" id="tree-missing" hidden>
           web-treeview build not found — run <code>npm run build</code> in <code>../web-treeview</code>.</p>
-        <web-treeview id="tree" expand-level="2" selection-mode="multi" show-checkboxes="false"></web-treeview>
+        <web-treeview id="tree" expand-level="2" selection-mode="multiple" show-checkboxes="false"></web-treeview>
       </div>
     </section>
 
@@ -420,7 +420,7 @@
     load('/vendor/web-multiselect/multiselect.js', 'web-multiselect', 'ms-missing'),
   ]);
   if (treeOk) {
-    tree.data = [
+    tree.nodes = [
       { id: 1, path: '1', displayValue: 'Documents' },
       { id: 2, path: '1.1', displayValue: 'Reports' },
       { id: 3, path: '1.1.1', displayValue: 'Q1 Report.pdf' },

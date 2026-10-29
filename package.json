@@ -42,7 +42,7 @@
     "test:check": "node --test test/check-contract.test.mjs",
     "test:e2e": "playwright test",
     "test:e2e:headed": "playwright test --headed",
-    "test:e2e:install": "playwright install chromium"
+    "test:e2e:install": "playwright install chromium firefox webkit"
   },
   "devDependencies": {
     "@playwright/test": "^1.64.1"
