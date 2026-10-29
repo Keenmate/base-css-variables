@@ -476,6 +476,18 @@ written directly into `*-outline` won't move the inset offset, so the outline sp
 | `--base-focused-text-color` | Text on the focused item (default: `currentColor`) |
 | `--base-focused-outline` | Keyboard-focus outline shorthand. *Derived:* `var(--base-outline-width) solid var(--base-primary-color)` |
 
+#### Drop target
+Where a dragged item or file can land: tree rows, dropzones, grid column reorder, pure-admin's file
+dropzone. The success tint by default, so a drop target never looks like the primary-tinted
+selection next to it; a theme restyles every drop here without touching selection
+(`demo/drop-target.html`). A drop that is *not allowed* stays a danger tint in the component.
+
+| Variable | Purpose |
+|----------|---------|
+| `--base-drop-target-bg` | A valid target while a drag is in progress (the "armed" dropzone). *Derived:* `var(--base-success-bg-subtle)` |
+| `--base-drop-target-bg-active` | The target under the pointer. *Derived:* `var(--base-success-bg-subtle-hover)` |
+| `--base-drop-target-border-color` | Border / outline of a drop target. *Derived:* `var(--base-success-color)` |
+
 ### Text
 | Variable | Purpose |
 |----------|---------|

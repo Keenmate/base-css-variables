@@ -18,6 +18,12 @@ All notable changes to `@keenmate/base-css-variables` are documented here. Forma
   wave (CSS and SMIL inside the SVG), the shadow-root swap and reduced motion in Chromium,
   Firefox and WebKit.
 
+- **Drop target — `--base-drop-target-bg` / `-bg-active` / `-border-color`:** one look for
+  everything you can drop onto (tree rows, dropzones, grid column reorder, pure-admin's file
+  dropzone). Derived from the success role (`--base-success-bg-subtle`, `-bg-subtle-hover`,
+  `--base-success-color`), so a drop target is told apart from the primary-tinted selection at a
+  glance; a theme restyles drops here alone. Consumers today borrow the primary tint or mix their
+  own 5–28% — they move to these. `demo/drop-target.html`.
 - **`--base-tree-indent: 1.6`** — indent per tree level (16px at 10px rem base), unitless like the
   spacing scale. One value for web-treeview / svelte-treeview (`--*-indent-size`), the web-grid
   tree column (`--wg-tree-indent`, 20px today) and the web-multiselect tree (12px today).

@@ -54,6 +54,17 @@ test('primary: tints, input borders and item states follow --base-primary-color'
   expect(await paint(page, 'outline: var(--base-focused-outline)', 'outline-color')).toBe(RED);
 });
 
+test('drop target: success tint and border by default, apart from the primary selection', async ({ page }) => {
+  for (const scheme of ['light', 'dark'] as const) {
+    await open(page, scheme);
+    expect(await bg(page, 'var(--base-drop-target-bg)'), scheme).toBe(await bg(page, 'var(--base-success-bg-subtle)'));
+    expect(await bg(page, 'var(--base-drop-target-bg-active)'), scheme).toBe(await bg(page, 'var(--base-success-bg-subtle-hover)'));
+    expect(await bg(page, 'var(--base-drop-target-bg)'), scheme).not.toBe(await bg(page, 'var(--base-selected-bg)'));
+  }
+  await setRoot(page, { '--base-success-color': RED });
+  expect(await borderColor(page, '1px solid var(--base-drop-target-border-color)')).toBe(RED);
+});
+
 test('primary tint is mode-aware like the role tints (dark 20% / 30%)', async ({ page }) => {
   await open(page, 'dark');
   await setRoot(page, { '--base-primary-color': RED });

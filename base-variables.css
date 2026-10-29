@@ -437,6 +437,13 @@
   --base-selected-bg-hover: var(--base-selected-bg);  /* Selected row keeps its tint on hover */
   --base-focused-outline: var(--base-outline-width) solid var(--base-primary-color);  /* Keyboard-focus outline (drawn inset) */
 
+  /* DROP TARGET — where a dragged item / file can land (tree rows, dropzones, column
+   * reorder). Success tint by default, so a drop target never looks like the
+   * primary-tinted selection; a theme retargets drops here alone. */
+  --base-drop-target-bg: var(--base-success-bg-subtle);  /* A valid target while a drag is in progress */
+  --base-drop-target-bg-active: var(--base-success-bg-subtle-hover);  /* The target under the pointer */
+  --base-drop-target-border-color: var(--base-success-color);
+
   /* BORDERS */
   --base-border-color: light-dark(oklch(from var(--base-main-bg) calc(l - 0.096) c h), oklch(from var(--base-main-bg) calc(l + 0.192) c h));
   --base-border: var(--base-border-width) solid var(--base-border-color);

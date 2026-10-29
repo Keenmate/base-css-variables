@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Drop target — borrowed tint vs --base-drop-target-*</title>
+<link rel="stylesheet" href="../base-variables.css">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 16px 20px 60px; font: 14px/1.45 var(--base-font-family); background: var(--base-page-bg); color: var(--base-text-color-1); }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  p.lead { margin: 0 0 12px; max-width: 1050px; color: var(--base-text-color-2); }
+  code { font: 12px var(--base-font-family-mono); }
+  .bar { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; padding: 8px 0 12px; border-bottom: 1px solid var(--base-border-color); margin-bottom: 8px; }
+  .bar label { display: inline-flex; gap: 6px; align-items: center; font-size: 13px; }
+  .cols { display: grid; grid-template-columns: repeat(2, minmax(360px, 1fr)); gap: 16px; max-width: 1100px; }
+  .col h2 { font-size: 15px; margin: 8px 0 2px; }
+  .col p.note { margin: 0 0 8px; font-size: 12.5px; color: var(--base-text-color-2); min-height: 3.2em; }
+  .card { background: var(--base-main-bg); border: 1px solid var(--base-border-color); border-radius: 8px; padding: 10px; margin-bottom: 12px; }
+  .card h3 { margin: 0 0 6px; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--base-text-color-3); }
+
+  /* --- tree rows --- */
+  .row { display: flex; gap: 8px; align-items: center; padding: 4px 8px; border-radius: var(--base-border-radius-sm, 4px); cursor: grab; user-select: none; }
+  .row .ico { width: 14px; height: 14px; border-radius: 3px; background: var(--base-text-color-3); opacity: .5; flex: none; }
+  .row .tag { margin-left: auto; font-size: 11px; color: var(--base-text-color-3); }
+  .row[data-l="2"] { padding-left: 28px; }
+  .row:hover { background: var(--base-hover-bg); }
+  .row.selected { background: var(--base-selected-bg); color: var(--base-selected-text-color, inherit); }
+  .row.dragging { opacity: .45; }
+
+  /* drop states, two ways */
+  .borrowed .row.drop-over { background: var(--base-primary-bg-subtle); box-shadow: inset 0 0 0 1px var(--base-primary-color); }
+  .proposed .row.drop-over { background: var(--base-drop-target-bg-active); box-shadow: inset 0 0 0 1px var(--base-drop-target-border-color); }
+
+  /* --- drop area (dropzone / pure-admin file dropzone) --- */
+  .area { display: grid; place-items: center; height: 92px; border: 2px dashed var(--base-border-color); border-radius: 8px; color: var(--base-text-color-3); font-size: 13px; transition: background var(--base-duration-normal), border-color var(--base-duration-normal); }
+  .borrowed .area.armed { background: var(--base-primary-bg-subtle); border-color: var(--base-primary-color); }
+  .borrowed .area.over { background: var(--base-primary-bg-subtle-hover); border-style: solid; border-color: var(--base-primary-color); }
+  .proposed .area.armed { background: var(--base-drop-target-bg); border-color: var(--base-drop-target-border-color); }
+  .proposed .area.over { background: var(--base-drop-target-bg-active); border-style: solid; border-color: var(--base-drop-target-border-color); }
+
+  /* --- grid header reorder --- */
+  .hdr { display: flex; border: 1px solid var(--base-border-color); border-radius: 6px; overflow: hidden; }
+  .hdr div { flex: 1; padding: 6px 10px; font-size: 12px; font-weight: 600; background: var(--base-subtle-bg, var(--base-page-bg)); border-right: 1px solid var(--base-border-color); cursor: grab; }
+  .hdr div:last-child { border-right: 0; }
+  .hdr div.selected { background: var(--base-selected-bg); }
+  .borrowed .hdr div.drop-over { background: var(--base-primary-bg-subtle); box-shadow: inset 2px 0 0 var(--base-primary-color); }
+  .proposed .hdr div.drop-over { background: var(--base-drop-target-bg-active); box-shadow: inset 2px 0 0 var(--base-drop-target-border-color); }
+
+  .static .tag::before { content: ''; }
+  .legend { font-size: 12px; color: var(--base-text-color-2); margin: 6px 0 0; }
+  textarea { width: 100%; font: 12px var(--base-font-family-mono); height: 64px; }
+</style>
+<style id="theme"></style>
+</head>
+<body>
+<h1>Drop target — borrowed tint vs <code>--base-drop-target-*</code></h1>
+<p class="lead">Before 2.0.0-rc06 a drop target borrowed the primary tint, which is also what <code>--base-selected-bg</code>
+  is. On the left, "Music" is selected and "Videos" is the row you're dropping onto: only a 1px outline tells them apart.
+  On the right, the same picture drawn from <code>--base-drop-target-bg</code> / <code>-bg-active</code> /
+  <code>-border-color</code> — the success tint by default, so the drop target stands out from the selection.
+  Pick a theme override to see that only drops change. You can also drag the rows, the header cells and a file from
+  your desktop.</p>
+
+<div class="bar">
+  <label><input type="checkbox" id="dark"> dark</label>
+  <label>Theme override
+    <select id="preset">
+      <option value="">none (contract default = success tint)</option>
+      <option value="primary">drops in primary blue (the old look)</option>
+      <option value="info">drops in info cyan</option>
+      <option value="strong">stronger tint (25% / 35%)</option>
+      <option value="custom">custom…</option>
+    </select>
+  </label>
+</div>
+<textarea id="custom" hidden spellcheck="false">:root {
+  --base-drop-target-bg: color-mix(in srgb, var(--base-warning-color) 12%, transparent);
+  --base-drop-target-bg-active: color-mix(in srgb, var(--base-warning-color) 24%, transparent);
+  --base-drop-target-border-color: var(--base-warning-color);
+}</textarea>
+
+<div class="cols">
+  <div class="col borrowed">
+    <h2>Before — borrowed primary tint</h2>
+    <p class="note">Drop state reads <code>--base-primary-bg-subtle(-hover)</code>. A theme can't restyle drops
+      without restyling selection and every tint.</p>
+    <div class="card static"><h3>Tree — selected vs drop target</h3>
+      <div class="row selected"><span class="ico"></span>Music<span class="tag">selected</span></div>
+      <div class="row drop-over"><span class="ico"></span>Videos<span class="tag">drop target</span></div>
+      <div class="row"><span class="ico"></span>Pictures</div>
+    </div>
+    <div class="card"><h3>Tree — try dragging</h3><div class="tree"></div></div>
+    <div class="card static"><h3>Drop area — armed / pointer over</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div class="area armed">armed (dragging)</div><div class="area over">pointer over</div>
+      </div></div>
+    <div class="card"><h3>Drop area — drag a file here</h3><div class="area live">Drop files</div></div>
+    <div class="card"><h3>Grid header — selected column + reorder target</h3>
+      <div class="hdr"><div class="selected">Name</div><div class="drop-over">Size</div><div>Modified</div></div></div>
+  </div>
+
+  <div class="col proposed">
+    <h2>rc06 — <code>--base-drop-target-*</code></h2>
+    <p class="note">The success tint by default — and a drop is its own knob, for the treeviews, dropzone, grid
+      column reorder and pure-admin's file dropzone at once.</p>
+    <div class="card static"><h3>Tree — selected vs drop target</h3>
+      <div class="row selected"><span class="ico"></span>Music<span class="tag">selected</span></div>
+      <div class="row drop-over"><span class="ico"></span>Videos<span class="tag">drop target</span></div>
+      <div class="row"><span class="ico"></span>Pictures</div>
+    </div>
+    <div class="card"><h3>Tree — try dragging</h3><div class="tree"></div></div>
+    <div class="card static"><h3>Drop area — armed / pointer over</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div class="area armed">armed (dragging)</div><div class="area over">pointer over</div>
+      </div></div>
+    <div class="card"><h3>Drop area — drag a file here</h3><div class="area live">Drop files</div></div>
+    <div class="card"><h3>Grid header — selected column + reorder target</h3>
+      <div class="hdr"><div class="selected">Name</div><div class="drop-over">Size</div><div>Modified</div></div></div>
+  </div>
+</div>
+
+<script>
+  const PRESETS = {
+    primary: `:root{--base-drop-target-bg:var(--base-primary-bg-subtle);--base-drop-target-bg-active:var(--base-primary-bg-subtle-hover);--base-drop-target-border-color:var(--base-primary-color)}`,
+    info: `:root{--base-drop-target-bg:var(--base-info-bg-subtle);--base-drop-target-bg-active:var(--base-info-bg-subtle-hover);--base-drop-target-border-color:var(--base-info-color)}`,
+    strong: `:root{--base-drop-target-bg:color-mix(in srgb,var(--base-primary-color) 25%,transparent);--base-drop-target-bg-active:color-mix(in srgb,var(--base-primary-color) 35%,transparent)}`,
+  };
+  const theme = document.getElementById('theme'), custom = document.getElementById('custom'), preset = document.getElementById('preset');
+  const apply = () => {
+    custom.hidden = preset.value !== 'custom';
+    theme.textContent = preset.value === 'custom' ? custom.value : (PRESETS[preset.value] ?? '');
+  };
+  preset.addEventListener('change', apply);
+  custom.addEventListener('input', apply);
+  document.getElementById('dark').addEventListener('change', (e) => { document.documentElement.style.colorScheme = e.target.checked ? 'dark' : 'light'; });
+
+  // live trees: drag a row onto another
+  const ITEMS = [['Documents', 1], ['Reports', 2], ['Music', 1, true], ['Pictures', 1], ['Videos', 1]];
+  for (const tree of document.querySelectorAll('.tree')) {
+    for (const [name, l, sel] of ITEMS) {
+      const r = document.createElement('div');
+      r.className = 'row' + (sel ? ' selected' : '');
+      r.dataset.l = l; r.draggable = true;
+      r.innerHTML = `<span class="ico"></span>${name}`;
+      tree.append(r);
+    }
+    let dragged = null;
+    tree.addEventListener('dragstart', (e) => { dragged = e.target.closest('.row'); dragged.classList.add('dragging'); e.dataTransfer.setData('text/plain', ''); });
+    tree.addEventListener('dragend', () => { dragged?.classList.remove('dragging'); tree.querySelectorAll('.drop-over').forEach((x) => x.classList.remove('drop-over')); dragged = null; });
+    tree.addEventListener('dragover', (e) => {
+      const r = e.target.closest('.row');
+      if (!r || r === dragged) return;
+      e.preventDefault();
+      tree.querySelectorAll('.drop-over').forEach((x) => x !== r && x.classList.remove('drop-over'));
+      r.classList.add('drop-over');
+    });
+    tree.addEventListener('drop', (e) => { e.preventDefault(); const r = e.target.closest('.row'); r?.classList.remove('drop-over'); if (r && dragged) r.after(dragged); });
+  }
+
+  // live headers: reorder
+  for (const hdr of document.querySelectorAll('.hdr')) {
+    let dragged = null;
+    for (const c of hdr.children) c.draggable = true;
+    hdr.addEventListener('dragstart', (e) => { dragged = e.target; hdr.querySelectorAll('.drop-over').forEach((x) => x.classList.remove('drop-over')); e.dataTransfer.setData('text/plain', ''); });
+    hdr.addEventListener('dragover', (e) => { if (e.target === dragged || e.target.parentElement !== hdr) return; e.preventDefault(); hdr.querySelectorAll('.drop-over').forEach((x) => x.classList.remove('drop-over')); e.target.classList.add('drop-over'); });
+    hdr.addEventListener('drop', (e) => { e.preventDefault(); e.target.classList.remove('drop-over'); if (dragged && e.target.parentElement === hdr) e.target.before(dragged); });
+  }
+
+  // live drop areas: armed while a file is dragged over the window, "over" on the area
+  let depth = 0;
+  const areas = document.querySelectorAll('.area.live');
+  const arm = (on) => areas.forEach((a) => a.classList.toggle('armed', on));
+  addEventListener('dragenter', (e) => { if (e.dataTransfer?.types.includes('Files')) { depth++; arm(true); } });
+  addEventListener('dragleave', (e) => { if (e.dataTransfer?.types.includes('Files') && --depth <= 0) { depth = 0; arm(false); } });
+  addEventListener('drop', (e) => { if (e.dataTransfer?.types.includes('Files')) e.preventDefault(); depth = 0; arm(false); areas.forEach((a) => a.classList.remove('over')); });
+  addEventListener('dragover', (e) => { if (e.dataTransfer?.types.includes('Files')) e.preventDefault(); });
+  for (const a of areas) {
+    a.addEventListener('dragenter', () => a.classList.add('over'));
+    a.addEventListener('dragleave', (e) => { if (!a.contains(e.relatedTarget)) a.classList.remove('over'); });
+    a.addEventListener('drop', (e) => { const n = e.dataTransfer.files.length; a.textContent = `${n} file${n === 1 ? '' : 's'} dropped`; });
+  }
+  window.__demo = { ready: true };
+</script>
+</body>
+</html>
