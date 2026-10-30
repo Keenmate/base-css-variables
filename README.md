@@ -653,6 +653,19 @@ Generic stacking tiers for overlay coordination.
 | `--base-z-toast` | Toast (8000) |
 | `--base-z-tooltip` | Tooltip (9000) |
 
+### Breakpoints
+The layout lines by viewport width: below `-mobile` is mobile, below `-tablet` is tablet, else
+desktop. Read in JS (`parseFloat(getComputedStyle(document.documentElement).getPropertyValue(…))`)
+by pure-css (`pureCss` config `mobileBreakpoint` / `tabletBreakpoint`) and web-components-core
+(`env.breakpoint`), so the app shell and every component switch at the same width. `@media` can't
+read `var()`: pure-css compiles the same lines from `$mobile-breakpoint` / `$tablet-breakpoint` —
+change both together. Plain `px`, not rem multipliers.
+
+| Variable | Purpose |
+|----------|---------|
+| `--base-breakpoint-mobile` | Mobile below this width (`768px`) |
+| `--base-breakpoint-tablet` | Tablet below this width (`1024px`) |
+
 ### Icons
 Inline `data:image/svg+xml` Lucide glyphs, rendered by consumers via
 `mask: var(--base-icon-*); background: currentColor`. Mode-invariant — override any

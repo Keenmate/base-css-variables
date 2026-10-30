@@ -260,6 +260,13 @@ test('reduced motion: the four durations are 0s; otherwise 0.1s / 0.15s / 0.25s 
   expect(await scroll()).toBe('auto');
 });
 
+test('breakpoints: 768px / 1024px, parsed by JS as numbers', async ({ page }) => {
+  await open(page);
+  const px = await page.evaluate(() => ['mobile', 'tablet']
+    .map((b) => parseFloat(getComputedStyle(document.documentElement).getPropertyValue(`--base-breakpoint-${b}`))));
+  expect(px).toEqual([768, 1024]);
+});
+
 test('on-fill text: black or white, whichever reads better by APCA, following the fill', async ({ page }) => {
   await open(page);
   // navy → white, yellow → black; sky blue and red-500 → white (WCAG 2 would pick black);

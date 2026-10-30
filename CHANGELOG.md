@@ -3,6 +3,16 @@
 All notable changes to `@keenmate/base-css-variables` are documented here. Format based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.0.0-rc07] — 2026-10-30
+
+### Added
+
+- **Breakpoints — `--base-breakpoint-mobile` (`768px`) / `--base-breakpoint-tablet` (`1024px`):**
+  the layout lines, already read by pure-css (`pureCss` config `mobileBreakpoint` /
+  `tabletBreakpoint`) and web-components-core (`env.breakpoint`), so the app shell and every
+  component switch at the same width. Read in JS — `@media` can't read `var()`; pure-css compiles
+  the same lines from `$mobile-breakpoint` / `$tablet-breakpoint`. README → Breakpoints.
+
 ## [2.0.0-rc06] — 2026-10-29 [PUBLISHED]
 
 ### Added

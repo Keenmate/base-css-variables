@@ -249,6 +249,16 @@
   --base-z-tooltip: 9000;
 
   /* ======================================================================
+   * BREAKPOINTS — the layout lines (viewport width) shared by pure-css and
+   * the web components: below -mobile = mobile, below -tablet = tablet, else
+   * desktop. Read by JS (getComputedStyle → parseFloat), since @media can't
+   * read var(); pure-css compiles the same lines into its @media rules
+   * ($mobile-breakpoint / $tablet-breakpoint). px, not rem multipliers.
+   * ==================================================================== */
+  --base-breakpoint-mobile: 768px;
+  --base-breakpoint-tablet: 1024px;
+
+  /* ======================================================================
    * ICONS — mask-friendly SVG glyphs (Lucide defaults), rendered via
    * `mask: var(--base-icon-*); background: currentColor`. Mode-invariant.
    * Two disclosure models: chevron ROTATES one glyph (points right, rotate 90°

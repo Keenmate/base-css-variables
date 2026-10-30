@@ -23,9 +23,9 @@ function run(css, { allow = [], ext = 'css' } = {}) {
 }
 const rules = (res) => res.findings.map((f) => `${f.rule} ${f.token}`);
 
-test('parses the contract: 192 tokens, inputs and derived', () => {
+test('parses the contract: 194 tokens, inputs and derived', () => {
   const t = parseContract(readFileSync(DEFAULT_CONTRACT, 'utf8'));
-  assert.equal(t.size, 192);
+  assert.equal(t.size, 194);
   assert.equal(t.get('--base-loader-duration').value, '0.8s'); // not the reduced-motion 1.5s
   assert.equal(t.get('--base-primary-color').kind, 'input');
   assert.equal(t.get('--base-primary-color-hover').kind, 'derived');
