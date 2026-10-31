@@ -139,6 +139,9 @@ test('C1: setting a name the contract does not have (CSS, style attribute, setPr
   assert.deepEqual(rules(html), ['C1 --base-accent-color']);
   const js = run(`el.style.setProperty('--base-text-color-on-accent', '#fff'); el.style.setProperty("--base-main-bg", '#fff');`, { ext: 'js' });
   assert.deepEqual(rules(js), ['C1 --base-text-color-on-accent']);
+  // A name built in a template literal is dynamic: nothing to check.
+  const dynamic = run('el.style.setProperty(`--base-icon-${key}`, v); el.style.setProperty(`--base-duration-${s}`, "0s");', { ext: 'js' });
+  assert.deepEqual(rules(dynamic), []);
 });
 
 test('HTML and Markdown are scanned; HTML comments are ignored', () => {

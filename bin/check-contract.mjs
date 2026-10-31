@@ -286,7 +286,7 @@ export function check({ paths = ['src'], contract = DEFAULT_CONTRACT, renames = 
   for (const { file, text } of sources) {
     const media = mediaBlocks(text);
     // Setting a name the contract doesn't have: nothing reads it, so the override does nothing.
-    const sets = [...scanDecls(text), ...[...text.matchAll(/setProperty\(\s*['"`](--base-[A-Za-z0-9_-]+)/g)].map((m) => ({ name: m[1], index: m.index }))];
+    const sets = [...scanDecls(text), ...[...text.matchAll(/setProperty\(\s*(['"`])(--base-[A-Za-z0-9_-]+)\1/g)].map((m) => ({ name: m[2], index: m.index }))];
     for (const d of sets) {
       if (!d.name.startsWith('--base-') || tokens.has(d.name)) continue;
       const at = { token: d.name, file: relative(cwd, file).replaceAll('\\', '/'), ...lineCol(text, d.index) };

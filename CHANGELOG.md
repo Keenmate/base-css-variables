@@ -3,6 +3,14 @@
 All notable changes to `@keenmate/base-css-variables` are documented here. Format based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.0.0-rc08] — 2026-10-31
+
+### Fixed
+
+- **`base-contract-check` no longer flags a dynamic `setProperty` name** — `setProperty(`--base-icon-${key}`, …)`
+  was read as setting the unknown token `--base-icon-` (C1). A name is checked only when the string
+  ends right after it.
+
 ## [2.0.0-rc07] — 2026-10-30 [PUBLISHED]
 
 ### Added
