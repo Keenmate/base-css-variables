@@ -280,7 +280,7 @@ npx base-contract-check src        # paths default to src; exit 1 on findings
 
 | Rule | Checks |
 |---|---|
-| **C1** | every `--base-*` read exists in the contract; a renamed or removed name says what to use (`renames.json`) |
+| **C1** | every `--base-*` read **or set** exists in the contract; a renamed or removed name says what to use (`renames.json`). Setting an unknown name (`--base-accent-color: #10b981` in CSS, a `style` attribute or `style.setProperty(…)`) does nothing, so it is a finding too |
 | **C2** | the fallback of an **input** token equals the contract default, per mode (`light-dark()`); inside `@media (prefers-reduced-motion: reduce)` it equals the contract's reduced value (`var(--base-loader-duration, 1.5s)`, `var(--base-duration-fast, 0s)`) |
 | **C3** | the fallback of a **derived** token is a formula on the component's own tokens, not a literal |
 
@@ -310,7 +310,7 @@ Deliberate differences go in `contract-check.json` next to `package.json`, each 
 ```
 
 Options: `--report` (list, exit 0 — for adopting), `--json`, `--config <file>`,
-`--contract <base-variables.css>`. Scans `.css .scss .ts .js .mjs .svelte`, comments stripped,
+`--contract <base-variables.css>`. Scans `.css .scss .ts .js .mjs .svelte .html .md` (example pages and docs too), comments stripped,
 `node_modules` / `dist` skipped. The same check is importable: `import { check } from
 '@keenmate/base-css-variables/check'`.
 

@@ -13,6 +13,15 @@ All notable changes to `@keenmate/base-css-variables` are documented here. Forma
   component switch at the same width. Read in JS — `@media` can't read `var()`; pure-css compiles
   the same lines from `$mobile-breakpoint` / `$tablet-breakpoint`. README → Breakpoints.
 
+### Changed
+
+- **`base-contract-check` C1 also catches setting a name the contract doesn't have** —
+  `--base-accent-color: #10b981` in CSS, in a `style` attribute or via `style.setProperty(…)`
+  does nothing since 2.0.0, and nothing said so. The rename hint names the replacement.
+- **`base-contract-check` scans `.html` and `.md` too** (HTML comments stripped), so example pages,
+  scaffold templates and docs snippets are checked like the source. A component's default path is
+  still `src`; pass the extra folders to include them.
+
 ## [2.0.0-rc06] — 2026-10-29 [PUBLISHED]
 
 ### Added

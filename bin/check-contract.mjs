@@ -3,7 +3,9 @@
  * base-contract-check — checks a component's `var(--base-*, fallback)` reads against
  * the contract (the base-variables.css shipped next to this script).
  *
- *   C1  every --base-* read exists in the contract (renames.json says what to use)
+ *   C1  every --base-* read or set exists in the contract (renames.json says what to use):
+ *       setting a name it doesn't have (`--base-accent-color: #10b981`, in CSS, a style
+ *       attribute or `style.setProperty(…)`) does nothing
  *   C2  the fallback of an INPUT token equals the contract default (per mode). Inside
  *       an `@media` block the contract also sets (`prefers-reduced-motion: reduce` →
  *       --base-loader-duration: 1.5s), the fallback must equal that block's value instead
@@ -17,7 +19,7 @@
  *
  * Usage:  base-contract-check [paths…] [--config contract-check.json]
  *                             [--contract base-variables.css] [--report] [--json]
- * Paths default to `src`. Scans .css .scss .ts .js .mjs .svelte (comments stripped),
+ * Paths default to `src`. Scans .css .scss .ts .js .mjs .svelte .html .md (comments stripped),
  * skips node_modules / dist. Exit 1 on any finding not on the allowlist, unless --report.
  *
  * Allowlist (`contract-check.json` in the working directory, optional):
@@ -31,15 +33,18 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 const here = dirname(fileURLToPath(import.meta.url));
 export const DEFAULT_CONTRACT = join(here, '..', 'base-variables.css');
 export const DEFAULT_RENAMES = join(here, '..', 'renames.json');
-const EXTS = new Set(['.css', '.scss', '.ts', '.js', '.mjs', '.svelte']);
+const EXTS = new Set(['.css', '.scss', '.ts', '.js', '.mjs', '.svelte', '.html', '.md']);
+const MARKUP = /\.(html|md)$/;
 const SKIP_DIRS = new Set(['node_modules', 'dist', '.git', '.svelte-kit', 'build']);
 const ROLES = ['success', 'danger', 'warning', 'info'];
 
 // ---------------------------------------------------------------- parsing
 
 /** Blank out comments, keeping offsets and newlines (so line numbers stay right). */
-export function stripComments(text, { lineComments = false } = {}) {
-  let out = text.replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, ' '));
+export function stripComments(text, { lineComments = false, markupComments = false } = {}) {
+  const blank = (m) => m.replace(/[^\n]/g, ' ');
+  let out = text.replace(/\/\*[\s\S]*?\*\//g, blank);
+  if (markupComments) out = out.replace(/<!--[\s\S]*?-->/g, blank);
   // `// …` only at line start: inside code a `//` is usually a URL in a string.
   if (lineComments) out = out.replace(/^([ \t]*)\/\/.*$/gm, (m, ind) => ind + ' '.repeat(m.length - ind.length));
   return out;
@@ -75,10 +80,10 @@ export function scanVars(text, prefix = '--') {
   return out;
 }
 
-/** Custom-property declarations `--name: value;` (top-level value, up to `;` or `}`). */
+/** Custom-property declarations `--name: value;` (top-level value, up to `;` or `}`; also in a `style="…"`). */
 export function scanDecls(text) {
   const out = [];
-  const re = /(^|[\s{;])(--[A-Za-z0-9_-]+)\s*:/g;
+  const re = /(^|[\s{;"'])(--[A-Za-z0-9_-]+)\s*:/g;
   let m;
   while ((m = re.exec(text))) {
     let i = m.index + m[0].length, depth = 0;
@@ -260,7 +265,8 @@ export function check({ paths = ['src'], contract = DEFAULT_CONTRACT, renames = 
   const files = paths.flatMap((p) => walk(resolve(cwd, p), []));
   const sources = files.map((f) => {
     const raw = readFileSync(f, 'utf8');
-    return { file: f, text: stripComments(raw, { lineComments: !/\.(s?css)$/.test(f) }) };
+    const markup = MARKUP.test(f);
+    return { file: f, text: stripComments(raw, { lineComments: !markup && !/\.(s?css)$/.test(f), markupComments: markup }) };
   });
 
   // Component tokens declared anywhere in the scanned files (first declaration wins).
@@ -269,18 +275,29 @@ export function check({ paths = ['src'], contract = DEFAULT_CONTRACT, renames = 
     for (const d of scanDecls(text)) if (!d.name.startsWith('--base-') && !locals.has(d.name)) locals.set(d.name, d.value);
   }
 
+  const renameHint = (name) => {
+    const rn = renamed.get(name);
+    if (!rn) return '';
+    return rn.to ? ` — use ${rn.to} (renamed in ${rn.since}${rn.note ? `; ${rn.note}` : ''})` : ` — ${rn.note ?? 'removed'} in ${rn.since}`;
+  };
+
   const findings = [];
   let reads = 0;
   for (const { file, text } of sources) {
     const media = mediaBlocks(text);
+    // Setting a name the contract doesn't have: nothing reads it, so the override does nothing.
+    const sets = [...scanDecls(text), ...[...text.matchAll(/setProperty\(\s*['"`](--base-[A-Za-z0-9_-]+)/g)].map((m) => ({ name: m[1], index: m.index }))];
+    for (const d of sets) {
+      if (!d.name.startsWith('--base-') || tokens.has(d.name)) continue;
+      const at = { token: d.name, file: relative(cwd, file).replaceAll('\\', '/'), ...lineCol(text, d.index) };
+      findings.push({ rule: 'C1', ...at, message: `sets ${d.name}, which is not in the contract${renameHint(d.name)}` });
+    }
     for (const r of scanVars(text, '--base-')) {
       reads++;
       const at = { token: r.name, file: relative(cwd, file).replaceAll('\\', '/'), ...lineCol(text, r.index) };
       const t = tokens.get(r.name);
       if (!t) {
-        const rn = renamed.get(r.name);
-        const hint = rn ? (rn.to ? ` — use ${rn.to} (renamed in ${rn.since}${rn.note ? `; ${rn.note}` : ''})` : ` — ${rn.note ?? 'removed'} in ${rn.since}`) : '';
-        findings.push({ rule: 'C1', ...at, message: `${r.name} is not in the contract${hint}` });
+        findings.push({ rule: 'C1', ...at, message: `${r.name} is not in the contract${renameHint(r.name)}` });
         continue;
       }
       if (r.fallback == null) continue;

@@ -131,6 +131,23 @@ test('C3: an alias is followed when the chain reads the aliased token', () => {
   assert.match(bad.findings[0].message, /aliases --base-main-bg/);
 });
 
+test('C1: setting a name the contract does not have (CSS, style attribute, setProperty)', () => {
+  const css = run(`:root { --base-accent-color: #10b981; --base-primary-color: #10b981; --ms-x: 1px; }`);
+  assert.deepEqual(rules(css), ['C1 --base-accent-color']);
+  assert.match(css.findings[0].message, /^sets --base-accent-color.*use --base-primary-color/);
+  const html = run(`<div style="--base-accent-color: red"></div><div style='--base-main-bg: #fff'></div>`, { ext: 'html' });
+  assert.deepEqual(rules(html), ['C1 --base-accent-color']);
+  const js = run(`el.style.setProperty('--base-text-color-on-accent', '#fff'); el.style.setProperty("--base-main-bg", '#fff');`, { ext: 'js' });
+  assert.deepEqual(rules(js), ['C1 --base-text-color-on-accent']);
+});
+
+test('HTML and Markdown are scanned; HTML comments are ignored', () => {
+  const html = run(`<!-- var(--base-nope) --><style>a { b: var(--base-gone) }</style><a href="https://x.y">x</a>`, { ext: 'html' });
+  assert.deepEqual(rules(html), ['C1 --base-gone']);
+  const md = run("See https://x.y\n```css\n:root { --base-accent-color: #10b981; }\na { c: var(--base-main-bg, #000); }\n```\n", { ext: 'md' });
+  assert.deepEqual(rules(md), ['C1 --base-accent-color', 'C2 --base-main-bg']);
+});
+
 test('comments are ignored; TS line comments too, URLs in strings are not', () => {
   const css = run(`/* var(--base-nope, 1) */ a { b: var(--base-primary-color, #3b82f6); }`);
   assert.deepEqual(rules(css), []);

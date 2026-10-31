@@ -15,7 +15,7 @@ There is no build, lint, or bundle step. Editing the CSS *is* the work; publishi
 field) — the demo and tests below are repo-only.
 
 **Component check (shipped):** `bin/check-contract.mjs` (`npx base-contract-check src`) is run by
-components (devDependency) in their build: C1 unknown `--base-*` reads, C2 input fallbacks ≠
+components (devDependency) in their build: C1 unknown `--base-*` reads or sets, C2 input fallbacks ≠
 contract default, C3 derived fallbacks that are literals instead of formulas. It parses
 `base-variables.css` itself — no second token list. **When you rename or remove a token, add it
 to `renames.json`** (old → new, version) so the check tells components what to use. Unit tests:
