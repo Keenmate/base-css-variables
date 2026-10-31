@@ -1,0 +1,196 @@
+<meta name="kmwc:title" content="Motion">
+<meta name="kmwc:subtitle" content="Four speeds, three easings, reduced motion and turning motion off, scroll behaviour">
+<meta name="kmwc:entry" content="none">
+<link rel="stylesheet" href="/base-variables.css">
+<style>
+  :root { --base-rem: 10px; }
+
+  .controls { gap: 12px 24px; }
+  .readout { font-family: var(--base-font-family-mono); font-size: 13px; }
+  .readout b { color: var(--base-primary-text-color); }
+
+  .lanes { display: grid; gap: 10px; }
+  .lane { display: grid; grid-template-columns: 260px 1fr; align-items: center; gap: 12px; font-size: 12px; }
+  .lane code { font-size: 11px; }
+  .track { position: relative; height: 28px; border-radius: 6px; background: var(--base-subtle-bg); }
+  .dot {
+    position: absolute; top: 4px; left: 4px;
+    width: 20px; height: 20px; border-radius: 50%;
+    background: var(--base-primary-color);
+    transition-property: left;
+    transition-duration: var(--lane-duration);
+    transition-timing-function: var(--lane-easing, var(--base-ease-standard));
+  }
+  .lanes.is-moved .dot { left: calc(100% - 24px); }
+
+  /* The speeds in their real use: small state changes. */
+  .real { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 16px; }
+  .real-item {
+    padding: 10px 14px; border-radius: 6px; font-size: 13px; cursor: pointer;
+    border: var(--base-border); background: var(--base-main-bg); color: var(--base-text-color-1);
+    transition: background-color var(--real-duration) var(--base-ease-standard), color var(--real-duration) var(--base-ease-standard);
+  }
+  .real-item:hover { background: var(--base-primary-color); color: var(--base-on-primary-text-color); }
+
+  #rm-anyway { display: block; margin-top: 8px; }
+  #rm-anyway[hidden] { display: none; }
+  .off-region { padding: 12px; border-radius: 8px; border: 1px dashed var(--base-border-color); }
+  .off-region .real { margin-top: 12px; }
+
+  .scroller { height: 200px; overflow: auto; border: var(--base-border); border-radius: 8px; background: var(--base-main-bg); scroll-behavior: var(--base-scroll-behavior); }
+  .scroller div { padding: 6px 12px; font-size: 13px; border-bottom: var(--base-border); }
+  .scroller div.is-target { background: var(--base-selected-bg); font-weight: 600; }
+</style>
+
+<div class="note info">
+  Components use only four durations and three easings, all from the contract: snappy rather than
+  animated. Under <code>prefers-reduced-motion: reduce</code> the durations become <code>0s</code> and
+  scrolling jumps; the one exception is the loader, which slows down instead of stopping
+  (<a href="examples-loader.html">Loader</a>). Turning motion off is CSS only, no attribute.
+</div>
+
+<div class="note info" id="rm-note">
+  <strong>Every speed reads <code>0s</code>?</strong> Then your system asks for reduced motion
+  (<code>prefers-reduced-motion: reduce</code>), and the contract has turned animation off: that's the
+  feature working, not a bug. The setting lives in Windows: Settings → Accessibility → Visual
+  effects → Animation effects; macOS / iOS: Accessibility → Display / Motion → Reduce motion.
+  <span id="rm-state"></span>
+  <label id="rm-anyway" hidden><input type="checkbox" id="ctl-anyway"> Show motion on this page anyway
+    (sets the contract's normal speeds and <code>smooth</code> scrolling on <code>:root</code>)</label>
+</div>
+
+<section class="card">
+  <h2>MO01 · Four speeds, and turning motion off</h2>
+  <p>Each lane moves with one duration and the standard easing. In use the speeds are for small
+    changes: hover fills, opening a dropdown, expanding a row.</p>
+  <p>To turn motion off in an app, set the four durations to <code>0s</code>, page-wide or on one
+    region. It's CSS only, no attribute; a component also takes its own
+    <code>--&lt;prefix&gt;-transition-*: 0s</code>. The checkbox does it for the demo below.</p>
+  <p class="readout" id="speed-readout"></p>
+  <div class="controls">
+    <button type="button" class="btn" id="play-speeds">Play</button>
+    <label><input type="checkbox" id="ctl-off"> Motion off here (<code>--base-duration-*: 0s</code>)</label>
+  </div>
+  <div class="off-region" id="off-region">
+    <div class="lanes" id="speeds"></div>
+    <div class="real" id="real"></div>
+  </div>
+  <div class="code-block"><pre><code>/* Motion off for the whole app (or put it on one region) */
+:root {
+  --base-duration-fast: 0s;
+  --base-duration-normal: 0s;
+  --base-duration-medium: 0s;
+  --base-duration-slow: 0s;
+}</code></pre></div>
+</section>
+
+<section class="card">
+  <h2>MO02 · Three easings</h2>
+  <p>Same distance and duration (slowed to 1s here so the curve is visible). Under reduced motion they are <code>0s</code> as well, unless the switch at the top is on. <code>standard</code>
+    for moves within the page, <code>out</code> for things entering (a dropdown opening),
+    <code>in</code> for things leaving.</p>
+  <div class="controls"><button type="button" class="btn" id="play-easings">Play</button></div>
+  <div class="lanes" id="easings"></div>
+</section>
+
+<section class="card">
+  <h2>MO03 · Scroll behaviour</h2>
+  <p><code>--base-scroll-behavior</code> is <code>smooth</code>, and <code>auto</code> (a jump) under
+    reduced motion. Use it as CSS <code>scroll-behavior</code> or pass it to
+    <code>scrollTo</code> / <code>scrollIntoView</code>, as the buttons do.</p>
+  <p class="readout" id="scroll-readout"></p>
+  <div class="controls">
+    <button type="button" class="btn" data-scroll="45">Scroll to item 45</button>
+    <button type="button" class="btn" data-scroll="1">Back to the top</button>
+    <label><input type="checkbox" id="ctl-jump"> Set <code>--base-scroll-behavior: auto</code></label>
+  </div>
+  <div class="scroller" id="scroller"></div>
+  <div class="code-block"><pre><code>const behavior = getComputedStyle(list).getPropertyValue('--base-scroll-behavior').trim();
+row.scrollIntoView({ block: 'nearest', behavior });</code></pre></div>
+</section>
+
+<script type="module">
+  const root = document.documentElement;
+  const $ = (id) => document.getElementById(id);
+  const SPEEDS = ['fast', 'normal', 'medium', 'slow'];
+  const value = (t, el = root) => getComputedStyle(el).getPropertyValue(t).trim();
+
+  const lane = (label, style) => `<div class="lane"><span>${label}</span><div class="track"><span class="dot" style="${style}"></span></div></div>`;
+  const play = (lanes) => lanes.classList.toggle('is-moved');
+
+  /* -------------------------------------------------------------- MO01 */
+  $('speeds').innerHTML = SPEEDS.map((s) => lane(`<code>--base-duration-${s}</code>`, `--lane-duration: var(--base-duration-${s})`)).join('');
+  $('real').innerHTML = SPEEDS.map((s) => `<span class="real-item" style="--real-duration: var(--base-duration-${s})">hover me · ${s}</span>`).join('');
+  $('play-speeds').addEventListener('click', () => play($('speeds')));
+
+  /* -------------------------------------------------------------- MO02 */
+  $('easings').innerHTML = ['standard', 'out', 'in'].map((e) =>
+    lane(`<code>--base-ease-${e}</code>`, `--lane-duration: var(--demo-easing-duration); --lane-easing: var(--base-ease-${e})`)).join('');
+  $('play-easings').addEventListener('click', () => play($('easings')));
+
+  $('ctl-off').addEventListener('change', () => {
+    for (const s of SPEEDS) {
+      if ($('ctl-off').checked) $('off-region').style.setProperty(`--base-duration-${s}`, '0s');
+      else $('off-region').style.removeProperty(`--base-duration-${s}`);
+    }
+    renderReadouts();
+  });
+
+  /* -------------------------------------------------------------- MO03 */
+  $('scroller').innerHTML = Array.from({ length: 60 }, (_, i) => `<div data-item="${i + 1}">Item ${i + 1}</div>`).join('');
+  document.querySelectorAll('[data-scroll]').forEach((button) => button.addEventListener('click', () => {
+    const row = $('scroller').querySelector(`[data-item="${button.dataset.scroll}"]`);
+    $('scroller').querySelectorAll('.is-target').forEach((r) => r.classList.remove('is-target'));
+    row.classList.add('is-target');
+    // Scroll the list only (not the page), with the contract's behaviour.
+    $('scroller').scrollTo({ top: row.offsetTop - $('scroller').offsetTop, behavior: value('--base-scroll-behavior', $('scroller')) });
+  }));
+  $('ctl-jump').addEventListener('change', () => {
+    if ($('ctl-jump').checked) $('scroller').style.setProperty('--base-scroll-behavior', 'auto');
+    else $('scroller').style.removeProperty('--base-scroll-behavior');
+    renderReadouts();
+  });
+
+  /* ---------------------------------------------------------- readouts */
+  // The contract's own value of a token, outside the reduced-motion @media block.
+  const declared = (token) => {
+    for (const sheet of document.styleSheets) {
+      let rules;
+      try { rules = sheet.cssRules; } catch { continue; }
+      for (const rule of rules) {
+        if (rule.selectorText === ':root' && rule.style.getPropertyValue(token)) return rule.style.getPropertyValue(token).trim();
+      }
+    }
+    return '';
+  };
+
+  // "Show motion on this page anyway": the contract's normal values on :root, for the whole page.
+  const MOTION_TOKENS = [...SPEEDS.map((s) => `--base-duration-${s}`), '--base-scroll-behavior'];
+  function applyAnyway() {
+    for (const token of MOTION_TOKENS) {
+      if ($('ctl-anyway').checked) root.style.setProperty(token, declared(token));
+      else root.style.removeProperty(token);
+    }
+    renderReadouts();
+  }
+  $('ctl-anyway').addEventListener('change', applyAnyway);
+
+  function renderReadouts() {
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    $('rm-note').classList.toggle('warning', reduced);
+    $('rm-note').classList.toggle('info', !reduced);
+    $('rm-anyway').hidden = !reduced;
+    $('rm-state').innerHTML = reduced ? '<strong>It is on now.</strong>' : 'It is off now, so everything below moves.';
+    $('speed-readout').innerHTML = SPEEDS.map((s) => {
+      const now = value(`--base-duration-${s}`, $('speeds'));
+      const normal = declared(`--base-duration-${s}`);
+      return `${s}: <b>${now}</b>${now !== normal ? ` (normally ${normal})` : ''}`;
+    }).join(' · ');
+    const easingsOn = !reduced || $('ctl-anyway').checked;
+    $('easings').style.setProperty('--demo-easing-duration', easingsOn ? '1s' : '0s');
+    $('scroll-readout').innerHTML = `--base-scroll-behavior on the list: <b>${value('--base-scroll-behavior', $('scroller'))}</b>`;
+  }
+  matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', renderReadouts);
+  renderReadouts();
+  window.__demo = { ready: true };
+</script>

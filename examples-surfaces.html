@@ -1,0 +1,157 @@
+<meta name="kmwc:title" content="Surfaces & text">
+<meta name="kmwc:subtitle" content="The elevation ladder, four text levels, borders, shadows, the overlay and the z-index scale">
+<meta name="kmwc:entry" content="none">
+<link rel="stylesheet" href="/base-variables.css">
+<style>
+  :root { --base-rem: 10px; }
+
+  /* SU01: nested surfaces */
+  .ladder { padding: 16px; border-radius: 12px; background: var(--base-page-bg); border: var(--base-border); color: var(--base-text-color-1); }
+  .ladder > .s { padding: 14px; border-radius: 10px; }
+  .s { position: relative; }
+  .s > code { display: inline-block; margin-bottom: 10px; font-size: 11px; }
+  .s-subtle { background: var(--base-subtle-bg); }
+  .s-main { background: var(--base-main-bg); border: var(--base-border); box-shadow: var(--base-shadow-sm); margin-top: 12px; }
+  .s-elevated { background: var(--base-elevated-bg); border: var(--base-border); box-shadow: var(--base-shadow-md); margin-top: 12px; }
+  .states { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .states span { padding: 8px 12px; border-radius: 6px; font-size: 12px; border: 1px dashed var(--base-border-color); }
+  .st-hover { background: var(--base-hover-bg); }
+  .st-active { background: var(--base-active-bg); }
+  .st-disabled { background: var(--base-disabled-bg); }
+  .st-live { cursor: pointer; transition: background-color var(--base-duration-fast) var(--base-ease-standard); }
+  .st-live:hover { background: var(--base-hover-bg); }
+  .st-live:active { background: var(--base-active-bg); }
+
+  /* SU02: text levels */
+  .levels { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+  .levels > div { padding: 14px; border-radius: 10px; border: var(--base-border); }
+  .levels p { margin: 0 0 6px; }
+  .levels code { font-size: 11px; }
+  .t1 { color: var(--base-text-color-1); font-size: 16px; font-weight: 600; }
+  .t2 { color: var(--base-text-color-2); }
+  .t3 { color: var(--base-text-color-3); font-size: 13px; }
+  .t4 { color: var(--base-text-color-4); font-size: 13px; }
+
+  /* SU03: borders, shadows, overlay */
+  .boxes { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); padding: 16px; border-radius: 12px; background: var(--base-page-bg); }
+  .boxes > div { height: 90px; display: grid; place-items: center; border-radius: 8px; background: var(--base-main-bg); color: var(--base-text-color-2); font-size: 12px; }
+  .b-border { border: var(--base-border); }
+  .b-input { border: var(--base-input-border); }
+  .b-sm { box-shadow: var(--base-shadow-sm); }
+  .b-md { box-shadow: var(--base-shadow-md); }
+  .b-lg { box-shadow: var(--base-shadow-lg); }
+  .b-dropdown { border: var(--base-dropdown-border); box-shadow: var(--base-dropdown-box-shadow); }
+  .overlay-demo { position: relative; height: 180px; margin-top: 16px; border-radius: 12px; overflow: hidden; background: var(--base-page-bg); border: var(--base-border); }
+  .overlay-demo .page-lines { padding: 16px; color: var(--base-text-color-2); font-size: 13px; }
+  .overlay-demo .backdrop { position: absolute; inset: 0; background: var(--base-overlay-bg); display: grid; place-items: center; }
+  .overlay-demo .dialog { padding: 16px 20px; border-radius: 10px; background: var(--base-elevated-bg); color: var(--base-text-color-1); box-shadow: var(--base-shadow-lg); }
+
+  /* SU04: z-index */
+  .zstack { position: relative; height: 260px; }
+  .zstack > div {
+    position: absolute; width: 230px; padding: 10px 12px; border-radius: 8px;
+    background: var(--base-elevated-bg); color: var(--base-text-color-1);
+    border: var(--base-border); box-shadow: var(--base-shadow-md); font-size: 12px;
+  }
+  .zstack b { display: block; font-family: var(--base-font-family-mono); }
+</style>
+
+<div class="note info">
+  Surfaces form a ladder: <code>page</code> &lt; <code>subtle</code> &lt; <code>main</code> &lt;
+  <code>elevated</code>. Hover, active and disabled are a separate axis: translucent overlays that
+  work on any step. A theme sets <code>--base-page-bg</code>, <code>--base-main-bg</code> and
+  <code>--base-text-color-1</code>; the other steps, text levels 2–4 and the border are derived from
+  them. Role surfaces (<code>--base-input-bg</code>, <code>--base-dropdown-bg</code>,
+  <code>--base-tooltip-bg</code>) default into the ladder but can be retargeted alone.
+</div>
+
+<section class="card">
+  <h2>SU01 · The elevation ladder</h2>
+  <p>Each step nested in the one below it. The interaction states are overlays, so the same token
+    works on every step; hover and press the last chip on each surface.</p>
+  <div class="ladder" id="ladder">
+    <code>--base-page-bg</code> · the app background
+    <div class="s s-subtle"><code>--base-subtle-bg</code> · recessed: code, wells, sidebars
+      <div class="states" data-states></div>
+    </div>
+    <div class="s s-main"><code>--base-main-bg</code> · cards, panels, the content area
+      <div class="states" data-states></div>
+      <div class="s s-elevated"><code>--base-elevated-bg</code> · raised: headers, toolbars, popovers
+        <div class="states" data-states></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="card">
+  <h2>SU02 · Four text levels</h2>
+  <p>Level 1 is the input; 2–4 are level 1 mixed toward <code>--base-main-bg</code> (75 %, 55 %,
+    40 %), so they keep their steps in any theme and mode.</p>
+  <div class="levels">
+    <div style="background: var(--base-main-bg)">
+      <p class="t1">Order #1042 <code>--base-text-color-1</code></p>
+      <p class="t2">Shipped to Prague · 2 items <code>-2</code></p>
+      <p class="t3">Updated 5 minutes ago <code>-3</code></p>
+      <p class="t4">Archived after 30 days <code>-4</code></p>
+    </div>
+    <div style="background: var(--base-page-bg)">
+      <p class="t1">On the page background</p>
+      <p class="t2">Secondary text, descriptions</p>
+      <p class="t3">Hints, metadata, placeholders</p>
+      <p class="t4">Disabled, decorative</p>
+    </div>
+    <div style="background: var(--base-elevated-bg)">
+      <p class="t1">On an elevated surface</p>
+      <p class="t2">Secondary text, descriptions</p>
+      <p class="t3">Hints, metadata, placeholders</p>
+      <p class="t4">Disabled, decorative</p>
+    </div>
+  </div>
+</section>
+
+<section class="card">
+  <h2>SU03 · Borders, shadows and the overlay</h2>
+  <p>Borders are shorthands (<code>--base-border</code> = width, style and
+    <code>--base-border-color</code>). The shadow scale shares one <code>--base-shadow-color</code>,
+    which is stronger in dark mode so a shadow still reads on a dark page.</p>
+  <div class="boxes">
+    <div class="b-border"><code>--base-border</code></div>
+    <div class="b-input"><code>--base-input-border</code></div>
+    <div class="b-sm"><code>--base-shadow-sm</code></div>
+    <div class="b-md"><code>--base-shadow-md</code></div>
+    <div class="b-lg"><code>--base-shadow-lg</code></div>
+    <div class="b-dropdown"><code>--base-dropdown-*</code></div>
+  </div>
+  <div class="overlay-demo">
+    <div class="page-lines">The page under a modal. Lorem ipsum dolor sit amet, consectetur adipiscing
+      elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</div>
+    <div class="backdrop"><div class="dialog"><code>--base-overlay-bg</code> behind an elevated dialog</div></div>
+  </div>
+</section>
+
+<section class="card">
+  <h2>SU04 · Layers (z-index)</h2>
+  <p>One stacking order for the app and every component, so a component's dropdown opens over a
+    pure-admin modal and a tooltip is always on top. Each box below uses its token as
+    <code>z-index</code>; later boxes overlap earlier ones only because their value is higher.</p>
+  <div class="zstack" id="zstack"></div>
+</section>
+
+<script type="module">
+  const $ = (id) => document.getElementById(id);
+
+  for (const states of document.querySelectorAll('[data-states]')) {
+    states.innerHTML = '<span class="st-hover">hover</span><span class="st-active">active</span>' +
+      '<span class="st-disabled">disabled</span><span class="st-live">hover / press me</span>';
+  }
+
+  // Shuffled DOM order: the stacking comes from the tokens, not from source order.
+  const LAYERS = ['--base-z-tooltip', '--base-z-modal-backdrop', '--base-z-popover', '--base-z-modal', '--base-z-toast', '--base-z-dropdown'];
+  const cs = getComputedStyle(document.documentElement);
+  const sorted = [...LAYERS].sort((a, b) => Number(cs.getPropertyValue(a)) - Number(cs.getPropertyValue(b)));
+  $('zstack').innerHTML = LAYERS.map((t) => {
+    const i = sorted.indexOf(t);
+    return `<div style="z-index: var(${t}); left: ${i * 70}px; top: ${i * 34}px"><b>${t}</b>${cs.getPropertyValue(t).trim()}</div>`;
+  }).join('');
+  window.__demo = { ready: true };
+</script>

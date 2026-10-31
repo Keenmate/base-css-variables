@@ -9,12 +9,12 @@
   .demo-card h3 { margin: 0 0 6px; padding: 0; border: 0; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--base-text-color-3); }
 
   /* --- tree rows --- */
-  .row { display: flex; gap: 8px; align-items: center; padding: 4px 8px; border-radius: var(--base-border-radius-sm, 4px); cursor: grab; user-select: none; }
+  .row { display: flex; gap: 8px; align-items: center; padding: 4px 8px; border-radius: calc(var(--base-border-radius-sm) * 10px); cursor: grab; user-select: none; }
   .row .ico { width: 14px; height: 14px; border-radius: 3px; background: var(--base-text-color-3); opacity: .5; flex: none; }
   .row .tag { margin-left: auto; font-size: 11px; color: var(--base-text-color-3); }
   .row[data-l="2"] { padding-left: 28px; }
   .row:hover { background: var(--base-hover-bg); }
-  .row.selected { background: var(--base-selected-bg); color: var(--base-selected-text-color, inherit); }
+  .row.selected { background: var(--base-selected-bg); color: var(--base-selected-text-color); }
   .row.dragging { opacity: .45; }
 
   /* drop states, two ways */
@@ -69,7 +69,7 @@
 
 <div class="cols">
   <div class="card col borrowed">
-    <h2>Before — borrowed primary tint</h2>
+    <h2>DT01 · Before — borrowed primary tint</h2>
     <p class="col-note">Drop state reads <code>--base-primary-bg-subtle(-hover)</code>. A theme can't restyle drops
       without restyling selection and every tint.</p>
     <div class="demo-card static"><h3>Tree — selected vs drop target</h3>
@@ -88,7 +88,7 @@
   </div>
 
   <div class="card col proposed">
-    <h2>rc06 — <code>--base-drop-target-*</code></h2>
+    <h2>DT02 · rc06 — <code>--base-drop-target-*</code></h2>
     <p class="col-note">The success tint by default — and a drop is its own knob, for the treeviews, dropzone, grid
       column reorder and pure-admin's file dropzone at once.</p>
     <div class="demo-card static"><h3>Tree — selected vs drop target</h3>

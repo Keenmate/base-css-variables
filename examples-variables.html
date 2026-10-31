@@ -228,7 +228,7 @@ function defCell(t) {
       </tr>`).join('');
     root.insertAdjacentHTML('beforeend', `
       <section id="${id}" class="card">
-        <h2>${g.title}<small>${g.items.length} tokens · ${ins} input · ${g.items.length - ins} derived</small></h2>
+        <h2>VA${String(gi + 1).padStart(2, '0')} · ${g.title}<small>${g.items.length} tokens · ${ins} input · ${g.items.length - ins} derived</small></h2>
         ${g.note ? `<p class="group-note">${g.note}</p>` : ''}
         <table><thead><tr><th>Token</th><th>Kind</th><th>Light</th><th>Dark</th><th class="defh">Definition</th><th>Comment</th></tr></thead>
         <tbody>${rows}</tbody></table>

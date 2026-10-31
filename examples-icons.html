@@ -1,0 +1,174 @@
+<meta name="kmwc:title" content="Icons & palette">
+<meta name="kmwc:subtitle" content="--base-icon-* masks every component draws in currentColor; the nine palette slots">
+<meta name="kmwc:entry" content="none">
+<link rel="stylesheet" href="/base-variables.css">
+<link rel="stylesheet" href="/examples-mock.css">
+<style>
+  :root { --base-rem: 10px; }
+
+  .controls { gap: 12px 24px; }
+  output { font-family: var(--base-font-family-mono); }
+
+  .icons { display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+  .icon-cell { display: grid; justify-items: center; gap: 8px; padding: 14px 8px 10px; border-radius: 8px; background: var(--base-subtle-bg); }
+  .icon-cell code { font-size: 10px; background: none; padding: 0; }
+  .icon-cell .alias { font-size: 10px; color: var(--base-text-color-3); margin-top: -6px; }
+  /* The drawing contract: a mask over a block painted in currentColor. */
+  .ico {
+    display: inline-block;
+    inline-size: var(--demo-icon-size, 24px);
+    block-size: var(--demo-icon-size, 24px);
+    background: currentColor;
+    mask: var(--glyph) center / contain no-repeat;
+  }
+
+  .swap { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); align-items: start; }
+
+  .palette { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
+  .slot { border-radius: 8px; overflow: hidden; border: var(--base-border); font-size: 12px; }
+  .slot > div:first-child { height: 52px; display: grid; place-items: center; font-weight: 600; }
+  .slot > div:last-child { padding: 6px 8px; background: var(--base-main-bg); }
+  .slot code { font-size: 10px; }
+  .uses { display: grid; gap: 20px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); margin-top: 16px; }
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tag { padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+  .avatars { display: flex; gap: 6px; }
+  .avatar { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font-size: 13px; font-weight: 600; }
+  .chart { display: flex; align-items: flex-end; gap: 6px; height: 120px; padding: 8px; border-radius: 8px; background: var(--base-subtle-bg); }
+  .chart div { flex: 1; border-radius: 4px 4px 0 0; }
+</style>
+
+<div class="note info">
+  Icons are inline SVG data URIs (Lucide glyphs). Components draw them as a mask over
+  <code>currentColor</code>, so an icon takes the text colour of wherever it sits, and the mask
+  works inside shadow roots where a page's icon font or sprite can't reach. Swap a token and the
+  glyph changes in pure-admin and every component.
+</div>
+
+<section class="card">
+  <h2>IC01 · The icon set</h2>
+  <div class="controls">
+    <label>Size <input type="range" id="ctl-size" min="12" max="48" step="2" value="24"> <output id="out-size">24px</output></label>
+    <label>Colour
+      <select id="ctl-color">
+        <option value="var(--base-text-color-1)">text</option>
+        <option value="var(--base-text-color-3)">muted</option>
+        <option value="var(--base-primary-text-color)">primary</option>
+        <option value="var(--base-danger-text-color)">danger</option>
+      </select></label>
+  </div>
+  <div class="icons" id="icons"></div>
+  <p class="muted">Aliases follow their source with <code>var()</code>: <code>--base-icon-clear</code> and
+    <code>--base-icon-remove</code> follow <code>--base-icon-close</code>. The draw rule:</p>
+  <div class="code-block"><pre><code>.icon {
+  inline-size: 1em;
+  block-size: 1em;
+  background: currentColor;
+  mask: var(--base-icon-close) center / contain no-repeat;
+}</code></pre></div>
+</section>
+
+<section class="card">
+  <h2>IC02 · Swap an icon everywhere</h2>
+  <p>Each select sets one token on <code>:root</code>. Open the multiselect: the chip remove ✕ and
+    the clear button follow <code>--base-icon-close</code>; the dropdown arrow and the tree's expander are <code>--base-icon-chevron</code>.</p>
+  <p class="note info">A replacement chevron must point <strong>right</strong>, like the default:
+    components rotate it 90° when open (the multiselect's arrow always, a tree row when expanded).
+    A glyph drawn pointing down ends up pointing left.</p>
+  <div class="controls">
+    <label><code>--base-icon-close</code> <select id="ctl-close"></select></label>
+    <label><code>--base-icon-chevron</code> <select id="ctl-chevron"></select></label>
+  </div>
+  <div class="swap">
+    <div>
+      <p class="notice" data-missing="web-multiselect" hidden>web-multiselect build not found — run
+        <code>npm run build</code> in <code>../web-multiselect</code>.</p>
+      <web-multiselect multiple="true" value-member="value" display-value-member="label">
+        <option value="a" selected>Apple</option><option value="b">Banana</option><option value="c" selected>Cherry</option>
+      </web-multiselect>
+    </div>
+    <div>
+      <p class="notice" data-missing="web-treeview" hidden>web-treeview build not found — run
+        <code>npm run build</code> in <code>../web-treeview</code>.</p>
+      <web-treeview expand-level="1"></web-treeview>
+    </div>
+  </div>
+</section>
+
+<section class="card">
+  <h2>IC03 · Palette slots</h2>
+  <p>Nine categorical colours for things that need to be told apart but carry no meaning: chart
+    series, tags, avatars, calendar categories. They are not roles: no hover steps, no tints.
+    Each has a text-on-fill token picked by contrast.</p>
+  <div class="palette" id="palette"></div>
+  <div class="uses">
+    <div><h3>Tags</h3><div class="tags" id="tags"></div></div>
+    <div><h3>Avatars</h3><div class="avatars" id="avatars"></div></div>
+    <div><h3>Chart</h3><div class="chart" id="chart"></div></div>
+  </div>
+</section>
+
+<script type="module">
+  import { loadComponent, TREE_NODES } from '/examples-mock.js';
+
+  const root = document.documentElement;
+  const $ = (id) => document.getElementById(id);
+
+  /* -------------------------------------------------------------- IC01 */
+  const ALIASES = { '--base-icon-clear': '--base-icon-close', '--base-icon-remove': '--base-icon-close' };
+  const ICONS = [...new Set([...document.styleSheets].flatMap((sheet) => {
+    try { return [...sheet.cssRules]; } catch { return []; }
+  }).flatMap((rule) => rule.style ? [...rule.style] : []).filter((p) => /^--base-icon-(?!check-size)/.test(p)))].sort();
+  $('icons').innerHTML = ICONS.map((t) => `<div class="icon-cell" data-token="${t}">
+      <span class="ico" style="--glyph: var(${t})"></span><code>${t.replace('--base-icon-', '')}</code>
+      ${ALIASES[t] ? `<span class="alias">→ ${ALIASES[t].replace('--base-icon-', '')}</span>` : ''}</div>`).join('');
+  const applyLook = () => {
+    $('out-size').textContent = `${$('ctl-size').value}px`;
+    $('icons').style.setProperty('--demo-icon-size', `${$('ctl-size').value}px`);
+    $('icons').style.color = $('ctl-color').value;
+  };
+  $('ctl-size').addEventListener('input', applyLook);
+  $('ctl-color').addEventListener('change', applyLook);
+  applyLook();
+
+  /* -------------------------------------------------------------- IC02 */
+  // Lucide glyphs, black strokes: a mask only reads alpha, so the colour doesn't matter.
+  const svg = (body) => `url("data:image/svg+xml,${encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${body}</svg>`)}")`;
+  const OPTIONS = {
+    close: {
+      '': 'contract default (x)',
+      [svg('<circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/>')]: 'circle-x',
+      [svg('<path d="M5 12h14"/>')]: 'minus',
+      [svg('<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>')]: 'trash',
+    },
+    // Drawn pointing RIGHT, like the contract's chevron: components rotate it 90° when open.
+    chevron: {
+      '': 'contract default (chevron)',
+      [svg('<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>')]: 'arrow',
+      [svg('<path d="M9 6v12l7-6z" fill="#000"/>')]: 'triangle',
+    },
+  };
+  for (const [key, options] of Object.entries(OPTIONS)) {
+    const select = $(`ctl-${key}`);
+    select.innerHTML = Object.entries(options).map(([value, label]) => `<option value='${value}'>${label}</option>`).join('');
+    select.addEventListener('change', () => {
+      if (select.value) root.style.setProperty(`--base-icon-${key}`, select.value);
+      else root.style.removeProperty(`--base-icon-${key}`);
+    });
+  }
+
+  /* -------------------------------------------------------------- IC03 */
+  const SLOTS = Array.from({ length: 9 }, (_, i) => i + 1);
+  const fill = (n) => `background: var(--base-palette-${n}); color: var(--base-on-palette-${n}-text-color)`;
+  $('palette').innerHTML = SLOTS.map((n) => `<div class="slot"><div style="${fill(n)}">Aa</div>
+      <div><code>--base-palette-${n}</code><br><span class="muted">${getComputedStyle(root).getPropertyValue(`--base-palette-${n}`).trim()}</span></div></div>`).join('');
+  const TAGS = ['Design', 'Backend', 'Urgent', 'Docs', 'Research', 'Infra', 'Legal', 'Sales', 'Ops'];
+  $('tags').innerHTML = SLOTS.map((n) => `<span class="tag" style="${fill(n)}">${TAGS[n - 1]}</span>`).join('');
+  $('avatars').innerHTML = ['OV', 'JN', 'KS', 'PM', 'AL', 'TB'].map((who, i) => `<span class="avatar" style="${fill(i + 1)}">${who}</span>`).join('');
+  $('chart').innerHTML = [62, 45, 80, 30, 55, 70, 40, 90, 50].map((h, i) => `<div style="height: ${h}%; background: var(--base-palette-${i + 1})"></div>`).join('');
+
+  const [msOk, treeOk] = await Promise.all([loadComponent('web-multiselect'), loadComponent('web-treeview')]);
+  if (treeOk) document.querySelector('web-treeview').nodes = TREE_NODES;
+  window.__demo = { ready: true, components: { multiselect: msOk, treeview: treeOk } };
+</script>

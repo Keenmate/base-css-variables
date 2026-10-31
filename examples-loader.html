@@ -45,7 +45,7 @@
 </div>
 
 <div class="card">
-  <h2>1. In text, sized by <code>em</code></h2>
+  <h2>LO01 · In text, sized by <code>em</code></h2>
   <p><code>--base-loader-size: 1.25em</code> — the loader follows the font size of the line it sits in.
     Colour is <code>currentColor</code>.</p>
   <div class="row">
@@ -67,7 +67,7 @@
 </div>
 
 <div class="card">
-  <h2>2. Inside a component's shadow root</h2>
+  <h2>LO02 · Inside a component's shadow root</h2>
   <p>A minimal web component: its <code>--demo-loader-*</code> tokens fall back to
     <code>--base-loader-*</code>. The page's shape choice above reaches it, with no class or keyframes crossing the
     shadow boundary.</p>
@@ -84,7 +84,7 @@
 </div>
 
 <div class="card">
-  <h2>3. Reduced motion</h2>
+  <h2>LO03 · Reduced motion</h2>
   <p>Under <code>prefers-reduced-motion: reduce</code> the four <code>--base-duration-*</code> become
     <code>0s</code> but <code>--base-loader-duration</code> slows to <code>1.5s</code> — a loader that stops reads as
     "frozen". An SVG that animates itself keeps its own timing: it doesn't read

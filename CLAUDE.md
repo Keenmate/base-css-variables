@@ -28,6 +28,12 @@ an accent-override pass). Plan and rationale: `docs/plan-contract-check.md`.
 `@keenmate/web-components-devkit` (registry library, port block 15300; config in
 `package.json#kmwc`). Pages are root `examples-*.html` **fragments** (`kmwc:title` meta, one `.card`
 + `<h2>` per chapter, `kmwc:entry none` — there is no JS entry) plus the `index.html` landing;
+every chapter heading starts with its page code and number, `<h2>TH01 · …</h2>` (TH theming, LD light / dark,
+RO roles, SU surfaces, FO forms, IS item states, SZ sizing, IC icons, MO motion, LO loader, VA variables; design
+notes: DE derived, FS fill states, RS role steps, DT drop target), so the user can point at one. Feature pages
+come first in the index; the design notes carry a "Design note" badge. `examples-mock.css` / `examples-mock.js`
+hold the shared mock app (plain CSS reading only `--base-*`), the vendor component loader and `resolveColor()`.
+Run `npx base-contract-check examples-*.html examples-mock.*` after editing a page;
 the devkit adds the layout, theme switch, chapter nav and copy-links. `npm run dev` serves them on
 :15300; `vite.config.ts` also mounts the *local* builds of the sibling repos
 (`../web-treeview/dist`, `../web-multiselect/dist`, `../pure-admin-themes` → `/vendor/*`) so the

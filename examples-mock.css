@@ -1,0 +1,110 @@
+/* =====================================================================
+ * MOCK APP: a plain-CSS consumer that reads only --base-* tokens, the way
+ * pure-admin and the components do. Nothing here sets a colour of its own.
+ * Used by several example pages (examples-mock.js builds the markup).
+ * =================================================================== */
+.app {
+  --u: var(--base-rem);
+  font-size: calc(var(--base-font-size-sm) * var(--u));
+  line-height: var(--base-line-height-normal);
+  color: var(--base-text-color-1);
+  background: var(--base-page-bg);
+  border: var(--base-border);
+  border-radius: calc(var(--base-border-radius-lg) * var(--u));
+  overflow: hidden;
+}
+.app-bar {
+  display: flex; align-items: center; gap: calc(var(--base-space-md) * var(--u));
+  padding: calc(var(--base-space-sm) * var(--u)) calc(var(--base-space-md) * var(--u));
+  background: var(--base-elevated-bg);
+  border-bottom: var(--base-border);
+}
+.app-bar strong { font-weight: var(--base-font-weight-bold); }
+.app-bar .app-input { margin-left: auto; max-width: 18em; }
+.app-body { display: grid; grid-template-columns: 10em 1fr; min-height: 16em; }
+.app-nav { display: flex; flex-direction: column; gap: 2px; padding: calc(var(--base-space-sm) * var(--u)); border-right: var(--base-border); }
+.app-nav a {
+  padding: calc(var(--base-space-xs) * var(--u)) calc(var(--base-space-sm) * var(--u));
+  border-radius: calc(var(--base-border-radius-sm) * var(--u));
+  color: var(--base-text-color-2);
+  text-decoration: none;
+  cursor: pointer;
+}
+.app-nav a:hover { background: var(--base-hover-bg); color: var(--base-text-color-1); }
+.app-nav a.is-selected { background: var(--base-selected-bg); color: var(--base-primary-text-color); font-weight: var(--base-font-weight-medium); }
+.app-nav a.is-selected:hover { background: var(--base-selected-bg-hover); }
+.app-main { display: grid; gap: calc(var(--base-space-md) * var(--u)); align-content: start; padding: calc(var(--base-space-md) * var(--u)); }
+.app-alert {
+  padding: calc(var(--base-space-sm) * var(--u)) calc(var(--base-space-md) * var(--u));
+  border-radius: calc(var(--base-border-radius-md) * var(--u));
+  background: var(--base-primary-bg-subtle);
+  color: var(--base-primary-text-color);
+}
+.app-panel {
+  display: grid; gap: calc(var(--base-space-xs) * var(--u));
+  padding: calc(var(--base-space-md) * var(--u));
+  background: var(--base-main-bg);
+  border: var(--base-border);
+  border-radius: calc(var(--base-border-radius-md) * var(--u));
+  box-shadow: var(--base-shadow-sm);
+}
+.app-panel h4 { margin: 0; font-size: calc(var(--base-font-size-base) * var(--u)); font-weight: var(--base-font-weight-semibold); }
+.app-panel p { margin: 0; }
+.app .t2 { color: var(--base-text-color-2); }
+.app .t3 { color: var(--base-text-color-3); font-size: calc(var(--base-font-size-xs) * var(--u)); }
+.app-tags, .app-actions { display: flex; flex-wrap: wrap; align-items: center; gap: calc(var(--base-space-xs) * var(--u)); }
+.app-actions { margin-top: calc(var(--base-space-xs) * var(--u)); }
+.app-tag {
+  padding: 1px calc(var(--base-space-sm) * var(--u));
+  border-radius: 999px;
+  font-size: calc(var(--base-font-size-xs) * var(--u));
+  font-weight: var(--base-font-weight-medium);
+}
+.app-tag--success { background: var(--base-success-bg-subtle); color: var(--base-success-text-color); }
+.app-tag--warning { background: var(--base-warning-bg-subtle); color: var(--base-warning-text-color); }
+.app-tag--danger { background: var(--base-danger-bg-subtle); color: var(--base-danger-text-color); }
+.app-btn {
+  font: inherit;
+  height: calc(var(--base-input-size-sm-height) * var(--u));
+  padding: 0 calc(var(--base-space-md) * var(--u));
+  border-radius: calc(var(--base-border-radius-sm) * var(--u));
+  border: var(--base-border-width) solid transparent;
+  cursor: pointer;
+  transition: background-color var(--base-duration-fast) var(--base-ease-standard);
+}
+.app-btn--primary { background: var(--base-primary-color); color: var(--base-on-primary-text-color); }
+.app-btn--primary:hover { background: var(--base-primary-color-hover); }
+.app-btn--primary:active { background: var(--base-primary-color-active); }
+.app-btn--outline { background: var(--base-main-bg); color: var(--base-text-color-1); border: var(--base-border); }
+.app-btn--outline:hover { background: var(--base-hover-bg); }
+.app-btn--danger { background: var(--base-danger-color); color: var(--base-on-danger-text-color); }
+.app-btn--danger:hover { background: var(--base-danger-color-hover); }
+.app-link { color: var(--base-primary-text-color); }
+.app-input {
+  font: inherit;
+  height: calc(var(--base-input-size-sm-height) * var(--u));
+  padding: 0 calc(var(--base-space-sm) * var(--u));
+  color: var(--base-input-text-color);
+  background: var(--base-input-bg);
+  border: var(--base-input-border);
+  border-radius: calc(var(--base-border-radius-sm) * var(--u));
+  outline: none;
+}
+.app-input::placeholder { color: var(--base-input-placeholder-color); }
+.app-input:hover { border: var(--base-input-border-hover); }
+.app-input:focus { border: var(--base-input-border-focus); box-shadow: var(--base-input-box-shadow-focus); }
+
+/* Compact variant for side-by-side panels. */
+.app--mini .app-body { grid-template-columns: 1fr; min-height: 0; }
+.app--mini .app-nav { flex-direction: row; flex-wrap: wrap; border-right: 0; border-bottom: var(--base-border); }
+.app--mini .app-bar .app-input { display: none; }
+
+/* Missing-build notice for the vendor components (examples-mock.js). */
+.notice {
+  padding: 10px 12px;
+  border-radius: calc(var(--base-border-radius-md) * var(--base-rem));
+  background: var(--base-warning-bg-subtle);
+  color: var(--base-warning-text-color);
+}
+.notice[hidden] { display: none; }
+web-treeview { display: block; }

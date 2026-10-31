@@ -1,0 +1,162 @@
+<meta name="kmwc:title" content="Roles">
+<meta name="kmwc:subtitle" content="Six roles, the same seven tokens each; a theme sets one colour per role">
+<meta name="kmwc:entry" content="none">
+<link rel="stylesheet" href="/base-variables.css">
+<style>
+  :root { --base-rem: 10px; }
+
+  .roles { width: 100%; border-collapse: separate; border-spacing: 6px; font-size: 12px; }
+  .roles th { text-align: left; font-weight: 600; color: var(--base-text-color-2); padding: 0 4px; }
+  .roles th code { font-size: 11px; }
+  .roles td { height: 46px; border-radius: 6px; padding: 0 8px; }
+  .roles td.name { font-weight: 600; color: var(--base-text-color-1); white-space: nowrap; }
+  .roles td.fill { color: var(--on); }
+  .roles td.tint { background: var(--tint); color: var(--text); }
+  .roles td.text { color: var(--text); background: var(--base-main-bg); border: var(--base-border); font-weight: 600; }
+  .roles td.on { background: var(--fill); color: var(--on); font-weight: 600; }
+  .roles small { display: block; font-family: var(--base-font-family-mono); font-size: 10px; opacity: 0.85; }
+
+  .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 0 0 10px; }
+
+  /* Reference consumer: buttons, alerts, badges, links built from the role tokens only. */
+  .r-btn {
+    font: inherit; font-size: calc(var(--base-font-size-sm) * var(--base-rem));
+    height: calc(var(--base-input-size-md-height) * var(--base-rem));
+    padding: 0 calc(var(--base-space-md) * var(--base-rem));
+    border-radius: calc(var(--base-border-radius-sm) * var(--base-rem));
+    border: var(--base-border-width) solid transparent;
+    background: var(--fill); color: var(--on);
+    cursor: pointer;
+    transition: background-color var(--base-duration-fast) var(--base-ease-standard);
+  }
+  .r-btn:hover { background: var(--fill-hover); }
+  .r-btn:active { background: var(--fill-active); }
+  .r-btn:disabled { opacity: var(--base-disabled-opacity); cursor: not-allowed; }
+  .r-btn:disabled:hover { background: var(--fill); }
+  .r-btn--soft { background: var(--tint); color: var(--text); }
+  .r-btn--soft:hover, .r-btn--soft:active { background: var(--tint-hover); }
+  .r-btn--outline { background: transparent; color: var(--text); border-color: var(--fill); }
+  .r-btn--outline:hover { background: var(--tint); }
+  .r-alert {
+    padding: calc(var(--base-space-sm) * var(--base-rem)) calc(var(--base-space-md) * var(--base-rem));
+    border-radius: calc(var(--base-border-radius-md) * var(--base-rem));
+    background: var(--tint); color: var(--text);
+    border-left: 3px solid var(--fill);
+    margin: 0 0 8px;
+  }
+  .r-badge { padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; background: var(--fill); color: var(--on); }
+  .r-badge--soft { background: var(--tint); color: var(--text); }
+  .r-link { color: var(--text); font-weight: 600; }
+
+  .controls { gap: 12px 20px; }
+  .role-grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+</style>
+
+<div class="note info">
+  Every role (primary, secondary, success, danger, warning, info) has the same seven tokens. A theme
+  sets <code>--base-&lt;role&gt;-color</code> (and, for the status roles, the text colour); hover,
+  pressed, the tint and the text on the fill are formulas over it. "Danger, one step darker" is then
+  the same answer in pure-admin and in every component. Per-state <em>button</em> tokens are a
+  component's own design and stay in the component (<code>--pa-btn-*</code>), defaulting to these.
+</div>
+
+<section class="card">
+  <h2>RO01 · The seven tokens</h2>
+  <p>Hover over the fill cells to see the hover step; the text on each fill is picked by APCA
+    contrast (black or white), so a light fill like warning gets dark text.</p>
+  <table class="roles" id="roles">
+    <thead><tr>
+      <th>Role</th>
+      <th><code>-color</code></th><th><code>-color-hover</code></th><th><code>-color-active</code></th>
+      <th><code>-bg-subtle</code></th><th><code>-bg-subtle-hover</code></th>
+      <th><code>-text-color</code></th><th><code>--base-on-*-text-color</code></th>
+    </tr></thead>
+    <tbody></tbody>
+  </table>
+</section>
+
+<section class="card">
+  <h2>RO02 · In use</h2>
+  <p>Buttons (solid, soft, outline, disabled), alerts, badges and links, all built from the role
+    tokens. Hover and press the buttons.</p>
+  <div id="usage"></div>
+</section>
+
+<section class="card">
+  <h2>RO03 · Change a role colour</h2>
+  <p>Each picker sets one <code>--base-&lt;role&gt;-color</code> on <code>:root</code>. Everything
+    above follows: steps, tints, and the text on the fill flips when the fill gets light or dark
+    enough. Try a pale yellow or a dark navy.</p>
+  <div class="controls" id="pickers"></div>
+  <div class="code-block"><pre><code id="roles-css"></code></pre></div>
+</section>
+
+<script type="module">
+  import { resolveColor } from '/examples-mock.js';
+
+  const root = document.documentElement;
+  const $ = (id) => document.getElementById(id);
+  const ROLES = ['primary', 'secondary', 'success', 'danger', 'warning', 'info'];
+  const DEFAULTS = { primary: '#3b82f6', secondary: '#6c757d', success: '#10b981', danger: '#dc2626', warning: '#f59e0b', info: '#06b6d4' };
+
+  // Each role's tokens under short local names, so one rule set draws every role.
+  const roleVars = (r) => [
+    `--fill: var(--base-${r}-color)`, `--fill-hover: var(--base-${r}-color-hover)`, `--fill-active: var(--base-${r}-color-active)`,
+    `--tint: var(--base-${r}-bg-subtle)`, `--tint-hover: var(--base-${r}-bg-subtle-hover)`,
+    `--text: var(--base-${r}-text-color)`, `--on: var(--base-on-${r}-text-color)`,
+  ].join('; ');
+
+  /* -------------------------------------------------------------- RO01 */
+  const cell = (cls, bg, label, token) =>
+    `<td class="${cls}" style="background: var(${bg})" data-token="${token}">${label}<small></small></td>`;
+  $('roles').tBodies[0].innerHTML = ROLES.map((r) => `<tr style="${roleVars(r)}">
+      <td class="name">${r}</td>
+      ${cell('fill', `--base-${r}-color`, 'Aa', `--base-${r}-color`)}
+      ${cell('fill', `--base-${r}-color-hover`, 'Aa', `--base-${r}-color-hover`)}
+      ${cell('fill', `--base-${r}-color-active`, 'Aa', `--base-${r}-color-active`)}
+      ${cell('tint', `--base-${r}-bg-subtle`, 'Aa', `--base-${r}-bg-subtle`)}
+      ${cell('tint', `--base-${r}-bg-subtle-hover`, 'Aa', `--base-${r}-bg-subtle-hover`)}
+      <td class="text" data-token="--base-${r}-text-color">Text<small></small></td>
+      <td class="on" data-token="--base-on-${r}-text-color">On fill<small></small></td>
+    </tr>`).join('');
+
+  function renderValues() {
+    for (const td of document.querySelectorAll('#roles td[data-token]')) td.querySelector('small').textContent = resolveColor(td.dataset.token);
+  }
+
+  /* -------------------------------------------------------------- RO02 */
+  $('usage').innerHTML = `<div class="role-grid">${ROLES.map((r) => `
+    <div style="${roleVars(r)}">
+      <div class="row">
+        <button type="button" class="r-btn">${r[0].toUpperCase() + r.slice(1)}</button>
+        <button type="button" class="r-btn r-btn--soft">Soft</button>
+        <button type="button" class="r-btn r-btn--outline">Outline</button>
+        <button type="button" class="r-btn" disabled>Disabled</button>
+      </div>
+      <p class="r-alert">A <strong>${r}</strong> message, tinted. <a class="r-link" href="#" onclick="return false">A link</a></p>
+      <div class="row"><span class="r-badge">${r}</span><span class="r-badge r-badge--soft">${r} soft</span></div>
+    </div>`).join('')}</div>`;
+
+  /* -------------------------------------------------------------- RO03 */
+  $('pickers').innerHTML = ROLES.map((r) =>
+    `<label>${r} <input type="color" data-role="${r}" value="${DEFAULTS[r]}"></label>`).join('') +
+    '<button type="button" class="btn" id="ctl-reset">Reset</button>';
+  function applyPickers() {
+    const lines = [];
+    for (const input of $('pickers').querySelectorAll('input')) {
+      const name = `--base-${input.dataset.role}-color`;
+      if (input.value === DEFAULTS[input.dataset.role]) root.style.removeProperty(name);
+      else { root.style.setProperty(name, input.value); lines.push(`  ${name}: ${input.value};`); }
+    }
+    $('roles-css').textContent = lines.length ? `:root {\n${lines.join('\n')}\n}` : '/* no overrides, the contract defaults */';
+    renderValues();
+  }
+  $('pickers').addEventListener('input', applyPickers);
+  $('ctl-reset').addEventListener('click', () => {
+    for (const input of $('pickers').querySelectorAll('input')) input.value = DEFAULTS[input.dataset.role];
+    applyPickers();
+  });
+  new MutationObserver(renderValues).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
+  applyPickers();
+  window.__demo = { ready: true };
+</script>

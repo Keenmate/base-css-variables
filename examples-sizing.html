@@ -1,0 +1,148 @@
+<meta name="kmwc:title" content="Sizing">
+<meta name="kmwc:subtitle" content="Unitless scales × --base-rem: one knob for density; the font, spacing, radius and height scales; breakpoints">
+<meta name="kmwc:entry" content="none">
+<link rel="stylesheet" href="/base-variables.css">
+<link rel="stylesheet" href="/examples-mock.css">
+<style>
+  :root { --base-rem: 10px; }
+
+  .controls { gap: 12px 24px; }
+  output { font-family: var(--base-font-family-mono); }
+  .density { display: grid; gap: 16px; grid-template-columns: minmax(320px, 1.4fr) minmax(240px, 1fr); align-items: start; }
+  @media (max-width: 900px) { .density { grid-template-columns: 1fr; } }
+  .density-side { display: grid; gap: 10px; }
+
+  .scale { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .scale td { padding: 6px 8px; border-top: var(--base-border); vertical-align: middle; }
+  .scale td:first-child { width: 240px; }
+  .scale td:nth-child(2) { width: 120px; font-family: var(--base-font-family-mono); color: var(--base-text-color-3); }
+  .bar { height: 12px; border-radius: 3px; background: var(--base-primary-color); }
+  .radius-box { width: 64px; height: 40px; background: var(--base-primary-bg-subtle); border: 2px solid var(--base-primary-color); }
+  .height-box { width: 160px; border: var(--base-input-border); border-radius: 4px; background: var(--base-input-bg); }
+  .scales { display: grid; gap: 20px; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); }
+  .scales h3 { margin: 0 0 6px; }
+
+  .bp-readout { font-family: var(--base-font-family-mono); font-size: 13px; }
+  .bp-readout b { color: var(--base-primary-text-color); }
+  .bp-track { position: relative; height: 34px; margin: 12px 0 30px; border-radius: 6px; background: var(--base-subtle-bg); }
+  .bp-track span { position: absolute; top: 0; bottom: 0; display: grid; place-items: center; font-size: 12px; color: var(--base-text-color-2); }
+  .bp-track i { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--base-text-color-3); }
+  .bp-track i::after { content: attr(data-label); position: absolute; top: 100%; translate: -50% 4px; white-space: nowrap; font-size: 11px; font-style: normal; color: var(--base-text-color-3); }
+  .bp-track .now { width: 3px; background: var(--base-primary-color); }
+</style>
+
+<div class="note info">
+  Font sizes, spacing, radii and field heights are stored as bare numbers and multiplied by one
+  unit: <code>calc(var(--base-font-size-sm) * var(--base-rem))</code>. pure-admin sets the unit to
+  10px (its <code>html</code> font size), so <code>1.4</code> is 14px. Change <code>--base-rem</code>
+  on any element and everything inside scales together: a compact grid, a roomy dialog.
+</div>
+
+<section class="card">
+  <h2>SZ01 · One knob for density</h2>
+  <p>The slider sets <code>--base-rem</code> on the region below only. The mock app and the
+    component scale as one; the text, padding, radii and heights keep their proportions.</p>
+  <div class="controls">
+    <label><code>--base-rem</code>
+      <input type="range" id="ctl-rem" min="7" max="14" step="0.5" value="10"> <output id="out-rem">10px</output></label>
+    <button type="button" class="btn" data-rem="8">Compact (8px)</button>
+    <button type="button" class="btn" data-rem="10">Default (10px)</button>
+    <button type="button" class="btn" data-rem="12">Comfortable (12px)</button>
+  </div>
+  <div class="density" id="density">
+    <div id="density-mock"></div>
+    <div class="density-side">
+      <p class="notice" data-missing="web-multiselect" hidden>web-multiselect build not found — run
+        <code>npm run build</code> in <code>../web-multiselect</code>.</p>
+      <web-multiselect multiple="true" value-member="value" display-value-member="label">
+        <option value="a" selected>Apple</option><option value="b">Banana</option><option value="c" selected>Cherry</option>
+      </web-multiselect>
+    </div>
+  </div>
+  <div class="code-block"><pre><code id="rem-css"></code></pre></div>
+</section>
+
+<section class="card">
+  <h2>SZ02 · The scales</h2>
+  <p>Every step, rendered at the current unit (10px). The middle column is the stored number and
+    what it resolves to.</p>
+  <div class="scales">
+    <div><h3>Font size</h3><table class="scale" id="sc-font"></table></div>
+    <div><h3>Spacing</h3><table class="scale" id="sc-space"></table></div>
+    <div><h3>Border radius</h3><table class="scale" id="sc-radius"></table></div>
+    <div><h3>Field height</h3><table class="scale" id="sc-height"></table></div>
+    <div><h3>Weight and line height</h3><table class="scale" id="sc-weight"></table></div>
+  </div>
+</section>
+
+<section class="card">
+  <h2>SZ03 · Breakpoints</h2>
+  <p><code>--base-breakpoint-mobile</code> and <code>--base-breakpoint-tablet</code> are the widths
+    where layouts switch. <code>@media</code> can't read <code>var()</code>, so they are read from
+    JavaScript (pure-css's config, web-components-core's <code>env.breakpoint</code>); pure-css
+    compiles the same widths from SCSS. Resize the window.</p>
+  <p class="bp-readout" id="bp-readout"></p>
+  <div class="bp-track" id="bp-track"></div>
+  <div class="code-block"><pre><code>const css = getComputedStyle(document.documentElement);
+const mobile = parseFloat(css.getPropertyValue('--base-breakpoint-mobile'));  // 768
+const isMobile = matchMedia(`(max-width: ${mobile - 0.02}px)`).matches;</code></pre></div>
+</section>
+
+<script type="module">
+  import { mockApp, loadComponent } from '/examples-mock.js';
+
+  const root = document.documentElement;
+  const $ = (id) => document.getElementById(id);
+  const cs = () => getComputedStyle(root);
+  const num = (t) => cs().getPropertyValue(t).trim();
+
+  /* -------------------------------------------------------------- SZ01 */
+  $('density-mock').append(mockApp());
+  function applyRem(px) {
+    $('ctl-rem').value = px;
+    $('out-rem').textContent = `${px}px`;
+    $('density').style.setProperty('--base-rem', `${px}px`);
+    $('rem-css').textContent = `.compact-grid {\n  --base-rem: ${px}px;\n}`;
+  }
+  $('ctl-rem').addEventListener('input', () => applyRem(Number($('ctl-rem').value)));
+  document.querySelectorAll('[data-rem]').forEach((b) => b.addEventListener('click', () => applyRem(Number(b.dataset.rem))));
+  applyRem(10);
+
+  /* -------------------------------------------------------------- SZ02 */
+  const row = (token, preview) => `<tr><td><code>${token}</code></td><td>${num(token)} · ${Math.round(num(token) * 10 * 10) / 10}px</td><td>${preview}</td></tr>`;
+  $('sc-font').innerHTML = ['2xs', 'xs', 'sm', 'base', 'lg', 'xl', '2xl'].map((s) =>
+    row(`--base-font-size-${s}`, `<span style="font-size: calc(var(--base-font-size-${s}) * var(--base-rem))">Order #1042</span>`)).join('');
+  $('sc-space').innerHTML = ['xs', 'sm', 'md', 'base', 'lg', 'xl', '2xl'].map((s) =>
+    row(`--base-space-${s}`, `<div class="bar" style="width: calc(var(--base-space-${s}) * var(--base-rem))"></div>`)).join('');
+  $('sc-radius').innerHTML = ['sm', 'md', 'lg'].map((s) =>
+    row(`--base-border-radius-${s}`, `<div class="radius-box" style="border-radius: calc(var(--base-border-radius-${s}) * var(--base-rem))"></div>`)).join('');
+  $('sc-height').innerHTML = ['xs', 'sm', 'md', 'lg', 'xl'].map((s) =>
+    row(`--base-input-size-${s}-height`, `<div class="height-box" style="height: calc(var(--base-input-size-${s}-height) * var(--base-rem))"></div>`)).join('');
+  $('sc-weight').innerHTML =
+    ['normal', 'medium', 'semibold', 'bold'].map((s) =>
+      `<tr><td><code>--base-font-weight-${s}</code></td><td>${num(`--base-font-weight-${s}`)}</td><td style="font-weight: var(--base-font-weight-${s})">Order #1042</td></tr>`).join('') +
+    ['tight', 'normal', 'relaxed'].map((s) =>
+      `<tr><td><code>--base-line-height-${s}</code></td><td>${num(`--base-line-height-${s}`)}</td><td style="line-height: var(--base-line-height-${s}); max-width: 220px">Two lines of text to show the line height.</td></tr>`).join('');
+
+  /* -------------------------------------------------------------- SZ03 */
+  function renderBreakpoints() {
+    const mobile = parseFloat(num('--base-breakpoint-mobile'));
+    const tablet = parseFloat(num('--base-breakpoint-tablet'));
+    const width = window.innerWidth;
+    const mode = width < mobile ? 'mobile' : width < tablet ? 'tablet' : 'desktop';
+    $('bp-readout').innerHTML = `--base-breakpoint-mobile: <b>${mobile}px</b> · --base-breakpoint-tablet: <b>${tablet}px</b> · window: <b>${width}px</b> → <b>${mode}</b>`;
+    const max = Math.max(1600, width + 100);
+    const pct = (px) => `${(px / max) * 100}%`;
+    $('bp-track').innerHTML =
+      `<span style="left: 0; width: ${pct(mobile)}">mobile</span>` +
+      `<span style="left: ${pct(mobile)}; width: calc(${pct(tablet)} - ${pct(mobile)})">tablet</span>` +
+      `<span style="left: ${pct(tablet)}; right: 0">desktop</span>` +
+      `<i style="left: ${pct(mobile)}" data-label="${mobile}px"></i><i style="left: ${pct(tablet)}" data-label="${tablet}px"></i>` +
+      `<i class="now" style="left: ${pct(width)}" data-label="you"></i>`;
+  }
+  addEventListener('resize', renderBreakpoints);
+  renderBreakpoints();
+
+  const msOk = await loadComponent('web-multiselect');
+  window.__demo = { ready: true, components: { multiselect: msOk } };
+</script>

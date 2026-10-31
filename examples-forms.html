@@ -1,0 +1,237 @@
+<meta name="kmwc:title" content="Forms">
+<meta name="kmwc:subtitle" content="Inputs, dropdowns, tooltips and the checkbox: one look in pure-admin and every component">
+<meta name="kmwc:entry" content="none">
+<link rel="stylesheet" href="/base-variables.css">
+<link rel="stylesheet" href="/examples-mock.css">
+<style>
+  :root { --base-rem: 10px; }
+
+  .fields { display: grid; gap: 14px 20px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+  .fields label { display: grid; gap: 4px; font-size: 12px; color: var(--base-text-color-2); }
+
+  /* Reference text field: everything from the input tokens. */
+  .f-input {
+    box-sizing: border-box;
+    width: 100%;
+    font: inherit; font-size: calc(var(--base-font-size-sm) * var(--base-rem));
+    height: calc(var(--base-input-size-md-height) * var(--base-rem));
+    padding: 0 calc(var(--base-space-sm) * var(--base-rem));
+    color: var(--base-input-text-color);
+    background: var(--base-input-bg);
+    border: var(--base-input-border);
+    border-radius: calc(var(--base-border-radius-sm) * var(--base-rem));
+    outline: none;
+    transition: border-color var(--base-duration-fast) var(--base-ease-standard), box-shadow var(--base-duration-fast) var(--base-ease-standard);
+  }
+  .f-input::placeholder { color: var(--base-input-placeholder-color); }
+  .f-input:hover, .f-input.is-hover { border: var(--base-input-border-hover); }
+  .f-input:focus, .f-input.is-focus { border: var(--base-input-border-focus); box-shadow: var(--base-input-box-shadow-focus); }
+  .f-input:disabled { background: var(--base-input-bg-disabled); opacity: var(--base-disabled-opacity); cursor: not-allowed; }
+  .f-input.is-invalid { border-color: var(--base-danger-color); }
+  .f-input.is-invalid:focus { box-shadow: 0 0 0 3px color-mix(in srgb, var(--base-danger-color) 15%, transparent); }
+  .f-help { font-size: 12px; color: var(--base-text-color-3); }
+  .f-error { font-size: 12px; color: var(--base-danger-text-color); }
+
+  /* Field with icons: a search glyph and a clear button, both masks in the icon colour. */
+  .f-wrap { position: relative; }
+  .f-wrap .f-input { padding-left: calc(var(--base-space-sm) * var(--base-rem) + 20px); padding-right: 34px; }
+  .f-icon, .f-clear {
+    position: absolute; top: 50%; translate: 0 -50%;
+    width: 16px; height: 16px;
+    background: var(--base-input-icon-color);
+    mask: var(--glyph) center / contain no-repeat;
+  }
+  .f-icon { --glyph: var(--base-icon-search); left: calc(var(--base-space-sm) * var(--base-rem)); pointer-events: none; }
+  .f-clear-btn {
+    position: absolute; right: 6px; top: 50%; translate: 0 -50%;
+    width: 24px; height: 24px; border: 0; padding: 0; border-radius: 4px;
+    background: transparent; cursor: pointer;
+  }
+  .f-clear-btn:hover { background: var(--base-input-icon-bg-hover); }
+  .f-clear-btn .f-clear { --glyph: var(--base-icon-clear); position: absolute; left: 4px; top: 50%; }
+
+  /* Sizes */
+  .sizes { display: grid; gap: 10px; }
+  .sizes > div { display: grid; grid-template-columns: 220px 1fr; align-items: center; gap: 12px; font-size: 12px; }
+  .sizes code { font-size: 11px; }
+
+  /* Dropdown + tooltip, static so both are visible at once. */
+  .float-demo { display: grid; gap: 24px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); align-items: start; }
+  .dd {
+    background: var(--base-dropdown-bg);
+    border: var(--base-dropdown-border);
+    box-shadow: var(--base-dropdown-box-shadow);
+    border-radius: calc(var(--base-border-radius-md) * var(--base-rem));
+    padding: 4px; margin-top: 4px;
+    font-size: 14px; color: var(--base-text-color-1);
+  }
+  .dd div { padding: 6px 10px; border-radius: calc(var(--base-border-radius-sm) * var(--base-rem)); cursor: pointer; }
+  .dd div:hover { background: var(--base-hover-bg); }
+  .dd .is-selected { background: var(--base-selected-bg); }
+  .dd .is-focused { outline: var(--base-focused-outline); outline-offset: calc(-1 * var(--base-outline-width)); }
+  .tip-host { position: relative; padding-top: 52px; }
+  .tip {
+    position: absolute; top: 0; left: 0;
+    padding: 6px 10px; border-radius: 6px; font-size: 12px;
+    background: var(--base-tooltip-bg); color: var(--base-tooltip-text-color);
+    box-shadow: var(--base-shadow-md);
+  }
+  .tip::after { content: ''; position: absolute; left: 18px; bottom: -5px; width: 10px; height: 10px; rotate: 45deg; background: inherit; }
+
+  /* Checkbox, README "Checkbox render method". */
+  .cb {
+    --cb-size: 16px;
+    --cb-radius: 3px;
+    flex: none;
+    box-sizing: border-box;
+    inline-size:  calc(var(--cb-size) * var(--base-checkbox-scale, 1));
+    block-size:   calc(var(--cb-size) * var(--base-checkbox-scale, 1));
+    border-width: calc(var(--base-border-width) * var(--base-checkbox-scale, 1));
+    border-style: solid;
+    border-color: var(--base-checkbox-border-color);
+    border-radius: calc(var(--cb-radius) * var(--base-checkbox-scale, 1));
+    background: var(--base-input-bg);
+    position: relative;
+  }
+  .cb.is-checked, .cb.is-indeterminate { background: var(--base-primary-color); border-color: var(--base-primary-color); }
+  .cb.is-checked::after, .cb.is-indeterminate::after {
+    content: ''; position: absolute; inset: 0;
+    background-color: var(--base-on-primary-text-color);
+    mask: var(--base-icon-check) no-repeat center / var(--base-icon-check-size, 68%);
+  }
+  .cb.is-indeterminate::after { mask-image: var(--base-icon-indeterminate); }
+  .cb.is-disabled { opacity: var(--base-disabled-opacity); }
+  /* The anti-pattern, for comparison: a 16px box scaled with transform. */
+  .cb.is-transformed { --base-checkbox-scale: 1; transform: scale(var(--demo-scale)); transform-origin: left center; }
+
+  .cb-rows { display: grid; gap: 4px; }
+  .cb-row { display: flex; align-items: center; gap: 10px; padding: 4px 8px; border-radius: 4px; font-size: 14px; }
+  .cb-row:hover { background: var(--base-hover-bg); }
+  .cb-cols { display: grid; gap: 20px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+  .controls { gap: 12px 24px; }
+  output { font-family: var(--base-font-family-mono); }
+</style>
+
+<div class="note info">
+  Every field in pure-admin and in every component reads the same input tokens, so a select in
+  web-multiselect, a date field in web-daterangepicker and a pure-admin text box line up: same
+  height scale, border, focus ring, placeholder and icon colour. The checkbox has one render method
+  for everyone (README → Checkbox render method).
+</div>
+
+<section class="card">
+  <h2>FO01 · Text field states</h2>
+  <p>The first field is live: hover it and click into it. The rest are pinned to one state.</p>
+  <div class="fields">
+    <label>Live <input class="f-input" placeholder="Type here…"></label>
+    <label>Placeholder <input class="f-input" placeholder="--base-input-placeholder-color"></label>
+    <label>Hover <input class="f-input is-hover" value="--base-input-border-hover"></label>
+    <label>Focus <input class="f-input is-focus" value="--base-input-border-focus + halo"></label>
+    <label>Disabled <input class="f-input" value="--base-input-bg-disabled" disabled></label>
+    <label>Invalid <input class="f-input is-invalid" value="danger border">
+      <span class="f-error">Built from the danger role, not a form token.</span></label>
+    <label>With icons
+      <span class="f-wrap">
+        <span class="f-icon"></span>
+        <input class="f-input" value="Search and clear">
+        <button type="button" class="f-clear-btn" aria-label="Clear"><span class="f-clear"></span></button>
+      </span>
+      <span class="f-help"><code>--base-input-icon-color</code>, <code>-icon-bg-hover</code></span></label>
+  </div>
+</section>
+
+<section class="card">
+  <h2>FO02 · Field heights</h2>
+  <p>Five heights, unitless × <code>--base-rem</code>. A component's <code>size</code> attribute
+    picks one, so an <code>sm</code> multiselect and an <code>sm</code> pure-admin input are the same height.</p>
+  <div class="sizes" id="sizes"></div>
+</section>
+
+<section class="card">
+  <h2>FO03 · Dropdowns and tooltips</h2>
+  <p>A dropdown panel uses the main surface with its own border and shadow tokens, and the item
+    states from the item-state model (hover, selected tint, focused ring). The tooltip is the
+    inverse of the surface: dark on a light page, light on a dark one.</p>
+  <div class="float-demo">
+    <div>
+      <input class="f-input is-focus" value="Cherry" aria-label="Fruit">
+      <div class="dd">
+        <div>Apple</div><div>Banana</div><div class="is-selected">Cherry</div>
+        <div class="is-focused">Grape</div><div>Lemon</div>
+      </div>
+    </div>
+    <div class="tip-host">
+      <span class="tip"><code>--base-tooltip-bg</code> / <code>-text-color</code></span>
+      <button type="button" class="app-btn app-btn--outline">Hover target</button>
+    </div>
+    <div>
+      <p class="notice" data-missing="web-multiselect" hidden>web-multiselect build not found — run
+        <code>npm run build</code> in <code>../web-multiselect</code>.</p>
+      <web-multiselect multiple="true" search-placeholder="The real component…" value-member="value" display-value-member="label">
+        <option value="apple">Apple</option><option value="banana">Banana</option><option value="cherry" selected>Cherry</option>
+        <option value="grape">Grape</option><option value="lemon">Lemon</option>
+      </web-multiselect>
+    </div>
+  </div>
+</section>
+
+<section class="card">
+  <h2>FO04 · The checkbox</h2>
+  <p>Two knobs: <code>--base-checkbox-scale</code> sizes the box, its border and its corners (all
+    through <code>calc</code>); <code>--base-icon-check-size</code> sizes the glyph as a percentage of
+    the box. Never <code>transform: scale()</code>: it moves the box to its own layer, which snaps the
+    glyph to whole pixels, so the tick drifts from row to row. Compare the columns at 1.25 or 1.5.</p>
+  <div class="controls">
+    <label><code>--base-checkbox-scale</code>
+      <input type="range" id="ctl-scale" min="1" max="2" step="0.05" value="1"> <output id="out-scale">1</output></label>
+    <label><code>--base-icon-check-size</code>
+      <input type="range" id="ctl-glyph" min="40" max="100" step="2" value="68"> <output id="out-glyph">68%</output></label>
+  </div>
+  <div class="cb-cols">
+    <div>
+      <h3>calc (the method)</h3>
+      <div class="cb-rows" id="cb-calc"></div>
+    </div>
+    <div>
+      <h3>transform: scale() (don't)</h3>
+      <div class="cb-rows" id="cb-transform"></div>
+    </div>
+  </div>
+</section>
+
+<script type="module">
+  import { loadComponent } from '/examples-mock.js';
+
+  const root = document.documentElement;
+  const $ = (id) => document.getElementById(id);
+
+  $('sizes').innerHTML = ['xs', 'sm', 'md', 'lg', 'xl'].map((s) => `<div>
+      <code>--base-input-size-${s}-height</code>
+      <input class="f-input" style="height: calc(var(--base-input-size-${s}-height) * var(--base-rem)); max-width: 320px" value="${s}" aria-label="${s}">
+    </div>`).join('');
+
+  const ROWS = [['Unchecked', ''], ['Checked', 'is-checked'], ['Indeterminate', 'is-indeterminate'], ['Checked', 'is-checked'],
+    ['Disabled', 'is-checked is-disabled'], ['Checked', 'is-checked']];
+  const rows = (extra) => ROWS.map(([label, cls]) =>
+    `<div class="cb-row"><span class="cb ${cls} ${extra}"></span>${label}</div>`).join('');
+  $('cb-calc').innerHTML = rows('');
+  $('cb-transform').innerHTML = rows('is-transformed');
+
+  function applyCheckbox() {
+    const scale = $('ctl-scale').value;
+    const glyph = $('ctl-glyph').value;
+    $('out-scale').textContent = scale;
+    $('out-glyph').textContent = `${glyph}%`;
+    $('cb-calc').style.setProperty('--base-checkbox-scale', scale);
+    $('cb-transform').style.setProperty('--demo-scale', scale);
+    // The transform column has to make room for the scaled box itself.
+    $('cb-transform').querySelectorAll('.cb').forEach((cb) => { cb.style.marginRight = `${(scale - 1) * 16}px`; });
+    root.style.setProperty('--base-icon-check-size', `${glyph}%`);
+  }
+  $('ctl-scale').addEventListener('input', applyCheckbox);
+  $('ctl-glyph').addEventListener('input', applyCheckbox);
+  applyCheckbox();
+
+  const msOk = await loadComponent('web-multiselect');
+  window.__demo = { ready: true, components: { multiselect: msOk } };
+</script>

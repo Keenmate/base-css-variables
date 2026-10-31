@@ -1,0 +1,153 @@
+<meta name="kmwc:title" content="Light / dark">
+<meta name="kmwc:subtitle" content="light-dark() follows color-scheme; [data-theme] forces a mode on any part of the page">
+<meta name="kmwc:entry" content="none">
+<link rel="stylesheet" href="/base-variables.css">
+<link rel="stylesheet" href="/examples-mock.css">
+<style>
+  :root { --base-rem: 10px; }
+
+  .readout { font-family: var(--base-font-family-mono); font-size: 13px; }
+  .readout b { color: var(--base-primary-text-color); }
+
+  .pairs { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .pairs th { text-align: left; font-weight: 600; padding: 6px 8px; color: var(--base-text-color-2); }
+  .pairs td { padding: 4px 8px; border-top: var(--base-border); vertical-align: middle; }
+  .pairs td.chip { width: 26%; }
+  .pairs td.chip > div { display: flex; align-items: center; gap: 8px; padding: 6px; border-radius: 6px; background: var(--base-page-bg); color: var(--base-text-color-1); }
+  .pairs i { flex: none; inline-size: 28px; block-size: 20px; border-radius: 4px; border: var(--base-border); }
+  .pairs span { font-family: var(--base-font-family-mono); font-size: 11px; }
+  .pairs tr.is-current-light td.chip[data-theme="light"] > div,
+  .pairs tr.is-current-dark td.chip[data-theme="dark"] > div { outline: 2px solid var(--base-primary-color); }
+
+  .forced { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+  .forced > div { display: grid; gap: 10px; padding: 12px; border-radius: 10px; background: var(--base-page-bg); color: var(--base-text-color-1); border: var(--base-border); }
+  .forced h3 { margin: 0; }
+
+  .editor { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+  .editor > div { display: grid; gap: 10px; padding: 12px; border-radius: 10px; background: var(--base-page-bg); color: var(--base-text-color-1); }
+  .editor h3 { margin: 0; }
+  .controls { gap: 12px 24px; }
+</style>
+
+<div class="note info">
+  Every colour that differs between modes is written once, as <code>light-dark(light, dark)</code>.
+  The browser picks a side from <code>color-scheme</code>: the contract sets <code>light dark</code>
+  on <code>:root</code> (follow the OS), and <code>[data-theme="light"]</code> /
+  <code>[data-theme="dark"]</code> force one mode on any element and everything inside it, shadow roots included.
+  There are no separate dark-mode tokens and no <code>.dark</code> class to keep in sync.
+</div>
+
+<section class="card">
+  <h2>LD01 · Which mode is on</h2>
+  <p>The page follows your OS until you use the theme switch (top right), which sets
+    <code>data-theme</code> on <code>&lt;html&gt;</code>. Both values of each input below are rendered
+    side by side; the one in use is outlined.</p>
+  <p class="readout" id="mode-readout"></p>
+  <table class="pairs" id="pairs">
+    <thead><tr><th>Token</th><th>Light</th><th>Dark</th></tr></thead>
+    <tbody></tbody>
+  </table>
+  <p class="muted">Sizes, spacing, durations, z-index, icons and the palette are the same in both
+    modes: plain values, no <code>light-dark()</code>.</p>
+</section>
+
+<section class="card">
+  <h2>LD02 · Forcing a mode on one region</h2>
+  <p>A dark sidebar in a light app, or a light preview inside a dark editor:
+    <code>data-theme</code> on the region. The derived tokens are recalculated there too, so hover
+    steps, tints and text levels match the forced mode, and plain CSS inside follows.</p>
+  <p class="note warning">Keenmate components detect the <em>page</em> theme (<code>data-theme</code> on
+    <code>&lt;html&gt;</code> / <code>&lt;body&gt;</code>, via web-components-core) and that signal wins over
+    the region's. Inside a forced region, give each component the region's mode too:
+    <code>&lt;web-multiselect data-theme="dark"&gt;</code>. The multiselects below do.</p>
+  <div class="forced">
+    <div data-theme="dark" id="forced-dark">
+      <h3><code>data-theme="dark"</code></h3>
+    </div>
+    <div data-theme="light" id="forced-light">
+      <h3><code>data-theme="light"</code></h3>
+    </div>
+  </div>
+  <div class="code-block"><pre><code>&lt;aside data-theme="dark"&gt;                      &lt;!-- always dark --&gt;
+  &lt;web-multiselect data-theme="dark"&gt;&lt;/web-multiselect&gt;
+&lt;/aside&gt;
+&lt;section data-theme="light"&gt; … &lt;/section&gt; &lt;!-- always light --&gt;</code></pre></div>
+</section>
+
+<section class="card">
+  <h2>LD03 · A theme input with two values</h2>
+  <p>A theme writes its inputs the same way the contract does. Pick both values of
+    <code>--base-main-bg</code> and <code>--base-primary-color</code>: both panels get the same
+    declaration, and each shows its own side.</p>
+  <div class="controls">
+    <label>Main bg light <input type="color" id="ctl-bg-light" value="#ffffff"></label>
+    <label>Main bg dark <input type="color" id="ctl-bg-dark" value="#1e293b"></label>
+    <label>Primary light <input type="color" id="ctl-primary-light" value="#3b82f6"></label>
+    <label>Primary dark <input type="color" id="ctl-primary-dark" value="#3b82f6"></label>
+  </div>
+  <div class="editor">
+    <div data-theme="light" class="edit-target"><h3>Light</h3></div>
+    <div data-theme="dark" class="edit-target"><h3>Dark</h3></div>
+  </div>
+  <div class="code-block"><pre><code id="editor-css"></code></pre></div>
+</section>
+
+<script type="module">
+  import { mockApp, loadComponent, resolveColor } from '/examples-mock.js';
+
+  const root = document.documentElement;
+  const $ = (id) => document.getElementById(id);
+
+  /* -------------------------------------------------------------- LD01 */
+  const PAIRS = [
+    '--base-page-bg', '--base-main-bg', '--base-text-color-1', '--base-shadow-color',
+    '--base-success-text-color', '--base-danger-text-color', '--base-warning-text-color', '--base-info-text-color',
+    '--base-text-color-3', '--base-hover-bg', '--base-primary-bg-subtle', '--base-primary-text-color',
+  ];
+  const chip = (mode, token) => `<td class="chip" data-theme="${mode}"><div><i style="background: var(${token})"></i><span data-value></span></div></td>`;
+  $('pairs').tBodies[0].innerHTML = PAIRS.map((t) => `<tr><td><code>${t}</code></td>${chip('light', t)}${chip('dark', t)}</tr>`).join('');
+
+  function renderMode() {
+    const forced = root.getAttribute('data-theme');
+    const dark = forced ? forced === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+    $('mode-readout').innerHTML = `color-scheme: <b>${getComputedStyle(root).colorScheme}</b> · ` +
+      `data-theme: <b>${forced ?? '(none, follows the OS)'}</b> · in use: <b>${dark ? 'dark' : 'light'}</b>`;
+    for (const row of $('pairs').tBodies[0].rows) {
+      row.classList.toggle('is-current-dark', dark);
+      row.classList.toggle('is-current-light', !dark);
+      const token = row.cells[0].textContent;
+      for (const cell of row.querySelectorAll('td.chip')) cell.querySelector('[data-value]').textContent = resolveColor(token, cell);
+    }
+  }
+  new MutationObserver(renderMode).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', renderMode);
+  renderMode();
+
+  /* -------------------------------------------------------------- LD02 */
+  const ms = (mode) => `<web-multiselect data-theme="${mode}" multiple="true" value-member="value" display-value-member="label">
+      <option value="a" selected>Apple</option><option value="b">Banana</option><option value="c" selected>Cherry</option>
+    </web-multiselect>`;
+  for (const id of ['forced-dark', 'forced-light']) {
+    $(id).append(mockApp({ mini: true }));
+    $(id).insertAdjacentHTML('beforeend', ms($(id).dataset.theme));
+  }
+
+  /* -------------------------------------------------------------- LD03 */
+  for (const target of document.querySelectorAll('.edit-target')) target.append(mockApp({ mini: true }));
+  function applyEditor() {
+    const bg = `light-dark(${$('ctl-bg-light').value}, ${$('ctl-bg-dark').value})`;
+    const primary = $('ctl-primary-light').value === $('ctl-primary-dark').value
+      ? $('ctl-primary-light').value
+      : `light-dark(${$('ctl-primary-light').value}, ${$('ctl-primary-dark').value})`;
+    for (const target of document.querySelectorAll('.edit-target')) {
+      target.style.setProperty('--base-main-bg', bg);
+      target.style.setProperty('--base-primary-color', primary);
+    }
+    $('editor-css').textContent = `:root {\n  --base-main-bg: ${bg};\n  --base-primary-color: ${primary};\n}`;
+  }
+  document.querySelectorAll('.controls input').forEach((input) => input.addEventListener('input', applyEditor));
+  applyEditor();
+
+  const msOk = await loadComponent('web-multiselect');
+  window.__demo = { ready: true, components: { multiselect: msOk } };
+</script>

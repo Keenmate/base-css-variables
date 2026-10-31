@@ -9,13 +9,21 @@
 
     renderExamplesIndex({
         pages: [
-            { href: 'examples-variables.html', icon: '📋', title: 'Every variable', description: 'The whole --base-* contract in groups: input or derived, light and dark values.' },
-            { href: 'examples-derived.html', icon: '🧮', title: 'Derived tokens', description: 'The derivation formulas against the compiled pure-admin themes.' },
+            { href: 'examples-theming.html', icon: '🎨', title: 'Theming', description: 'A few inputs re-theme the app, the components and the page; theming one region with .base-scope.' },
+            { href: 'examples-light-dark.html', icon: '🌗', title: 'Light / dark', description: 'light-dark() follows color-scheme; data-theme forces a mode on any region.' },
+            { href: 'examples-roles.html', icon: '🚦', title: 'Roles', description: 'Six roles, seven tokens each: fill, hover, pressed, tint, text, text on the fill.' },
+            { href: 'examples-surfaces.html', icon: '🧱', title: 'Surfaces & text', description: 'The elevation ladder, four text levels, borders, shadows, the overlay, z-index.' },
+            { href: 'examples-forms.html', icon: '📝', title: 'Forms', description: 'Field states and heights, dropdowns, tooltips and the checkbox render method.' },
             { href: 'examples-item-states.html', icon: '🗂️', title: 'Item states', description: 'Hover / focused / selected / checked on a reference list, web-treeview and web-multiselect.' },
-            { href: 'examples-fill-states.html', icon: '🔤', title: 'Text on fills', description: 'WCAG 2 vs APCA text pick, button hover and pressed states.' },
-            { href: 'examples-role-steps.html', icon: '🎚️', title: 'Role steps', description: 'Hover / active / tint steps of every role: sRGB mix vs OKLCH.' },
-            { href: 'examples-drop-target.html', icon: '📥', title: 'Drop target', description: '--base-drop-target-* against the borrowed primary tint.' },
+            { href: 'examples-sizing.html', icon: '📏', title: 'Sizing', description: 'One --base-rem knob for density; the font, spacing, radius and height scales; breakpoints.' },
+            { href: 'examples-icons.html', icon: '✳️', title: 'Icons & palette', description: 'Every --base-icon-*, swapping one everywhere, and the nine palette slots.' },
+            { href: 'examples-motion.html', icon: '🎞️', title: 'Motion', description: 'Four speeds, three easings, reduced motion, motion off, scroll behaviour.' },
             { href: 'examples-loader.html', icon: '⏳', title: 'Loader', description: 'One loader for the app and every component: --base-loader-*.' },
+            { href: 'examples-variables.html', icon: '📋', title: 'Every variable', description: 'The whole --base-* contract in groups: input or derived, light and dark values.' },
+            { href: 'examples-derived.html', icon: '🧮', title: 'Derived tokens', badge: 'Design note', description: 'The derivation formulas against the compiled pure-admin themes.' },
+            { href: 'examples-fill-states.html', icon: '🔤', title: 'Text on fills', badge: 'Design note', description: 'WCAG 2 vs APCA text pick, button hover and pressed options.' },
+            { href: 'examples-role-steps.html', icon: '🎚️', title: 'Role steps', badge: 'Design note', description: 'Hover / active / tint steps of every role: sRGB mix vs OKLCH.' },
+            { href: 'examples-drop-target.html', icon: '📥', title: 'Drop target', badge: 'Design note', description: '--base-drop-target-* against the borrowed primary tint.' },
         ],
         links: [{ label: 'README', href: 'https://github.com/keenmate/base-css-variables#readme' }],
     });

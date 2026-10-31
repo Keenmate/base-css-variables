@@ -1,0 +1,226 @@
+<meta name="kmwc:title" content="Theming">
+<meta name="kmwc:subtitle" content="A theme is a few inputs; everything else follows: the app, the components, this page">
+<meta name="kmwc:entry" content="none">
+<link rel="stylesheet" href="/base-variables.css">
+<link rel="stylesheet" href="/examples-mock.css">
+<style>
+  /* The unitless multipliers assume a 10px unit (pure-admin's html font-size);
+     the kit keeps the browser's 16px rem, so the page sets the unit itself. */
+  :root { --base-rem: 10px; }
+
+  .controls { gap: 12px 24px; }
+  .controls label { white-space: nowrap; }
+
+  .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 8px; }
+  .swatch { display: grid; grid-template-columns: 36px 1fr; gap: 2px 10px; align-items: center; font-size: 12px; }
+  .swatch i { grid-row: span 2; height: 36px; border-radius: 6px; border: var(--base-border); }
+  .swatch code { font-size: 11px; }
+  .swatch span { color: var(--base-text-color-3); font-family: var(--base-font-family-mono); font-size: 11px; }
+  .swatch.is-input code::after { content: ' · input'; color: var(--base-primary-text-color); }
+
+  .scopes { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+  .scopes h3 { margin: 0 0 4px; }
+  .scopes .muted { margin: 0 0 8px; min-height: 3em; }
+  .scope-box { display: grid; gap: 10px; }
+  .verdict { font-size: 12px; font-weight: 600; }
+  .verdict.is-bad { color: var(--base-danger-text-color); }
+  .verdict.is-good { color: var(--base-success-text-color); }
+</style>
+
+<div class="note info">
+  A theme sets a handful of <strong>inputs</strong>: the primary colour, the page and main surfaces,
+  the text colour. Every other token (hover and pressed steps, tints, text levels, borders, text on
+  fills, item states) is a formula over them. Set the inputs once and pure-admin, every Keenmate
+  component and this page's own chrome follow. Light / dark: the theme switch (top right).
+</div>
+
+<section class="card">
+  <h2>TH01 · One theme, everything follows</h2>
+  <p>Pick a theme or a primary colour. It is written to <code>:root</code> as inline custom
+    properties, the same as a theme stylesheet would set them. The mock app (plain CSS), the two
+    real components and the page around them (header, chapter nav, cards) all re-theme together.</p>
+  <div class="controls">
+    <label>Theme <select id="ctl-theme"></select></label>
+    <label>Primary <input type="color" id="ctl-primary" value="#3b82f6"></label>
+    <button type="button" class="btn" id="ctl-reset">Reset</button>
+  </div>
+  <div class="grid" style="--grid-min: 320px">
+    <div id="mock-page"></div>
+    <div class="scope-box" id="components"></div>
+  </div>
+  <p>The whole theme:</p>
+  <div class="code-block"><pre><code id="theme-css"></code></pre></div>
+</section>
+
+<section class="card">
+  <h2>TH02 · Inputs in, derived out</h2>
+  <p>The tokens below are computed now, on <code>:root</code>. The ones marked <em>input</em> come from
+    the theme; the rest are formulas in <code>base-variables.css</code> (<code>color-mix()</code> and
+    OKLCH relative colours) and change with them. A theme never sets a derived token; to retune one
+    step for one component, override that component's own token instead.</p>
+  <div class="swatches" id="swatches"></div>
+</section>
+
+<section class="card">
+  <h2>TH03 · Theming one part of a page</h2>
+  <p>A second theme for one region: a dialog, a sidebar, an embedded widget. The derived tokens are
+    calculated where they are declared, on <code>:root</code>, <code>[data-theme]</code> and
+    <code>.base-scope</code>. Setting an input on any other element only changes that input, and
+    every formula keeps the page's value. Put the class on the element that sets the inputs.</p>
+  <div class="controls">
+    <label>Region theme <select id="ctl-scope-theme"></select></label>
+  </div>
+  <div class="scopes">
+    <div>
+      <h3>The page theme</h3>
+      <p class="muted">No override.</p>
+      <div class="scope-box" data-scope="none"></div>
+    </div>
+    <div>
+      <h3>Inputs on a plain <code>&lt;div&gt;</code></h3>
+      <p class="muted">The fills change, but the tints, hover steps and the selected row keep the page's primary.</p>
+      <div class="scope-box" data-scope="plain"></div>
+      <p class="verdict is-bad">✗ half themed</p>
+    </div>
+    <div>
+      <h3>Inputs on <code>.base-scope</code></h3>
+      <p class="muted">Same inputs. The formulas run again on this element, so everything inside follows.</p>
+      <div class="scope-box base-scope" data-scope="scope"></div>
+      <p class="verdict is-good">✓ fully themed</p>
+    </div>
+  </div>
+  <div class="code-block"><pre><code id="scope-css"></code></pre></div>
+</section>
+
+<script type="module">
+  import { mockApp, loadComponent, missingNotice, TREE_NODES, resolveColor } from '/examples-mock.js';
+
+  const root = document.documentElement;
+  const $ = (id) => document.getElementById(id);
+
+  /* A theme is inputs only. Light / dark pairs use light-dark(), like the contract. */
+  const THEMES = {
+    corporate: { label: 'Corporate (the default)', inputs: {} },
+    violet: {
+      label: 'Violet',
+      inputs: {
+        '--base-primary-color': '#7c3aed',
+        '--base-page-bg': 'light-dark(#f7f5fb, #17141f)',
+        '--base-main-bg': 'light-dark(#ffffff, #221d2e)',
+        '--base-text-color-1': 'light-dark(#3b3150, #ede9fe)',
+      },
+    },
+    forest: {
+      label: 'Forest',
+      inputs: {
+        '--base-primary-color': '#15803d',
+        '--base-page-bg': 'light-dark(#f3f6f2, #0f1712)',
+        '--base-main-bg': 'light-dark(#ffffff, #17231b)',
+        '--base-text-color-1': 'light-dark(#26352b, #e2eee5)',
+      },
+    },
+    sunset: {
+      label: 'Sunset',
+      inputs: {
+        '--base-primary-color': '#ea580c',
+        '--base-page-bg': 'light-dark(#fbf7f3, #1b1410)',
+        '--base-main-bg': 'light-dark(#ffffff, #281d17)',
+        '--base-text-color-1': 'light-dark(#3d2b20, #f6e9df)',
+      },
+    },
+  };
+  const INPUT_NAMES = ['--base-primary-color', '--base-page-bg', '--base-main-bg', '--base-text-color-1'];
+  const DEFAULT_PRIMARY = '#3b82f6';
+
+  for (const select of [$('ctl-theme'), $('ctl-scope-theme')]) {
+    select.innerHTML = Object.entries(THEMES).map(([key, t]) => `<option value="${key}">${t.label}</option>`).join('');
+  }
+  $('ctl-scope-theme').value = 'sunset';
+
+  /* ---------------------------------------------------- mock + components */
+  $('mock-page').append(mockApp());
+  $('components').innerHTML = `
+    <div>${missingNotice('web-multiselect')}
+      <web-multiselect multiple="true" search-placeholder="Pick fruits…" value-member="value" display-value-member="label">
+        <option value="apple" selected>Apple</option><option value="banana">Banana</option>
+        <option value="cherry" selected>Cherry</option><option value="grape">Grape</option>
+      </web-multiselect></div>
+    <div>${missingNotice('web-treeview')}
+      <web-treeview expand-level="2" selection-mode="multiple"></web-treeview></div>`;
+
+  for (const box of document.querySelectorAll('.scope-box[data-scope]')) {
+    box.append(mockApp({ mini: true }));
+    box.insertAdjacentHTML('beforeend', `<web-multiselect multiple="true" value-member="value" display-value-member="label">
+      <option value="a" selected>Apple</option><option value="b">Banana</option><option value="c">Cherry</option>
+    </web-multiselect>`);
+  }
+
+  /* ---------------------------------------------------------- page theme */
+  const cssBlock = (selector, inputs) => {
+    const lines = Object.entries(inputs).map(([k, v]) => `  ${k}: ${v};`);
+    return lines.length ? `${selector} {\n${lines.join('\n')}\n}` : `/* ${selector}: no overrides, the contract defaults */`;
+  };
+
+  function pageInputs() {
+    const inputs = { ...THEMES[$('ctl-theme').value].inputs };
+    const picked = $('ctl-primary').value.toLowerCase();
+    if (picked !== (inputs['--base-primary-color'] ?? DEFAULT_PRIMARY)) inputs['--base-primary-color'] = picked;
+    return inputs;
+  }
+
+  function applyPageTheme() {
+    const inputs = pageInputs();
+    for (const name of INPUT_NAMES) {
+      if (inputs[name]) root.style.setProperty(name, inputs[name]);
+      else root.style.removeProperty(name);
+    }
+    $('theme-css').textContent = cssBlock(':root', inputs);
+    renderSwatches();
+  }
+
+  $('ctl-theme').addEventListener('change', () => {
+    $('ctl-primary').value = THEMES[$('ctl-theme').value].inputs['--base-primary-color'] ?? DEFAULT_PRIMARY;
+    applyPageTheme();
+  });
+  $('ctl-primary').addEventListener('input', applyPageTheme);
+  $('ctl-reset').addEventListener('click', () => {
+    $('ctl-theme').value = 'corporate';
+    $('ctl-primary').value = DEFAULT_PRIMARY;
+    applyPageTheme();
+  });
+  // The kit's theme switch changes data-theme on <html>: recompute the readouts.
+  new MutationObserver(() => renderSwatches()).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
+
+  /* ------------------------------------------------------------ swatches */
+  const SWATCHES = [
+    '--base-primary-color', '--base-primary-color-hover', '--base-primary-color-active',
+    '--base-primary-bg-subtle', '--base-primary-text-color', '--base-on-primary-text-color',
+    '--base-selected-bg', '--base-input-shadow-color-focus',
+    '--base-page-bg', '--base-subtle-bg', '--base-main-bg', '--base-elevated-bg', '--base-hover-bg', '--base-border-color',
+    '--base-text-color-1', '--base-text-color-2', '--base-text-color-3', '--base-text-color-4',
+  ];
+
+  function renderSwatches() {
+    $('swatches').innerHTML = SWATCHES.map((t) =>
+      `<div class="swatch${INPUT_NAMES.includes(t) ? ' is-input' : ''}" data-token="${t}">` +
+      `<i style="background: var(${t})"></i><code>${t}</code><span>${resolveColor(t)}</span></div>`).join('');
+  }
+
+  /* ------------------------------------------------------------- regions */
+  function applyScopeTheme() {
+    const inputs = THEMES[$('ctl-scope-theme').value].inputs;
+    for (const box of document.querySelectorAll('.scope-box[data-scope="plain"], .scope-box[data-scope="scope"]')) {
+      for (const name of INPUT_NAMES) box.style.removeProperty(name);
+      for (const [name, value] of Object.entries(inputs)) box.style.setProperty(name, value);
+    }
+    $('scope-css').textContent = cssBlock('.my-region.base-scope', inputs);
+  }
+  $('ctl-scope-theme').addEventListener('change', applyScopeTheme);
+
+  applyPageTheme();
+  applyScopeTheme();
+
+  const [msOk, treeOk] = await Promise.all([loadComponent('web-multiselect'), loadComponent('web-treeview')]);
+  if (treeOk) document.querySelector('web-treeview').nodes = TREE_NODES;
+  window.__demo = { ready: true, components: { multiselect: msOk, treeview: treeOk } };
+</script>

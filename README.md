@@ -723,7 +723,11 @@ categorical color (charts, tags, avatars).
 - [`@keenmate/theme-designer`](https://github.com/keenmate/theme-designer) — visual
   theme designer & generator that produces `--base-*` values from 3 input colors.
   *Not yet updated for 2.0* — it still emits the 1.x names.
-- `examples-derived.html` in the [GitHub repo](https://github.com/Keenmate/base-css-variables) (not in the npm package; `make dev` → http://localhost:15300) — compares the derived formulas against
+- The examples site in the [GitHub repo](https://github.com/Keenmate/base-css-variables) (not in the npm package;
+  `make dev` → http://localhost:15300) — one page per feature, live with web-multiselect and web-treeview:
+  theming and `.base-scope`, light / dark, roles, surfaces and text, forms and the checkbox, item states,
+  sizing and density, icons and the palette, motion, the loader, and every variable. The design notes below are there too.
+- `examples-derived.html` (same place) — compares the derived formulas against
   the compiled pure-admin themes, with live input pickers and formula knobs.
 - `examples-fill-states.html` (same place) — text on fills (WCAG 2 vs APCA pick, with both scores),
   hover / press options for buttons, and how a theme overrides a button component's state tokens.
