@@ -20,7 +20,7 @@
  * Usage:  base-contract-check [paths…] [--config contract-check.json]
  *                             [--contract base-variables.css] [--report] [--json]
  * Paths default to `src`. Scans .css .scss .ts .js .mjs .svelte .html .md (comments stripped),
- * skips node_modules / dist. Exit 1 on any finding not on the allowlist, unless --report.
+ * skips node_modules / dist / dist-examples / test output. Exit 1 on any finding not on the allowlist, unless --report.
  *
  * Allowlist (`contract-check.json` in the working directory, optional):
  *   { "allow": [ { "token": "--base-icon-calendar", "rule": "C1", "reason": "…" } ] }
@@ -35,7 +35,7 @@ export const DEFAULT_CONTRACT = join(here, '..', 'base-variables.css');
 export const DEFAULT_RENAMES = join(here, '..', 'renames.json');
 const EXTS = new Set(['.css', '.scss', '.ts', '.js', '.mjs', '.svelte', '.html', '.md']);
 const MARKUP = /\.(html|md)$/;
-const SKIP_DIRS = new Set(['node_modules', 'dist', '.git', '.svelte-kit', 'build']);
+const SKIP_DIRS = new Set(['node_modules', 'dist', 'dist-examples', '.git', '.svelte-kit', 'build', 'test-results', 'playwright-report']);
 const ROLES = ['success', 'danger', 'warning', 'info'];
 
 // ---------------------------------------------------------------- parsing

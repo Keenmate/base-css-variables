@@ -20,7 +20,8 @@ All notable changes to `@keenmate/base-css-variables` are documented here. Forma
   does nothing since 2.0.0, and nothing said so. The rename hint names the replacement.
 - **`base-contract-check` scans `.html` and `.md` too** (HTML comments stripped), so example pages,
   scaffold templates and docs snippets are checked like the source. A component's default path is
-  still `src`; pass the extra folders to include them.
+  still `src`; pass the extra folders to include them. Build and test output (`dist-examples`,
+  `test-results`, `playwright-report`) is skipped like `dist`.
 
 ## [2.0.0-rc06] — 2026-10-29 [PUBLISHED]
 

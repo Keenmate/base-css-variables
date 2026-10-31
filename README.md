@@ -311,7 +311,7 @@ Deliberate differences go in `contract-check.json` next to `package.json`, each 
 
 Options: `--report` (list, exit 0 — for adopting), `--json`, `--config <file>`,
 `--contract <base-variables.css>`. Scans `.css .scss .ts .js .mjs .svelte .html .md` (example pages and docs too), comments stripped,
-`node_modules` / `dist` skipped. The same check is importable: `import { check } from
+`node_modules`, `dist`, `dist-examples` and test output skipped. The same check is importable: `import { check } from
 '@keenmate/base-css-variables/check'`.
 
 ### Parity test (e2e)
