@@ -12,6 +12,12 @@ that **cascade from these `--base-*` values**. Define the base layer once and ev
 component picks up a consistent, coordinated theme. Override a single `--base-*`
 variable and the change propagates everywhere.
 
+## What's New in 2.0.0-rc07
+
+- **Breakpoints — `--base-breakpoint-mobile` / `--base-breakpoint-tablet`** — `768px` and `1024px`, the widths where layouts switch. pure-css's JS config (`mobileBreakpoint` / `tabletBreakpoint`) and web-components-core (`env.breakpoint`) already read them, so the app shell and every component switch at the same width. They're read from JS, because `@media` can't read `var()`; pure-css compiles the same widths from `$mobile-breakpoint` / `$tablet-breakpoint`.
+- **Tooling — `base-contract-check` catches setting a name the contract doesn't have** — `--base-accent-color: #10b981` in CSS, in a `style` attribute or via `style.setProperty(…)` has done nothing since 2.0.0, and nothing said so. The check now flags it and names the replacement.
+- **Tooling — `base-contract-check` scans `.html` and `.md`** — example pages, scaffold templates and docs snippets get checked like the source (HTML comments are ignored). Build and test output (`dist-examples`, `test-results`, `playwright-report`) is skipped like `dist`.
+
 ## What's New in 2.0.0-rc06
 
 - **Motion — reduced motion turns animation off** — under `prefers-reduced-motion: reduce` the four `--base-duration-*` speeds become `0s` and `--base-scroll-behavior` becomes `auto`, so everything timed by the contract stops animating. Turning motion off any other time is CSS only: `--base-duration-*: 0s` page-wide, or a component's own `--<prefix>-transition-*: 0s`. Components use only the four speeds and the `--base-ease-*` easings.
@@ -19,12 +25,6 @@ variable and the change propagates everywhere.
 - **Drop target — `--base-drop-target-bg` / `-bg-active` / `-border-color`** — one look for everything you can drop onto (tree rows, dropzones, grid column reorder). Derived from the success role, so a drop target is told apart from the primary-tinted selection at a glance.
 - **New tokens — `--base-tree-indent` and `--base-scroll-behavior`** — `--base-tree-indent: 1.6` (unitless, 16px at a 10px rem) is one indent per level for both treeviews, the web-grid tree column and the web-multiselect tree. `--base-scroll-behavior` (`smooth`) drives programmatic scrolling, as CSS `scroll-behavior` or as the `behavior` passed to `scrollTo` / `scrollIntoView`.
 - **Tooling — `base-contract-check` knows reduced motion** — a read inside `@media (prefers-reduced-motion: reduce)` must fall back to the contract's value in that block (`var(--base-loader-duration, 1.5s)`, `var(--base-duration-fast, 0s)`). Before, that fallback was flagged as a C2 error.
-
-## What's New in 2.0.0-rc05
-
-- **Default primary — blue-500 `#3b82f6`** — `--base-primary-color` was Corporate's sky `#0ea5e9`, which read too light as text and on its own tint; its derived text (`--base-primary-text-color`) turned teal-grey. Everything derived from the primary follows: hover / active, tints, selected / focused item states, the input focus border and halo. White stays the text on the fill. The rest of the default theme stays Corporate; pure-css 2.0.0-rc05 mirrors the default.
-- **Tooling — `contractParity()` e2e helper** — `@keenmate/base-css-variables/testing/parity` renders a component standalone and with the contract, in light and dark plus a custom-accent pass, and compares every color token. It catches formula fallbacks that differ from the contract's, which the static check can't see (e.g. a 10% tint where the contract is 10% light / 20% dark).
-- **Tooling — stricter `base-contract-check`** — a fallback for a contract alias (`--base-selected-bg: var(--base-primary-bg-subtle)`) must go through the aliased token. The check no longer exits 0 without checking when run through a symlink (`npm link`, pnpm), and compares numbers by value.
 
 ## Install
 
