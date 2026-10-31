@@ -1,0 +1,22 @@
+<meta name="kmwc:layout" content="bare">
+<meta name="kmwc:entry" content="none">
+<link rel="stylesheet" href="/base-variables.css">
+
+<!-- Header, cards, footer, version badge and the cross-page nav are rendered by
+     the devkit from its registry + package.json#kmwc. -->
+<script type="module">
+    import { renderExamplesIndex } from '@keenmate/web-components-devkit/examples';
+
+    renderExamplesIndex({
+        pages: [
+            { href: 'examples-variables.html', icon: '📋', title: 'Every variable', description: 'The whole --base-* contract in groups: input or derived, light and dark values.' },
+            { href: 'examples-derived.html', icon: '🧮', title: 'Derived tokens', description: 'The derivation formulas against the compiled pure-admin themes.' },
+            { href: 'examples-item-states.html', icon: '🗂️', title: 'Item states', description: 'Hover / focused / selected / checked on a reference list, web-treeview and web-multiselect.' },
+            { href: 'examples-fill-states.html', icon: '🔤', title: 'Text on fills', description: 'WCAG 2 vs APCA text pick, button hover and pressed states.' },
+            { href: 'examples-role-steps.html', icon: '🎚️', title: 'Role steps', description: 'Hover / active / tint steps of every role: sRGB mix vs OKLCH.' },
+            { href: 'examples-drop-target.html', icon: '📥', title: 'Drop target', description: '--base-drop-target-* against the borrowed primary tint.' },
+            { href: 'examples-loader.html', icon: '⏳', title: 'Loader', description: 'One loader for the app and every component: --base-loader-*.' },
+        ],
+        links: [{ label: 'README', href: 'https://github.com/keenmate/base-css-variables#readme' }],
+    });
+</script>

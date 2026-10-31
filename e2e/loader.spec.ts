@@ -7,7 +7,7 @@ import { test, expect, type Page, type Locator } from '@playwright/test';
  * element screenshots: two frames that differ = the loader moves.
  */
 
-const PAGE = '/demo/loader.html';
+const PAGE = '/examples-loader.html';
 
 async function open(page: Page): Promise<void> {
   await page.goto(PAGE);
@@ -25,6 +25,8 @@ const rootVar = (page: Page, name: string) =>
  */
 async function shot(el: Locator): Promise<Buffer> {
   const clip = await el.evaluate((e: HTMLElement) => {
+    // A clip only sees the viewport: bring the loader into it first (the page header pushes it down).
+    ((e.getRootNode() as ShadowRoot).host ?? e).scrollIntoView({ block: 'center', behavior: 'instant' });
     let x = 0, y = 0;
     const r = (e.offsetParent ?? (e.getRootNode() as ShadowRoot).host ?? document.body).getBoundingClientRect();
     x = r.left + e.offsetLeft; y = r.top + e.offsetTop;

@@ -1,26 +1,12 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<title>--base-loader-* — one loader for the app and every component</title>
-<link rel="stylesheet" href="../base-variables.css">
+<meta name="kmwc:title" content="Loader">
+<meta name="kmwc:subtitle" content="--base-loader-* — one loader for the app and every component">
+<meta name="kmwc:entry" content="none">
+<link rel="stylesheet" href="/base-variables.css">
 <style>
-  * { box-sizing: border-box; }
-  body { margin: 0; padding: 16px 20px 60px; font: 14px/1.45 var(--base-font-family); background: #f3f4f6; color: #1f2937; }
-  h1 { font-size: 20px; margin: 0 0 4px; }
-  p.lead { margin: 0 0 12px; max-width: 1000px; color: #4b5563; }
-  code { font: 12px var(--base-font-family-mono); }
-  section { margin: 18px 0 6px; }
-  section h2 { font-size: 15px; margin: 0 0 2px; }
-  section p.note { margin: 0 0 8px; font-size: 12.5px; color: #4b5563; max-width: 1000px; }
-  .bar { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; padding: 8px 0 10px; border-bottom: 1px solid #d1d5db; }
-  .bar label { display: inline-flex; gap: 6px; align-items: center; font-size: 13px; }
   .row { display: flex; flex-wrap: wrap; gap: 12px; }
-  .card { background: var(--base-main-bg); color: var(--base-text-color-1); border: 1px solid var(--base-border-color);
-    border-radius: 8px; padding: 14px 16px; min-width: 210px; }
-  .card h3 { margin: 0 0 10px; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--base-text-color-3); }
-  .card .line { display: flex; gap: 8px; align-items: center; margin: 6px 0; }
-  .readout { font: 12px var(--base-font-family-mono); color: #374151; }
+  .demo-card { min-width: 210px; }
+  .demo-card .line { display: flex; gap: 8px; align-items: center; margin: 6px 0; }
+  .readout { font: 12px var(--base-font-family-mono); color: var(--base-text-color-2); }
 
   /* ---- the drawing contract: the same four lines in every consumer ---- */
   .demo-loader {
@@ -38,15 +24,15 @@
   .muted { color: var(--base-text-color-3); }
   .danger { color: var(--base-danger-color); }
 </style>
-</head>
-<body>
-<h1>Loader — <code>--base-loader-*</code></h1>
-<p class="lead">One loading indicator for the pure-admin app and every component. Shadow DOM lets only custom
+
+<div class="note info">
+  One loading indicator for the pure-admin app and every component. Shadow DOM lets only custom
   properties in, so the loader is four tokens and each consumer draws it with the same four lines
   (<code>mask</code> + <code>currentColor</code> + a rotate animation). Swap <code>--base-loader-icon</code> once
-  and every loader changes. Single colour: the icon is a mask.</p>
+  and every loader changes. Single colour: the icon is a mask.
+</div>
 
-<div class="bar">
+<div class="controls">
   <label>Shape
     <select id="shape">
       <option value="">contract default (spinner arc)</option>
@@ -55,23 +41,22 @@
       <option value="dots">three dots — rotates</option>
     </select>
   </label>
-  <label><input type="checkbox" id="dark"> dark</label>
   <span class="readout" id="readout"></span>
 </div>
 
-<section>
+<div class="card">
   <h2>1. In text, sized by <code>em</code></h2>
-  <p class="note"><code>--base-loader-size: 1.25em</code> — the loader follows the font size of the line it sits in.
+  <p><code>--base-loader-size: 1.25em</code> — the loader follows the font size of the line it sits in.
     Colour is <code>currentColor</code>.</p>
   <div class="row">
-    <div class="card">
+    <div class="demo-card">
       <h3>Sizes</h3>
       <div class="line" style="font-size:12px"><span class="demo-loader primary"></span> 12px Loading…</div>
       <div class="line" style="font-size:14px"><span class="demo-loader primary"></span> 14px Loading…</div>
       <div class="line" style="font-size:20px"><span class="demo-loader primary"></span> 20px Loading…</div>
       <div class="line" style="font-size:32px"><span class="demo-loader primary" data-probe="page"></span> 32px</div>
     </div>
-    <div class="card">
+    <div class="demo-card">
       <h3>Colours</h3>
       <div class="line"><span class="demo-loader"></span> text colour</div>
       <div class="line"><span class="demo-loader primary"></span> primary</div>
@@ -79,33 +64,33 @@
       <div class="line"><span class="demo-loader danger"></span> danger</div>
     </div>
   </div>
-</section>
+</div>
 
-<section>
+<div class="card">
   <h2>2. Inside a component's shadow root</h2>
-  <p class="note">A minimal web component: its <code>--demo-loader-*</code> tokens fall back to
+  <p>A minimal web component: its <code>--demo-loader-*</code> tokens fall back to
     <code>--base-loader-*</code>. The page's shape choice above reaches it, with no class or keyframes crossing the
     shadow boundary.</p>
   <div class="row">
-    <div class="card">
+    <div class="demo-card">
       <h3>&lt;demo-loading&gt;</h3>
       <demo-loading id="shadow-host"></demo-loading>
     </div>
-    <div class="card">
+    <div class="demo-card">
       <h3>Own override</h3>
       <demo-loading style="--demo-loader-size: 2em; --demo-loader-duration: 2s"></demo-loading>
     </div>
   </div>
-</section>
+</div>
 
-<section>
+<div class="card">
   <h2>3. Reduced motion</h2>
-  <p class="note">Under <code>prefers-reduced-motion: reduce</code> the four <code>--base-duration-*</code> become
+  <p>Under <code>prefers-reduced-motion: reduce</code> the four <code>--base-duration-*</code> become
     <code>0s</code> but <code>--base-loader-duration</code> slows to <code>1.5s</code> — a loader that stops reads as
     "frozen". An SVG that animates itself keeps its own timing: it doesn't read
     <code>--base-loader-duration</code>, so only a <code>@media</code> rule inside the SVG can slow it (see the
     test notes in <code>e2e/loader.spec.ts</code>).</p>
-</section>
+</div>
 
 <script>
   const svg = (s) => `url("data:image/svg+xml,${encodeURIComponent(s)}")`;
@@ -133,7 +118,6 @@
     else { root.style.removeProperty('--base-loader-icon'); root.style.removeProperty('--base-loader-rotate'); }
     show();
   });
-  document.getElementById('dark').addEventListener('change', (e) => { root.style.colorScheme = e.target.checked ? 'dark' : 'light'; document.body.style.background = e.target.checked ? '#0f172a' : '#f3f4f6'; });
   matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', show);
 
   customElements.define('demo-loading', class extends HTMLElement {
@@ -162,5 +146,3 @@
   show();
   window.__demo = { ready: true };
 </script>
-</body>
-</html>

@@ -1,23 +1,16 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<title>Text on fills — WCAG 2 vs APCA, hover / pressed states</title>
-<link rel="stylesheet" href="../base-variables.css">
+<meta name="kmwc:title" content="Text on fills">
+<meta name="kmwc:subtitle" content="WCAG 2 vs APCA, and hover / pressed states">
+<meta name="kmwc:entry" content="none">
+<link rel="stylesheet" href="/base-variables.css">
 <!-- The black/white pick formulas are generated into this block (see buildPickCss below). -->
 <style id="pick-css"></style>
 <style>
-  * { box-sizing: border-box; }
-  body {
-    margin: 0; padding: 16px 20px 60px;
-    font: 14px/1.45 var(--base-font-family);
-    background: var(--page-bg); color: var(--page-text);
-    --page-bg: var(--base-main-bg); --page-text: var(--base-text-color-1);
-  }
-  h1 { font-size: 20px; margin: 0 0 4px; }
-  h2 { font-size: 16px; margin: 26px 0 4px; }
-  p.lead { margin: 0 0 12px; max-width: 1150px; opacity: .85; }
-  code { font: 12px var(--base-font-family-mono); }
+  /* The theme / mode selects set --page-bg / --page-text and color-scheme on <body>
+     (inline, from the script); the cards are the surfaces that show them. */
+  body { --page-bg: var(--base-main-bg); --page-text: var(--base-text-color-1); }
+  .card { background: var(--page-bg); color: var(--page-text); font-size: 14px; }
+  .card h2, .card p, .card th { color: inherit; }
+  .card p.lead { max-width: 1150px; opacity: .85; }
 
   .controls { display: flex; flex-wrap: wrap; gap: 8px 22px; align-items: center; padding: 10px 12px; margin-bottom: 14px;
     border: 1px solid color-mix(in srgb, var(--page-text) 25%, transparent); border-radius: 8px; font-size: 13px;
@@ -79,17 +72,15 @@
   .presets { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
   .presets button { font: 12px var(--base-font-family); padding: 2px 8px; cursor: pointer; }
 </style>
-</head>
-<body>
-<h1>Text on fills — WCAG 2 vs APCA, and hover / pressed states</h1>
-<p class="lead">
+
+<div class="note info">
   A button's text is black or white, whichever contrasts more with its fill. "More" depends on the model:
   <b>WCAG 2</b> (the contrast ratio audits check today, pass = 4.5:1) or <b>APCA</b> (the perceptual model
   being developed for WCAG 3, scored as Lc; about 60 for body-size text, 45 for large or bold text).
   WCAG 2 is known to favour black on bright saturated colours; APCA usually prefers white there.
   Every chip shows both scores: <span style="text-decoration:underline wavy">wavy</span> = below WCAG 4.5:1,
   <span style="text-decoration:underline dotted">dotted</span> = below APCA Lc 60.
-</p>
+</div>
 
 <div class="controls">
   <label>Theme <select id="theme"></select></label>
@@ -100,6 +91,7 @@
   <label>Custom fill <input id="custom" type="color" value="#3b82f6"></label>
 </div>
 
+<div class="card">
 <h2>1 · WCAG 2 pick vs APCA pick (resting fill)</h2>
 <p class="lead">The same fill twice: text picked by WCAG 2, then by APCA. Where they differ, compare the two
   buttons by eye. <span class="summary" id="cmp-summary"></span></p>
@@ -107,7 +99,9 @@
   <thead><tr><th>Fill</th><th>Picked by WCAG 2</th><th>Picked by APCA</th><th>Verdict</th></tr></thead>
   <tbody id="cmp-rows"></tbody>
 </table>
+</div>
 
+<div class="card">
 <h2>2 · Hover and pressed — today vs option 1 vs option 2</h2>
 <p class="lead">Text picked by the model chosen above (<b id="pick-name"></b>). Hover and press the live buttons;
   the strip freezes rest / hover / pressed. <span class="summary" id="summary"></span></p>
@@ -122,7 +116,9 @@
   </thead>
   <tbody id="rows"></tbody>
 </table>
+</div>
 
+<div class="card">
 <h2>3 · The agreed model — contract colours, button states in each component</h2>
 <p class="lead">The contract supplies only the role colours (<code>--base-&lt;role&gt;-color</code> and
   <code>--base-on-&lt;role&gt;-text-color</code>, picked by APCA). Each button component has its own state
@@ -171,6 +167,7 @@
   <code>pow()</code> on colour channels); it matches exact APCA except where black and white differ by less
   than 1 Lc.
 </p>
+</div>
 
 <script>
 const THEMES = {"audi":{"light":{"bg":"#ffffff","text":"#212529","primary":"#ff0000","secondary":"#6c757d","success":"#00cc44","danger":"#ff0000","warning":"#ff6600","info":"#0099ff"},"dark":{"bg":"#1a1a1a","text":"#ffffff","primary":"#ff0000","secondary":"#6c757d","success":"#00cc44","danger":"#ff0000","warning":"#ff6600","info":"#0099ff"}},"ayu":{"light":{"bg":"#ffffff","text":"#575f66","primary":"#f29718","secondary":"#6c757d","success":"#aad94c","danger":"#f07178","warning":"#ff8f40","info":"#39bae6"},"dark":{"bg":"#242936","text":"#cccac2","primary":"#e6b450","secondary":"#6c757d","success":"#aad94c","danger":"#f07178","warning":"#ff8f40","info":"#39bae6"}},"cafeindustrial":{"light":{"bg":"#fffcf8","text":"#3d3428","primary":"#b87d24","secondary":"#6c757d","success":"#4a9e5c","danger":"#c94444","warning":"#e8a83c","info":"#3a8fa0"},"dark":{"bg":"#1e1a15","text":"#e8e0d4","primary":"#d4952b","secondary":"#6c757d","success":"#4a9e5c","danger":"#c94444","warning":"#e8a83c","info":"#3a8fa0"}},"cobalt2":{"light":{"bg":"#193549","text":"#ffffff","primary":"#ffc600","secondary":"#6c757d","success":"#a5ff90","danger":"#ff628c","warning":"#ff9d00","info":"#9effff"},"dark":{"bg":"#193549","text":"#ffffff","primary":"#ffc600","secondary":"#6c757d","success":"#a5ff90","danger":"#ff628c","warning":"#ff9d00","info":"#9effff"}},"corporate":{"light":{"bg":"#ffffff","text":"#334155","primary":"#0ea5e9","secondary":"#6c757d","success":"#10b981","danger":"#ef4444","warning":"#f59e0b","info":"#06b6d4"},"dark":{"bg":"#1e293b","text":"#f1f5f9","primary":"#0ea5e9","secondary":"#6c757d","success":"#10b981","danger":"#ef4444","warning":"#f59e0b","info":"#06b6d4"}},"dark":{"light":{"bg":"#ffffff","text":"#1e293b","primary":"#4dabf7","secondary":"#6c757d","success":"#059669","danger":"#dc2626","warning":"#d97706","info":"#0891b2"},"dark":{"bg":"#2a2a2a","text":"#ffffff","primary":"#4dabf7","secondary":"#6c757d","success":"#059669","danger":"#dc2626","warning":"#d97706","info":"#0891b2"}},"darkmatter":{"light":{"bg":"#1b232c","text":"#aec2e0","primary":"#4cbbff","secondary":"#6c757d","success":"#95cc5e","danger":"#ff5370","warning":"#ffe792","info":"#6ee2ff"},"dark":{"bg":"#1b232c","text":"#aec2e0","primary":"#4cbbff","secondary":"#6c757d","success":"#95cc5e","danger":"#ff5370","warning":"#ffe792","info":"#6ee2ff"}},"dracula":{"light":{"bg":"#2d2f3d","text":"#f8f8f2","primary":"#bd93f9","secondary":"#6c757d","success":"#50fa7b","danger":"#ff5555","warning":"#ffb86c","info":"#8be9fd"},"dark":{"bg":"#2d2f3d","text":"#f8f8f2","primary":"#bd93f9","secondary":"#6c757d","success":"#50fa7b","danger":"#ff5555","warning":"#ffb86c","info":"#8be9fd"}},"express":{"light":{"bg":"#ffffff","text":"#333333","primary":"#d40511","secondary":"#6c757d","success":"#10b981","danger":"#98040c","warning":"#f59e0b","info":"#06b6d4"},"dark":{"bg":"#242424","text":"#ffffff","primary":"#ffcc00","secondary":"#6c757d","success":"#10b981","danger":"#98040c","warning":"#f59e0b","info":"#06b6d4"}},"gruvbox":{"light":{"bg":"#f1efdf","text":"#3c3836","primary":"#d65d0e","secondary":"#6c757d","success":"#b8bb26","danger":"#fb4934","warning":"#fabd2f","info":"#83a598"},"dark":{"bg":"#3c3836","text":"#ebdbb2","primary":"#fe8019","secondary":"#6c757d","success":"#b8bb26","danger":"#fb4934","warning":"#fabd2f","info":"#83a598"}},"minimal":{"light":{"bg":"#ffffff","text":"#333333","primary":"#555555","secondary":"#6c757d","success":"#28a745","danger":"#dc3545","warning":"#ffc107","info":"#17a2b8"},"dark":{"bg":"#242424","text":"#e8e8e8","primary":"#e8e8e8","secondary":"#6c757d","success":"#28a745","danger":"#dc3545","warning":"#ffc107","info":"#17a2b8"}},"nato":{"light":{"bg":"#ffffff","text":"#1f2a44","primary":"#118acb","secondary":"#6c757d","success":"#2e8540","danger":"#c8102e","warning":"#f5b700","info":"#118acb"},"dark":{"bg":"#102b54","text":"#e6edf7","primary":"#118acb","secondary":"#6c757d","success":"#2e8540","danger":"#c8102e","warning":"#f5b700","info":"#118acb"}},"night-owl":{"light":{"bg":"#0b2236","text":"#d6deeb","primary":"#82aaff","secondary":"#6c757d","success":"#addb67","danger":"#ef5350","warning":"#ffcb8b","info":"#7fdbca"},"dark":{"bg":"#0b2236","text":"#d6deeb","primary":"#82aaff","secondary":"#6c757d","success":"#addb67","danger":"#ef5350","warning":"#ffcb8b","info":"#7fdbca"}},"one-dark":{"light":{"bg":"#282c34","text":"#abb2bf","primary":"#61afef","secondary":"#6c757d","success":"#98c379","danger":"#e06c75","warning":"#e5c07b","info":"#56b6c2"},"dark":{"bg":"#282c34","text":"#abb2bf","primary":"#61afef","secondary":"#6c757d","success":"#98c379","danger":"#e06c75","warning":"#e5c07b","info":"#56b6c2"}},"sentinel":{"light":{"bg":"#ffffff","text":"#23272e","primary":"#c01b2b","secondary":"#6c757d","success":"#2f8f4e","danger":"#dc2626","warning":"#d97706","info":"#2563eb"},"dark":{"bg":"#1e2228","text":"#eceef1","primary":"#c01b2b","secondary":"#6c757d","success":"#2f8f4e","danger":"#dc2626","warning":"#d97706","info":"#2563eb"}},"tokyo-night":{"light":{"bg":"#1e1f2b","text":"#a9b1d6","primary":"#7dcfff","secondary":"#6c757d","success":"#9ece6a","danger":"#ff5370","warning":"#e0af68","info":"#2ac3de"},"dark":{"bg":"#1e1f2b","text":"#a9b1d6","primary":"#7dcfff","secondary":"#6c757d","success":"#9ece6a","danger":"#ff5370","warning":"#e0af68","info":"#2ac3de"}}};
@@ -388,5 +385,3 @@ for (const id of ['theme', 'mode', 'pick', 'step', 'step2', 'custom']) $(id).add
 apply();
 applyTok();
 </script>
-</body>
-</html>

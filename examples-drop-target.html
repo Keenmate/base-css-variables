@@ -1,22 +1,12 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<title>Drop target — borrowed tint vs --base-drop-target-*</title>
-<link rel="stylesheet" href="../base-variables.css">
+<meta name="kmwc:title" content="Drop target">
+<meta name="kmwc:subtitle" content="Borrowed primary tint vs --base-drop-target-*">
+<meta name="kmwc:entry" content="none">
+<link rel="stylesheet" href="/base-variables.css">
 <style>
-  * { box-sizing: border-box; }
-  body { margin: 0; padding: 16px 20px 60px; font: 14px/1.45 var(--base-font-family); background: var(--base-page-bg); color: var(--base-text-color-1); }
-  h1 { font-size: 20px; margin: 0 0 4px; }
-  p.lead { margin: 0 0 12px; max-width: 1050px; color: var(--base-text-color-2); }
-  code { font: 12px var(--base-font-family-mono); }
-  .bar { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; padding: 8px 0 12px; border-bottom: 1px solid var(--base-border-color); margin-bottom: 8px; }
-  .bar label { display: inline-flex; gap: 6px; align-items: center; font-size: 13px; }
-  .cols { display: grid; grid-template-columns: repeat(2, minmax(360px, 1fr)); gap: 16px; max-width: 1100px; }
-  .col h2 { font-size: 15px; margin: 8px 0 2px; }
-  .col p.note { margin: 0 0 8px; font-size: 12.5px; color: var(--base-text-color-2); min-height: 3.2em; }
-  .card { background: var(--base-main-bg); border: 1px solid var(--base-border-color); border-radius: 8px; padding: 10px; margin-bottom: 12px; }
-  .card h3 { margin: 0 0 6px; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--base-text-color-3); }
+  .cols { display: grid; grid-template-columns: repeat(2, minmax(360px, 1fr)); gap: 16px; }
+  .col p.col-note { margin: 0 0 8px; font-size: 12.5px; color: var(--base-text-color-2); min-height: 3.2em; }
+  .demo-card { padding: 10px; margin-bottom: 12px; }
+  .demo-card h3 { margin: 0 0 6px; padding: 0; border: 0; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--base-text-color-3); }
 
   /* --- tree rows --- */
   .row { display: flex; gap: 8px; align-items: center; padding: 4px 8px; border-radius: var(--base-border-radius-sm, 4px); cursor: grab; user-select: none; }
@@ -47,22 +37,20 @@
   .proposed .hdr div.drop-over { background: var(--base-drop-target-bg-active); box-shadow: inset 2px 0 0 var(--base-drop-target-border-color); }
 
   .static .tag::before { content: ''; }
-  .legend { font-size: 12px; color: var(--base-text-color-2); margin: 6px 0 0; }
-  textarea { width: 100%; font: 12px var(--base-font-family-mono); height: 64px; }
+  textarea { width: 100%; font: 12px var(--base-font-family-mono); height: 64px; color: var(--base-input-text-color); background: var(--base-input-bg); border: var(--base-input-border); }
 </style>
 <style id="theme"></style>
-</head>
-<body>
-<h1>Drop target — borrowed tint vs <code>--base-drop-target-*</code></h1>
-<p class="lead">Before 2.0.0-rc06 a drop target borrowed the primary tint, which is also what <code>--base-selected-bg</code>
+
+<div class="note info">
+  Before 2.0.0-rc06 a drop target borrowed the primary tint, which is also what <code>--base-selected-bg</code>
   is. On the left, "Music" is selected and "Videos" is the row you're dropping onto: only a 1px outline tells them apart.
   On the right, the same picture drawn from <code>--base-drop-target-bg</code> / <code>-bg-active</code> /
   <code>-border-color</code> — the success tint by default, so the drop target stands out from the selection.
   Pick a theme override to see that only drops change. You can also drag the rows, the header cells and a file from
-  your desktop.</p>
+  your desktop.
+</div>
 
-<div class="bar">
-  <label><input type="checkbox" id="dark"> dark</label>
+<div class="controls">
   <label>Theme override
     <select id="preset">
       <option value="">none (contract default = success tint)</option>
@@ -80,41 +68,41 @@
 }</textarea>
 
 <div class="cols">
-  <div class="col borrowed">
+  <div class="card col borrowed">
     <h2>Before — borrowed primary tint</h2>
-    <p class="note">Drop state reads <code>--base-primary-bg-subtle(-hover)</code>. A theme can't restyle drops
+    <p class="col-note">Drop state reads <code>--base-primary-bg-subtle(-hover)</code>. A theme can't restyle drops
       without restyling selection and every tint.</p>
-    <div class="card static"><h3>Tree — selected vs drop target</h3>
+    <div class="demo-card static"><h3>Tree — selected vs drop target</h3>
       <div class="row selected"><span class="ico"></span>Music<span class="tag">selected</span></div>
       <div class="row drop-over"><span class="ico"></span>Videos<span class="tag">drop target</span></div>
       <div class="row"><span class="ico"></span>Pictures</div>
     </div>
-    <div class="card"><h3>Tree — try dragging</h3><div class="tree"></div></div>
-    <div class="card static"><h3>Drop area — armed / pointer over</h3>
+    <div class="demo-card"><h3>Tree — try dragging</h3><div class="tree"></div></div>
+    <div class="demo-card static"><h3>Drop area — armed / pointer over</h3>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
         <div class="area armed">armed (dragging)</div><div class="area over">pointer over</div>
       </div></div>
-    <div class="card"><h3>Drop area — drag a file here</h3><div class="area live">Drop files</div></div>
-    <div class="card"><h3>Grid header — selected column + reorder target</h3>
+    <div class="demo-card"><h3>Drop area — drag a file here</h3><div class="area live">Drop files</div></div>
+    <div class="demo-card"><h3>Grid header — selected column + reorder target</h3>
       <div class="hdr"><div class="selected">Name</div><div class="drop-over">Size</div><div>Modified</div></div></div>
   </div>
 
-  <div class="col proposed">
+  <div class="card col proposed">
     <h2>rc06 — <code>--base-drop-target-*</code></h2>
-    <p class="note">The success tint by default — and a drop is its own knob, for the treeviews, dropzone, grid
+    <p class="col-note">The success tint by default — and a drop is its own knob, for the treeviews, dropzone, grid
       column reorder and pure-admin's file dropzone at once.</p>
-    <div class="card static"><h3>Tree — selected vs drop target</h3>
+    <div class="demo-card static"><h3>Tree — selected vs drop target</h3>
       <div class="row selected"><span class="ico"></span>Music<span class="tag">selected</span></div>
       <div class="row drop-over"><span class="ico"></span>Videos<span class="tag">drop target</span></div>
       <div class="row"><span class="ico"></span>Pictures</div>
     </div>
-    <div class="card"><h3>Tree — try dragging</h3><div class="tree"></div></div>
-    <div class="card static"><h3>Drop area — armed / pointer over</h3>
+    <div class="demo-card"><h3>Tree — try dragging</h3><div class="tree"></div></div>
+    <div class="demo-card static"><h3>Drop area — armed / pointer over</h3>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
         <div class="area armed">armed (dragging)</div><div class="area over">pointer over</div>
       </div></div>
-    <div class="card"><h3>Drop area — drag a file here</h3><div class="area live">Drop files</div></div>
-    <div class="card"><h3>Grid header — selected column + reorder target</h3>
+    <div class="demo-card"><h3>Drop area — drag a file here</h3><div class="area live">Drop files</div></div>
+    <div class="demo-card"><h3>Grid header — selected column + reorder target</h3>
       <div class="hdr"><div class="selected">Name</div><div class="drop-over">Size</div><div>Modified</div></div></div>
   </div>
 </div>
@@ -132,7 +120,6 @@
   };
   preset.addEventListener('change', apply);
   custom.addEventListener('input', apply);
-  document.getElementById('dark').addEventListener('change', (e) => { document.documentElement.style.colorScheme = e.target.checked ? 'dark' : 'light'; });
 
   // live trees: drag a row onto another
   const ITEMS = [['Documents', 1], ['Reports', 2], ['Music', 1, true], ['Pictures', 1], ['Videos', 1]];
@@ -181,5 +168,3 @@
   }
   window.__demo = { ready: true };
 </script>
-</body>
-</html>

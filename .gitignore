@@ -6,3 +6,6 @@ Thumbs.db
 .vscode/
 test-results/
 playwright-report/
+dist-examples/
+# kmwc
+.makefile.env

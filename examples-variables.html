@@ -1,41 +1,36 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<title>--base-* variables — the whole contract</title>
-<link rel="stylesheet" href="../base-variables.css">
+<meta name="kmwc:title" content="Every variable">
+<meta name="kmwc:subtitle" content="The whole --base-* contract, read live from base-variables.css">
+<meta name="kmwc:entry" content="none">
+<link rel="stylesheet" href="/base-variables.css">
 <style>
-  * { box-sizing: border-box; }
-  body { margin: 0; padding: 16px 20px 60px; font: 14px/1.45 var(--base-font-family); background: #f3f4f6; color: #1f2937; }
-  h1 { font-size: 20px; margin: 0 0 4px; }
-  p.lead { margin: 0 0 12px; max-width: 1100px; color: #4b5563; }
   code, .mono { font: 12px var(--base-font-family-mono); }
 
-  .bar { position: sticky; top: 0; z-index: 2; display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center;
-    background: #f3f4f6; padding: 8px 0 10px; border-bottom: 1px solid #d1d5db; margin-bottom: 8px; }
-  .bar input[type=search] { font: inherit; padding: 4px 8px; width: 260px; border: 1px solid #9ca3af; border-radius: 6px; }
-  .bar label { display: inline-flex; gap: 5px; align-items: center; font-size: 13px; }
+  /* the filter bar stays in view while the groups scroll */
+  .controls.bar { position: sticky; top: 0; z-index: 2; gap: 8px 18px; background: var(--base-page-bg);
+    padding: 8px 0 10px; border-bottom: 1px solid var(--base-border-color); }
+  .bar input[type=search] { font: inherit; padding: 4px 8px; width: 260px; background: var(--base-input-bg); color: var(--base-input-text-color);
+    border: var(--base-input-border); border-radius: 6px; }
+  .bar label { gap: 5px; font-size: 13px; }
   .toc { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: 12.5px; }
-  .toc a { color: #2563eb; text-decoration: none; }
-  .counts { font-size: 12.5px; color: #4b5563; }
+  .toc a { color: var(--base-primary-text-color); text-decoration: none; }
+  .counts { font-size: 12.5px; color: var(--base-text-color-2); }
 
-  section { margin: 18px 0 6px; }
-  section h2 { font-size: 15px; margin: 0 0 2px; }
-  section h2 small { font-weight: 400; color: #6b7280; font-size: 12px; margin-left: 6px; }
-  section p.note { margin: 0 0 6px; font-size: 12.5px; color: #4b5563; max-width: 1100px; }
+  section.card h2 small { font-weight: 400; color: var(--base-text-color-3); font-size: 12px; margin-left: 6px; }
+  section.card p.group-note { margin: 0 0 6px; font-size: 12.5px; color: var(--base-text-color-2); max-width: 1100px; }
 
-  table { border-collapse: collapse; width: 100%; background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; }
-  th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .03em; color: #6b7280; padding: 6px 8px; background: #f9fafb; border-bottom: 1px solid #e5e7eb; }
-  td { padding: 5px 8px; border-top: 1px solid #f1f5f9; vertical-align: middle; font-size: 12.5px; }
+  table { border-collapse: collapse; width: 100%; background: var(--base-main-bg); border: 1px solid var(--base-border-color); border-radius: 8px; overflow: hidden; }
+  th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .03em; color: var(--base-text-color-3); padding: 6px 8px;
+    background: var(--base-elevated-bg); border-bottom: 1px solid var(--base-border-color); }
+  td { padding: 5px 8px; border-top: 1px solid var(--base-border-color); vertical-align: middle; font-size: 12.5px; }
   td.name { white-space: nowrap; }
-  td.name code { font-size: 12.5px; color: #111827; }
+  td.name code { font-size: 12.5px; color: var(--base-text-color-1); }
   .kind { display: inline-block; font-size: 10.5px; font-weight: 600; padding: 1px 6px; border-radius: 9px; }
-  .kind.input { background: #dbeafe; color: #1e40af; }
-  .kind.derived { background: #dcfce7; color: #166534; }
-  td.def { max-width: 420px; color: #374151; }
+  .kind.input { background: var(--base-info-bg-subtle); color: var(--base-info-text-color); }
+  .kind.derived { background: var(--base-success-bg-subtle); color: var(--base-success-text-color); }
+  td.def { max-width: 420px; color: var(--base-text-color-2); }
   td.def code { white-space: pre-wrap; word-break: break-all; font-size: 11.5px; }
-  td.def details summary { cursor: pointer; color: #2563eb; font-size: 11.5px; }
-  td.cmt { color: #6b7280; max-width: 300px; }
+  td.def details summary { cursor: pointer; color: var(--base-primary-text-color); font-size: 11.5px; }
+  td.cmt { color: var(--base-text-color-3); max-width: 300px; }
 
   /* the two mode columns resolve the tokens on their own scope */
   td.mode { width: 190px; }
@@ -55,17 +50,15 @@
   .fontsample { font-size: 15px; }
   tr.hidden, section.hidden { display: none; }
 </style>
-</head>
-<body>
-<h1>The <code>--base-*</code> contract — every variable</h1>
-<p class="lead">
+
+<div class="note info">
   Read live from <code>base-variables.css</code>. <span class="kind input">input</span> = set by hand in
   <code>:root</code> (what a theme decides); <span class="kind derived">derived</span> = a formula over the inputs,
   recalculated on <code>:root</code>, <code>[data-theme]</code> and <code>.base-scope</code>. The light and dark
   columns show what the browser resolves in each mode.
-</p>
+</div>
 
-<div class="bar">
+<div class="controls bar">
   <input type="search" id="q" placeholder="Filter by name, value or comment…">
   <label><input type="checkbox" id="only-inputs"> inputs only</label>
   <label><input type="checkbox" id="show-def" checked> definitions</label>
@@ -79,7 +72,9 @@
 <div data-theme="light" id="probe-light" style="position:absolute;left:-9999px;color:var(--base-text-color-1)"><div></div></div>
 <div data-theme="dark" id="probe-dark" style="position:absolute;left:-9999px;color:var(--base-text-color-1)"><div></div></div>
 
-<script>
+<script type="module">
+import { mountExamplesKit } from '@keenmate/web-components-devkit/examples';
+
 // ---- groups: matched in order, first match wins ----
 const ROLES = ['primary', 'secondary', 'success', 'danger', 'warning', 'info'];
 const GROUPS = [
@@ -116,7 +111,8 @@ function kindOf(n, def) {
 }
 
 async function load() {
-  const css = await (await fetch('../base-variables.css', { cache: 'no-store' })).text();
+  // ?direct: the raw file (Vite dev would answer a plain .css fetch with a JS module).
+  const css = await (await fetch('/base-variables.css?direct', { cache: 'no-store' })).text();
   const derivedAt = css.search(/:root,\s*\[data-theme\],\s*\.base-scope\s*\{/);
   const modeAt = css.search(/\[data-theme="light"\]\s*\{/);
   const tokens = [];
@@ -231,9 +227,9 @@ function defCell(t) {
         <td class="cmt">${t.comment.replace(/</g, '&lt;')}</td>
       </tr>`).join('');
     root.insertAdjacentHTML('beforeend', `
-      <section id="${id}">
+      <section id="${id}" class="card">
         <h2>${g.title}<small>${g.items.length} tokens · ${ins} input · ${g.items.length - ins} derived</small></h2>
-        ${g.note ? `<p class="note">${g.note}</p>` : ''}
+        ${g.note ? `<p class="group-note">${g.note}</p>` : ''}
         <table><thead><tr><th>Token</th><th>Kind</th><th>Light</th><th>Dark</th><th class="defh">Definition</th><th>Comment</th></tr></thead>
         <tbody>${rows}</tbody></table>
       </section>`);
@@ -259,7 +255,7 @@ function defCell(t) {
   };
   for (const id of ['q', 'only-inputs', 'show-def']) document.getElementById(id).addEventListener('input', update);
   update();
+  // the groups arrive after the fetch, past the kit's own mount: chapter nav + copy-links again
+  mountExamplesKit();
 })();
 </script>
-</body>
-</html>

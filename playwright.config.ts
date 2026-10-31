@@ -1,20 +1,25 @@
+import { readFileSync } from 'node:fs';
 import { defineConfig, devices } from '@playwright/test';
+
+const { dev: devPort } = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8')).kmwc.ports;
+const DEV_URL = `http://127.0.0.1:${devPort}`;
 
 /**
  * Playwright config for the base-css-variables e2e suite.
  *
  * The package itself has no build — this suite only locks the --base-* contract
- * against regressions by driving demo/*.html, served by the zero-dependency
- * demo/serve.mjs on :12510. That server also mounts the LOCAL builds of the
- * sibling component repos (../web-treeview/dist, ../web-multiselect/dist), so the
- * component specs prove real components read these tokens; they skip themselves
- * when a sibling build is missing. Nothing here ships (see `files` in package.json).
+ * against regressions by driving the examples pages (root examples-*.html), served
+ * by the devkit Vite preset on the registry port (package.json#kmwc.ports.dev).
+ * vite.config.ts also mounts the LOCAL builds of the sibling component repos
+ * (../web-treeview/dist, ../web-multiselect/dist) under /vendor/, so the component
+ * specs prove real components read these tokens; they skip themselves when a
+ * sibling build is missing. Nothing here ships (see `files` in package.json).
  *
  * Commands:
- *   npm run test:e2e:install   # one-time: download chromium
+ *   npm run test:e2e:install   # one-time: download chromium, firefox, webkit
  *   npm run test:e2e           # headless run
  *   npm run test:e2e:headed    # watch the browser
- *   npm run demo               # just serve the demo
+ *   npm run dev                # just serve the examples
  */
 export default defineConfig({
   testDir: './e2e',
@@ -29,7 +34,7 @@ export default defineConfig({
   reporter: process.env.CI ? 'github' : 'list',
 
   use: {
-    baseURL: 'http://localhost:12510',
+    baseURL: DEV_URL,
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
   },
@@ -42,8 +47,8 @@ export default defineConfig({
   ],
 
   webServer: {
-    command: 'node demo/serve.mjs',
-    url: 'http://localhost:12510/demo/item-states.html',
+    command: 'npm run dev',
+    url: `${DEV_URL}/examples-item-states.html`,
     reuseExistingServer: !process.env.CI,
     timeout: 30_000,
   },

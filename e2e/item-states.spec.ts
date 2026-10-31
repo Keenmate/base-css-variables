@@ -6,11 +6,11 @@ import { test, expect, type Page, type Locator } from '@playwright/test';
  * Model (Windows Explorer): focused = the ONE cursor item; selected = the
  * click / Ctrl / Shift-click set; checked = checkbox ticked (checkbox only, no row
  * tokens). These specs lock (1) the token defaults, (2) the reference consumer
- * in demo/item-states.html, and (3) that the real components render the SAME
+ * in examples-item-states.html, and (3) that the real components render the SAME
  * look from the same tokens — including the inset ring tracking the width.
  */
 
-const DEMO = '/demo/item-states.html';
+const DEMO = '/examples-item-states.html';
 
 async function open(page: Page): Promise<void> {
   await page.goto(DEMO);

@@ -10,7 +10,7 @@ import { test, expect, type Page } from '@playwright/test';
  * and compare against the same value computed by the browser directly.
  */
 
-const PAGE = '/demo/item-states.html';
+const PAGE = '/examples-item-states.html';
 
 async function open(page: Page, scheme: 'light' | 'dark' = 'light'): Promise<void> {
   await page.goto(PAGE);

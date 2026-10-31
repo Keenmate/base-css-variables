@@ -12,7 +12,7 @@ web-treeview, …) and by `@keenmate/pure-css` / `@keenmate/pure-admin-core`.
 There is no build, lint, or bundle step. Editing the CSS *is* the work; publishing is
 `npm publish`. The package ships `base-variables.css` + `README.md` + `CHANGELOG.md`
 + `LICENSE`, plus the component check `bin/check-contract.mjs` + `renames.json` (see the `files`
-field) — the demo and tests below are repo-only.
+field) — the examples site and tests below are repo-only.
 
 **Component check (shipped):** `bin/check-contract.mjs` (`npx base-contract-check src`) is run by
 components (devDependency) in their build: C1 unknown `--base-*` reads or sets, C2 input fallbacks ≠
@@ -24,10 +24,19 @@ shipped: `testing/parity.mjs` (`contractParity(page, …)`) — components call 
 Playwright e2e to compare every color token standalone vs. with the contract (light / dark, plus
 an accent-override pass). Plan and rationale: `docs/plan-contract-check.md`.
 
-**Demo + e2e (repo-only, dev-time):** `npm run demo` serves `demo/item-states.html` via the
-zero-dependency `demo/serve.mjs` on :12510. The server also mounts the *local* builds of the
-sibling repos (`../web-treeview/dist`, `../web-multiselect/dist` → `/vendor/*`) so the page
-shows real components reading this checkout's tokens. `npm run test:e2e` (Playwright,
+**Examples + e2e (repo-only, dev-time):** the examples site uses the shared
+`@keenmate/web-components-devkit` (registry library, port block 15300; config in
+`package.json#kmwc`). Pages are root `examples-*.html` **fragments** (`kmwc:title` meta, one `.card`
++ `<h2>` per chapter, `kmwc:entry none` — there is no JS entry) plus the `index.html` landing;
+the devkit adds the layout, theme switch, chapter nav and copy-links. `npm run dev` serves them on
+:15300; `vite.config.ts` also mounts the *local* builds of the sibling repos
+(`../web-treeview/dist`, `../web-multiselect/dist`, `../pure-admin-themes` → `/vendor/*`) so the
+pages show real components reading this checkout's tokens. The kit chrome reads `--base-*` too, so
+a page that overrides a token re-themes its own chrome — scope demo overrides to the demo element
+when that gets in the way. The examples container image (`make image-build` / `image-run`, port 15310)
+uses the devkit's generated `Dockerfile`, `nginx.conf` and `.dockerignore` (`npx kmwc sync` — it skips
+this repo's own `Makefile` and `CLAUDE.md`, see `kmwc.sync.skippedFiles`); the image has no `/vendor/*`
+builds, so its component panels show the "build not found" notice. `npm run test:e2e` (Playwright,
 `e2e/`) locks the item-state contract against the reference list *and* both components, and
 the derivation contract (inputs → derived, `.base-scope`, removed names);
 component specs skip when a sibling build is missing — run `npm run build` in those repos
@@ -68,9 +77,9 @@ traces this end-to-end for the primary color — read it before touching token s
   non-color tokens. Every token calculated from another lives in the second block,
   `:root, [data-theme], .base-scope { … }` — formulas (`color-mix`, OKLCH relative colors), so a
   re-themed scope recalculates. A new derived token goes there, never as a pasted literal.
-  `demo/derived.html` compares the formulas against the compiled pure-admin themes;
-  `demo/fill-states.html` shows text on fills (WCAG 2 vs APCA pick) and button hover / press states;
-  `demo/variables.html` lists every token in groups (input / derived, light + dark values).
+  `examples-derived.html` compares the formulas against the compiled pure-admin themes;
+  `examples-fill-states.html` shows text on fills (WCAG 2 vs APCA pick) and button hover / press states;
+  `examples-variables.html` lists every token in groups (input / derived, light + dark values).
 - **What belongs here (three categories):** INPUTS = what a theme decides (keep few);
   DERIVED = shared formulas for anything more than one consumer asks (hover / active steps,
   tints, text levels, text on fills…) — free to grow, a theme never sets them; COMPONENT tokens =

@@ -1,14 +1,14 @@
 import { test, expect } from '@playwright/test';
 
 /**
- * Smoke test for the dev page demo/derived.html (current vs formula-derived contract).
+ * Smoke test for the dev page examples-derived.html (current vs formula-derived contract).
  * Locks the two problems the formulas exist to fix: in dark mode hover must differ from the
  * elevated surface, and the faintest text must differ from the border color.
  */
 test('derived demo renders and fixes the dark-mode collisions', async ({ page }) => {
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(e.message));
-  await page.goto('/demo/derived.html');
+  await page.goto('/examples-derived.html');
   await page.waitForFunction(() => (window as any).__derived?.ready === true);
   expect(errors).toEqual([]);
 
@@ -38,7 +38,7 @@ test('derived demo renders and fixes the dark-mode collisions', async ({ page })
 test('derived demo loads a compiled pure-admin theme into both modes', async ({ page }) => {
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(e.message));
-  await page.goto('/demo/derived.html');
+  await page.goto('/examples-derived.html');
   await page.waitForFunction(() => (window as any).__derived?.ready === true);
   const res = await page.request.get('/vendor/pure-admin-themes/nato/dist/nato.css');
   test.skip(!res.ok(), 'pure-admin-themes build not available next to this repo');

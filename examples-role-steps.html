@@ -1,27 +1,18 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<title>Role steps — sRGB mix vs OKLCH (text, hover, active)</title>
-<link rel="stylesheet" href="../base-variables.css">
+<meta name="kmwc:title" content="Role steps">
+<meta name="kmwc:subtitle" content="sRGB mix vs OKLCH — role text, hover and active">
+<meta name="kmwc:entry" content="none">
+<link rel="stylesheet" href="/base-variables.css">
 <style>
-  * { box-sizing: border-box; }
-  /* pure-admin's rem base: the contract's --base-rem is 1rem = 10px here, as in pure-admin */
-  html { font-size: 10px; }
-  body {
-    margin: 0; padding: 16px 20px 60px;
-    font: 14px/1.45 var(--base-font-family);
-    background: var(--base-page-bg); color: var(--base-text-color-1);
+  /* pure-admin's rem base: the contract's --base-rem is 10px here, as in pure-admin */
+  :root {
+    --base-rem: 10px;
     /* OKLCH lightness steps (set by the sliders) */
     --d-text-light: 0.22; --d-text-dark: 0.12; --d-hover: 0.08; --d-active: 0.16;
   }
-  h1 { font-size: 20px; margin: 0 0 4px; }
-  p.lead { margin: 0 0 12px; max-width: 1200px; color: var(--base-text-color-2); }
-  code { font: 12px var(--base-font-family-mono); }
 
   .controls { display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: center; padding: 10px 12px; margin-bottom: 14px;
     border: 1px solid var(--base-border-color); border-radius: 8px; font-size: 13px;
-    position: sticky; top: 0; z-index: 10; background: var(--base-main-bg); }
+    position: sticky; top: 0; z-index: 10; background: var(--base-main-bg); color: var(--base-text-color-1); }
   .controls label { display: inline-flex; gap: 6px; align-items: center; }
   .controls input[type=range] { width: 90px; }
   .controls output { font: 12px var(--base-font-family-mono); min-width: 34px; }
@@ -31,7 +22,8 @@
   .grid { display: grid; grid-template-columns: repeat(3, minmax(360px, 1fr)); gap: 14px; align-items: start; }
   .col { border-radius: 10px; padding: 12px 14px 16px; background: var(--base-main-bg); color: var(--base-text-color-1);
     border: 1px solid var(--base-border-color); }
-  .col h2 { font-size: 15px; margin: 0 0 2px; }
+  /* Column titles are h3 (not h2), so they don't become chapters of the kit's chapter nav. */
+  .col h3 { font-size: 15px; margin: 0 0 2px; color: var(--base-text-color-1); }
   .col .formula { font: 11.5px/1.4 var(--base-font-family-mono); color: var(--base-text-color-3); margin: 0 0 10px; min-height: 48px; }
 
   .role { display: grid; grid-template-columns: 78px 1fr; gap: 4px 10px; padding: 8px 0; border-top: 1px solid var(--base-border-color); align-items: center; }
@@ -41,12 +33,12 @@
   .role .nums b { font-weight: 600; color: var(--base-text-color-2); }
   .role .nums .bad { color: var(--base-danger-text-color); }
 
-  /* badge = tint + role text + fill button (the multiselect badge shape) */
-  .badge { display: inline-flex; height: 26px; border-radius: 4px; overflow: hidden; font-weight: 600; font-size: 13px; }
-  .badge .t { padding: 0 8px; display: flex; align-items: center; background: var(--tint); color: var(--text); }
-  .badge .x { width: 26px; display: flex; align-items: center; justify-content: center; background: var(--fill); color: var(--on); }
-  .badge .x.hover { background: var(--hover); }
-  .badge .x.active { background: var(--active); }
+  /* role badge = tint + role text + fill button (the multiselect badge shape) */
+  .role-badge { display: inline-flex; height: 26px; border-radius: 4px; overflow: hidden; font-weight: 600; font-size: 13px; }
+  .role-badge .t { padding: 0 8px; display: flex; align-items: center; background: var(--tint); color: var(--text); }
+  .role-badge .x { width: 26px; display: flex; align-items: center; justify-content: center; background: var(--fill); color: var(--on); }
+  .role-badge .x.hover { background: var(--hover); }
+  .role-badge .x.active { background: var(--active); }
   .btn { height: 26px; padding: 0 10px; border-radius: 4px; display: inline-flex; align-items: center; font-size: 12px; font-weight: 600; background: var(--fill); color: var(--on); }
   .btn.hover { background: var(--hover); } .btn.active { background: var(--active); }
   .link { color: var(--text); font-weight: 600; font-size: 13px; text-decoration: underline; }
@@ -70,10 +62,8 @@
   }
 </style>
 <style id="step-css"></style>
-</head>
-<body>
-<h1>Role steps — sRGB mix vs OKLCH</h1>
-<p class="lead">
+
+<div class="note info">
   How the contract derives a role's <em>text</em> (the role as text on a surface or its own tint) and its
   <em>hover / active</em> fills. Today (left) they mix the fill with black (light mode) or white (dark) in sRGB,
   which darkens <strong>and</strong> greys the color — sky blue text turns teal-grey. The OKLCH columns lower
@@ -81,20 +71,22 @@
   (resting / <span class="tag">hover</span> / <span class="tag">active</span>); numbers are the text on its tint and on the surface
   (WCAG 2 ratio · APCA Lc). Status roles' text is a hand-set input in the contract, so only primary / secondary
   text changes between columns; hover / active change for every role in the last column.
-</p>
-
-<div class="controls">
-  <label>Mode
-    <select id="mode"><option value="light">light</option><option value="dark">dark</option></select></label>
-  <label>Primary <input type="color" id="primary" value="#3b82f6"></label>
-  <span id="presets"></span>
-  <label>Text Δ light <input type="range" id="dtl" min="0.05" max="0.4" step="0.01" value="0.22"><output id="dtl-o"></output></label>
-  <label>Text Δ dark <input type="range" id="dtd" min="0.02" max="0.3" step="0.01" value="0.12"><output id="dtd-o"></output></label>
-  <label>Hover Δ <input type="range" id="dh" min="0.02" max="0.2" step="0.01" value="0.08"><output id="dh-o"></output></label>
-  <label>Active Δ <input type="range" id="da" min="0.04" max="0.3" step="0.01" value="0.16"><output id="da-o"></output></label>
+  Light / dark follows the page's theme switch (top right).
 </div>
 
-<div class="grid" id="grid"></div>
+<div class="card">
+  <h2>sRGB mix vs OKLCH</h2>
+  <div class="controls">
+    <label>Primary <input type="color" id="primary" value="#3b82f6"></label>
+    <span id="presets"></span>
+    <label>Text Δ light <input type="range" id="dtl" min="0.05" max="0.4" step="0.01" value="0.22"><output id="dtl-o"></output></label>
+    <label>Text Δ dark <input type="range" id="dtd" min="0.02" max="0.3" step="0.01" value="0.12"><output id="dtd-o"></output></label>
+    <label>Hover Δ <input type="range" id="dh" min="0.02" max="0.2" step="0.01" value="0.08"><output id="dh-o"></output></label>
+    <label>Active Δ <input type="range" id="da" min="0.04" max="0.3" step="0.01" value="0.16"><output id="da-o"></output></label>
+  </div>
+
+  <div class="grid" id="grid"></div>
+</div>
 
 <script type="module">
   const $ = (id) => document.getElementById(id);
@@ -120,16 +112,16 @@
   for (const v of VARIANTS) {
     const col = document.createElement('section');
     col.className = `col base-scope ${v.cls}`;
-    col.innerHTML = `<h2>${v.title}</h2><p class="formula">${v.formula.replace(/\n/g, '<br>')}</p>` +
+    col.innerHTML = `<h3>${v.title}</h3><p class="formula">${v.formula.replace(/\n/g, '<br>')}</p>` +
       ROLES.map((r) => `
         <div class="role" data-role="${r}" style="--fill: var(--base-${r}-color); --hover: var(--base-${r}-color-hover);
              --active: var(--base-${r}-color-active); --tint: var(--base-${r}-bg-subtle); --text: var(--base-${r}-text-color);
              --on: var(--base-on-${r}-text-color);">
           <span class="name">${r}</span>
           <span class="demo">
-            <span class="badge"><span class="t">Label</span><span class="x">✕</span></span>
-            <span class="badge"><span class="t">Label</span><span class="x hover">✕</span></span><span class="tag">hover</span>
-            <span class="badge"><span class="t">Label</span><span class="x active">✕</span></span><span class="tag">active</span>
+            <span class="role-badge"><span class="t">Label</span><span class="x">✕</span></span>
+            <span class="role-badge"><span class="t">Label</span><span class="x hover">✕</span></span><span class="tag">hover</span>
+            <span class="role-badge"><span class="t">Label</span><span class="x active">✕</span></span><span class="tag">active</span>
             <span class="link">Link text</span>
           </span>
           <span class="nums"></span>
@@ -160,7 +152,7 @@
   function measure() {
     for (const row of document.querySelectorAll('.role')) {
       // Read what is painted (custom properties hold the unresolved formula).
-      const t = row.querySelector('.badge .t');
+      const t = row.querySelector('.role-badge .t');
       const bg = (el) => rgb(getComputedStyle(el).backgroundColor);
       const surface = bg(row.closest('.col'));
       const text = rgb(getComputedStyle(t).color);
@@ -179,12 +171,7 @@
     $('presets').appendChild(b);
   }
   function apply() {
-    const mode = $('mode').value;
-    document.documentElement.dataset.theme = mode;
-    for (const col of document.querySelectorAll('.col')) {
-      col.dataset.theme = mode;
-      col.style.setProperty('--base-primary-color', $('primary').value);
-    }
+    for (const col of document.querySelectorAll('.col')) col.style.setProperty('--base-primary-color', $('primary').value);
     for (const [id, v] of [['dtl', '--d-text-light'], ['dtd', '--d-text-dark'], ['dh', '--d-hover'], ['da', '--d-active']]) {
       document.body.style.setProperty(v, $(id).value);
       $(`${id}-o`).textContent = $(id).value;
@@ -192,17 +179,19 @@
     requestAnimationFrame(measure);
   }
   for (const el of document.querySelectorAll('.controls select, .controls input')) el.addEventListener('input', apply);
+  // Light / dark comes from the kit's theme switch (data-theme on <html>); re-measure when it changes.
+  new MutationObserver(() => requestAnimationFrame(measure)).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => requestAnimationFrame(measure));
   const qs = new URLSearchParams(location.search);
-  if (qs.get('mode')) $('mode').value = qs.get('mode');
+  if (qs.get('mode')) document.documentElement.dataset.theme = qs.get('mode');
   if (qs.get('primary')) $('primary').value = '#' + qs.get('primary').replace('#', '');
   apply();
 
   try {
-    await import('/vendor/web-multiselect/multiselect.js');
+    const multiselectUrl = '/vendor/web-multiselect/multiselect.js';
+    await import(/* @vite-ignore */ multiselectUrl);
   } catch (err) {
     for (const w of document.querySelectorAll('.ms-wrap')) w.querySelector('.muted').textContent = 'web-multiselect build not found — run npm run build in ../web-multiselect';
   }
   window.__demo = { ready: true };
 </script>
-</body>
-</html>

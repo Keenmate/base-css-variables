@@ -1,62 +1,49 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<title>Derived contract — current vs calculated</title>
-<link rel="stylesheet" href="../base-variables.css">
+<meta name="kmwc:title" content="Derived tokens">
+<meta name="kmwc:subtitle" content="Current vs calculated — the derivation formulas against the compiled pure-admin themes">
+<meta name="kmwc:entry" content="none">
+<link rel="stylesheet" href="/base-variables.css">
 <!-- The derived formulas are generated into this block from the controls below. They are
      declared on .derived (not :root) so they compute against that panel's inputs. -->
 <style id="derived-css"></style>
 <style>
-  * { box-sizing: border-box; }
-  body {
-    margin: 0; padding: 16px 20px 60px;
-    font: 14px/1.45 var(--base-font-family);
-    color-scheme: light; background: #f3f4f6; color: #1f2937;
-  }
-  h1 { font-size: 20px; margin: 0 0 4px; }
-  h2 { font-size: 15px; margin: 22px 0 8px; }
-  p.lead { margin: 0 0 14px; color: #4b5563; max-width: 1100px; }
-  code { font: 12px var(--base-font-family-mono); }
-
   /* ---------- controls ---------- */
-  .controls { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 6px 18px;
-    background: #fff; border: 1px solid #d1d5db; border-radius: 8px; padding: 12px 14px; }
+  .controls { display: grid; grid-template-columns: 260px 1fr; gap: 6px 18px; align-items: start; margin-bottom: 0;
+    background: var(--base-main-bg); border: 1px solid var(--base-border-color); border-radius: 8px; padding: 12px 14px; }
   .controls fieldset { border: 0; padding: 0; margin: 0; }
-  .controls legend { font-weight: 600; font-size: 12px; text-transform: uppercase; color: #6b7280; margin-bottom: 4px; }
+  .controls legend { font-weight: 600; font-size: 12px; text-transform: uppercase; color: var(--base-text-color-3); margin-bottom: 4px; }
   .ctl { display: flex; align-items: center; gap: 6px; font-size: 12.5px; margin: 3px 0; }
   .ctl > span:first-child { flex: 0 0 120px; }
   .ctl input[type=range] { flex: 1; }
   .ctl output { flex: 0 0 34px; width: 34px; text-align: right; font-variant-numeric: tabular-nums; }
-  .ctl input[type=color] { width: 34px; height: 22px; padding: 0; border: 1px solid #9ca3af; border-radius: 4px; }
-  .controls { grid-template-columns: 260px 1fr; }
+  .ctl input[type=color] { width: 34px; height: 22px; padding: 0; border: 1px solid var(--base-input-border-color); border-radius: 4px; }
   .knobs { min-width: 0; }
   .knob { display: grid; grid-template-columns: 150px 150px 40px minmax(0, 1fr) minmax(0, 0.8fr); align-items: start; gap: 4px 10px;
-    padding: 5px 0; border-top: 1px solid #f1f5f9; font-size: 12.5px; }
+    padding: 5px 0; border-top: 1px solid var(--base-border-color); font-size: 12.5px; }
   .knob input[type=range] { width: 100%; margin-top: 2px; }
   .knob output { text-align: right; font-variant-numeric: tabular-nums; }
   .reset-knobs { margin-left: 8px; font: 11px var(--base-font-family); text-transform: none; padding: 1px 8px;
-    border: 1px solid #9ca3af; border-radius: 4px; background: #fff; color: #374151; cursor: pointer; vertical-align: 1px; }
-  .reset-knobs:hover { background: #f3f4f6; }
-  .method { margin-left: 16px; font: 12px var(--base-font-family); text-transform: none; color: #374151; font-weight: 400; }
+    border: 1px solid var(--base-input-border-color); border-radius: 4px; background: var(--base-main-bg); color: var(--base-text-color-1); cursor: pointer; vertical-align: 1px; }
+  .reset-knobs:hover { background: var(--base-hover-bg); }
+  .method { margin-left: 16px; font: 12px var(--base-font-family); text-transform: none; color: var(--base-text-color-1); font-weight: 400; }
   .method select { font: inherit; padding: 1px 4px; }
-  .knob .help { color: #4b5563; font-size: 12px; line-height: 1.4; }
-  .knob .cons { color: #1e3a8a; font-size: 12px; line-height: 1.4; }
-  .knob.head { font-weight: 600; font-size: 11px; text-transform: uppercase; color: #6b7280; border-top: 0; padding-bottom: 2px; }
+  .knob .help { color: var(--base-text-color-2); font-size: 12px; line-height: 1.4; }
+  .knob .cons { color: var(--base-primary-text-color); font-size: 12px; line-height: 1.4; }
+  .knob.head { font-weight: 600; font-size: 11px; text-transform: uppercase; color: var(--base-text-color-3); border-top: 0; padding-bottom: 2px; }
   .buttons { display: flex; gap: 8px; margin-top: 10px; }
-  .buttons button { font: inherit; padding: 4px 10px; border: 1px solid #9ca3af; border-radius: 5px; background: #fff; cursor: pointer; }
+  .buttons button { font: inherit; padding: 4px 10px; border: 1px solid var(--base-input-border-color); border-radius: 5px;
+    background: var(--base-main-bg); color: var(--base-text-color-1); cursor: pointer; }
 
   /* ---------- the four panels ---------- */
   .theme-pick { display: flex; align-items: center; gap: 12px; margin: 0 0 10px; }
   .theme-pick label { font-weight: 600; display: flex; gap: 6px; align-items: center; }
   .theme-pick select { font: inherit; padding: 3px 6px; }
   .mock.na > * { display: none !important; }
-  .mock.na::before { content: 'This theme has no mode like this.'; display: block; padding: 40px 10px; text-align: center; color: #6b7280; background: #fff; }
-  .grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 14px; }
+  .mock.na::before { content: 'This theme has no mode like this.'; display: block; padding: 40px 10px; text-align: center; color: var(--base-text-color-3); background: var(--base-main-bg); }
+  .grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
   .panel-head { font-weight: 600; font-size: 13px; margin-bottom: 4px; display: flex; justify-content: space-between; }
-  .panel-head small { font-weight: 400; color: #6b7280; }
+  .panel-head small { font-weight: 400; color: var(--base-text-color-3); }
 
-  /* Everything inside .mock is painted ONLY from --base-* tokens. */
+  /* Everything inside .mock is painted ONLY from --base-* tokens (the data — not page chrome). */
   .mock {
     --r: calc(var(--base-border-radius-sm) * var(--base-rem));
     background: var(--base-page-bg); color: var(--base-text-color-1);
@@ -65,7 +52,7 @@
   .mock .bar { background: var(--base-elevated-bg); border: var(--base-border); border-radius: var(--r);
     padding: 6px 8px; display: flex; gap: 6px; align-items: center; margin-bottom: 8px; }
   .mock .bar .title { font-weight: 600; flex: 1; }
-  .mock .card { background: var(--base-main-bg); border: var(--base-border); border-radius: var(--r);
+  .mock .surface { background: var(--base-main-bg); border: var(--base-border); border-radius: var(--r);
     box-shadow: var(--base-shadow-md); padding: 8px; margin-bottom: 8px; }
   .mock .t1 { color: var(--base-text-color-1); font-weight: 600; }
   .mock .t2 { color: var(--base-text-color-2); }
@@ -108,57 +95,63 @@
   .mock .chip.solid.h { background: var(--base-danger-color-hover); }
 
   /* ---------- token table ---------- */
-  table { border-collapse: collapse; width: 100%; background: #fff; font-size: 12.5px; margin-top: 6px; }
-  th, td { border: 1px solid #e5e7eb; padding: 3px 6px; text-align: left; vertical-align: middle; }
-  th { background: #f9fafb; position: sticky; top: 0; z-index: 1; }
-  td.f { font: 11px var(--base-font-family-mono); color: #374151; max-width: 360px; }
+  table { border-collapse: collapse; width: 100%; background: var(--base-main-bg); font-size: 12.5px; margin-top: 6px; }
+  th, td { border: 1px solid var(--base-border-color); padding: 3px 6px; text-align: left; vertical-align: middle; }
+  th { background: var(--base-elevated-bg); position: sticky; top: 0; z-index: 1; }
+  td.f { font: 11px var(--base-font-family-mono); color: var(--base-text-color-2); max-width: 360px; }
   .sw { display: inline-flex; align-items: center; gap: 5px; font: 11px var(--base-font-family-mono); }
   .sw i { width: 34px; height: 16px; border-radius: 3px; border: 1px solid #9ca3af; display: inline-block;
     background-image: linear-gradient(45deg, #ddd 25%, transparent 25%, transparent 75%, #ddd 75%),
                       linear-gradient(45deg, #ddd 25%, transparent 25%, transparent 75%, #ddd 75%);
     background-size: 8px 8px; background-position: 0 0, 4px 4px; position: relative; overflow: hidden; }
   .sw i b { position: absolute; inset: 0; }
-  .cr { font-size: 10.5px; color: #6b7280; }
-  .cr.low { color: #b91c1c; font-weight: 600; }
-  .dup { color: #b45309; font-size: 10.5px; display: block; }
-  tr.group td { background: #eef2ff; font-weight: 600; }
-  .legend { font-size: 12px; color: #4b5563; margin: 4px 0 0; }
+  .cr { font-size: 10.5px; color: var(--base-text-color-3); }
+  .cr.low { color: var(--base-danger-text-color); font-weight: 600; }
+  .dup { color: var(--base-warning-text-color); font-size: 10.5px; display: block; }
+  tr.group td { background: var(--base-primary-bg-subtle); font-weight: 600; }
+  .legend { font-size: 12px; color: var(--base-text-color-2); margin: 4px 0 0; }
 </style>
-</head>
-<body>
-<h1>Derived contract — current vs calculated</h1>
-<p class="lead">
+
+<div class="note info">
   Left: today's <code>base-variables.css</code> (hand-picked hex values). Right: the same <b>inputs</b> with every
   other color <b>calculated</b> by the formulas below (<code>color-mix</code> of text into background, black/white
   steps for hover/active). Change an input or a percentage and the derived panels follow. Any derived token can
   still be overridden with a hand-set value — that just replaces its formula.
-</p>
-
-<div class="theme-pick">
-  <label>Theme
-    <select id="theme">
-      <option value="">Contract — base-variables.css (derived)</option>
-      <option value="corporate">corporate (hand-set, as compiled)</option>
-      <option value="cobalt2">cobalt2</option>
-      <option value="gruvbox">gruvbox</option>
-      <option value="express">express</option>
-      <option value="nato">nato</option>
-    </select></label>
-  <span class="legend" id="theme-note">Current = the contract (base-variables.css), itself derived now — pick "corporate" to compare with the hand-set Corporate values.</span>
-</div>
-<div class="controls" id="controls"></div>
-<div class="buttons">
-  <button id="btn-reset" type="button">Reset</button>
-  <button id="btn-copy" type="button">Copy derived CSS</button>
-  <span id="copy-msg" class="legend"></span>
 </div>
 
-<div class="grid" id="panels"></div>
+<div class="card">
+  <h2>Theme, inputs and formulas</h2>
+  <div class="theme-pick">
+    <label>Theme
+      <select id="theme">
+        <option value="">Contract — base-variables.css (derived)</option>
+        <option value="corporate">corporate (hand-set, as compiled)</option>
+        <option value="cobalt2">cobalt2</option>
+        <option value="gruvbox">gruvbox</option>
+        <option value="express">express</option>
+        <option value="nato">nato</option>
+      </select></label>
+    <span class="legend" id="theme-note">Current = the contract (base-variables.css), itself derived now — pick "corporate" to compare with the hand-set Corporate values.</span>
+  </div>
+  <div class="controls" id="controls"></div>
+  <div class="buttons">
+    <button id="btn-reset" type="button">Reset</button>
+    <button id="btn-copy" type="button">Copy derived CSS</button>
+    <span id="copy-msg" class="legend"></span>
+  </div>
+</div>
 
-<h2>Tokens</h2>
-<p class="legend">Contrast is against <code>--base-main-bg</code> of the same panel (WCAG ratio; red &lt; 3:1).
-  <span style="color:#b45309">same as …</span> = identical color to another surface token in that panel.</p>
-<table id="tokens"><thead></thead><tbody></tbody></table>
+<div class="card">
+  <h2>Current vs derived — light and dark</h2>
+  <div class="grid" id="panels"></div>
+</div>
+
+<div class="card">
+  <h2>Tokens</h2>
+  <p class="legend">Contrast is against <code>--base-main-bg</code> of the same panel (WCAG ratio; red &lt; 3:1).
+    <span class="dup" style="display:inline">same as …</span> = identical color to another surface token in that panel.</p>
+  <table id="tokens"><thead></thead><tbody></tbody></table>
+</div>
 
 <script type="module">
 // ---------------------------------------------------------------------------
@@ -336,7 +329,7 @@ function readControls() {
 // ---------------------------------------------------------------------------
 const MOCK = `
   <div class="bar"><span class="title">Header · elevated</span><span class="tooltip">Tooltip</span></div>
-  <div class="card">
+  <div class="surface">
     <div class="t1">Title — text-color-1</div>
     <div class="t2">Body / muted — text-color-2</div>
     <div class="t3">Metadata, icons, placeholders, hints — text-color-3</div>
@@ -353,7 +346,7 @@ const MOCK = `
       <div class="row hover">On elevated · hover</div>
     </div>
   </div>
-  <div class="card">
+  <div class="surface">
     <div class="input"><span>Value</span><span class="ic">✕</span></div>
     <div class="input focus"><span class="ph">Placeholder · focused</span><span class="ic">⌄</span></div>
     <div class="input disabled"><span>Disabled</span></div>
@@ -567,5 +560,3 @@ $('#btn-copy').onclick = async () => {
 };
 apply();
 </script>
-</body>
-</html>

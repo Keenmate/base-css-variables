@@ -483,7 +483,7 @@ written directly into `*-outline` won't move the inset offset, so the outline sp
 Where a dragged item or file can land: tree rows, dropzones, grid column reorder, pure-admin's file
 dropzone. The success tint by default, so a drop target never looks like the primary-tinted
 selection next to it; a theme restyles every drop here without touching selection
-(`demo/drop-target.html`). A drop that is *not allowed* stays a danger tint in the component.
+(`examples-drop-target.html`). A drop that is *not allowed* stays a danger tint in the component.
 
 | Variable | Purpose |
 |----------|---------|
@@ -625,7 +625,7 @@ custom properties in, so the loader is four tokens, and every consumer draws it 
 - **Swap the shape:** set `--base-loader-icon` to another SVG. A shape that should spin keeps
   `--base-loader-rotate: 1turn`; an SVG that animates itself (CSS or SMIL inside it, e.g. a
   travelling sine wave) sets `--base-loader-rotate: 0`. Both work as a mask in Chromium, Firefox
-  and WebKit (`e2e/loader.spec.ts`, `demo/loader.html`).
+  and WebKit (`e2e/loader.spec.ts`, `examples-loader.html`).
 - **One colour:** the icon is a mask painted with `currentColor`. Multi-colour loaders need
   markup, not a token.
 - **Reduced motion:** the loader is the one loop that keeps moving — it slows to `1.5s` per turn
@@ -723,11 +723,11 @@ categorical color (charts, tags, avatars).
 - [`@keenmate/theme-designer`](https://github.com/keenmate/theme-designer) — visual
   theme designer & generator that produces `--base-*` values from 3 input colors.
   *Not yet updated for 2.0* — it still emits the 1.x names.
-- `demo/derived.html` in the [GitHub repo](https://github.com/Keenmate/base-css-variables) (not in the npm package; `npm run demo`) — compares the derived formulas against
+- `examples-derived.html` in the [GitHub repo](https://github.com/Keenmate/base-css-variables) (not in the npm package; `make dev` → http://localhost:15300) — compares the derived formulas against
   the compiled pure-admin themes, with live input pickers and formula knobs.
-- `demo/fill-states.html` (same place) — text on fills (WCAG 2 vs APCA pick, with both scores),
+- `examples-fill-states.html` (same place) — text on fills (WCAG 2 vs APCA pick, with both scores),
   hover / press options for buttons, and how a theme overrides a button component's state tokens.
-- `demo/variables.html` (same place) — every `--base-*` token in logical groups, marked input or
+- `examples-variables.html` (same place) — every `--base-*` token in logical groups, marked input or
   derived, with its light and dark value, a preview and its definition.
 
 ## License
