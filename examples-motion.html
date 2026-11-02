@@ -1,5 +1,5 @@
 <meta name="kmwc:title" content="Motion">
-<meta name="kmwc:subtitle" content="Four speeds, three easings, reduced motion and turning motion off, scroll behaviour">
+<meta name="kmwc:subtitle" content="Four speeds, three easings, reduced motion and turning motion off, scroll behaviour, motion levels">
 <meta name="kmwc:entry" content="none">
 <link rel="stylesheet" href="/base-variables.css">
 <style>
@@ -40,13 +40,24 @@
   .scroller { height: 200px; overflow: auto; border: var(--base-border); border-radius: 8px; background: var(--base-main-bg); scroll-behavior: var(--base-scroll-behavior); }
   .scroller div { padding: 6px 12px; font-size: 13px; border-bottom: var(--base-border); }
   .scroller div.is-target { background: var(--base-selected-bg); font-weight: 600; }
+
+  .levels { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); align-items: start; gap: 12px; margin-bottom: 12px; }
+  .level-lanes { display: grid; gap: 4px; }
+  .level { display: grid; gap: 6px; align-content: start; padding: 10px; border-radius: 8px; border: 1px dashed var(--base-border-color); font-size: 12px; }
+  .level .level { margin-top: 4px; }
+  .level .track { height: 16px; }
+  .level .dot { top: 2px; left: 2px; width: 12px; height: 12px; }
+  .levels.is-moved .dot { left: calc(100% - 14px); }
+  .level-readout { font-family: var(--base-font-family-mono); font-size: 11px; }
+  .level-readout b { color: var(--base-primary-text-color); }
 </style>
 
 <div class="note info">
   Components use only four durations and three easings, all from the contract: snappy rather than
   animated. Under <code>prefers-reduced-motion: reduce</code> the durations become <code>0s</code> and
   scrolling jumps; the one exception is the loader, which slows down instead of stopping
-  (<a href="examples-loader.html">Loader</a>). Turning motion off is CSS only, no attribute.
+  (<a href="examples-loader.html">Loader</a>). Turning motion off: the durations at <code>0s</code> in
+  CSS, or the shortcut <code>data-motion="none"</code> (MO04).
 </div>
 
 <div class="note info" id="rm-note">
@@ -64,7 +75,7 @@
   <p>Each lane moves with one duration and the standard easing. In use the speeds are for small
     changes: hover fills, opening a dropdown, expanding a row.</p>
   <p>To turn motion off in an app, set the four durations to <code>0s</code>, page-wide or on one
-    region. It's CSS only, no attribute; a component also takes its own
+    region (the shortcut is <code>data-motion="none"</code>, MO04); a component also takes its own
     <code>--&lt;prefix&gt;-transition-*: 0s</code>. The checkbox does it for the demo below.</p>
   <p class="readout" id="speed-readout"></p>
   <div class="controls">
@@ -109,6 +120,31 @@
 row.scrollIntoView({ block: 'nearest', behavior });</code></pre></div>
 </section>
 
+<section class="card">
+  <h2>MO04 · Motion levels — <code>data-motion</code></h2>
+  <p><code>data-motion="none | snappy | smooth"</code> on any element (<code>&lt;html&gt;</code>, a
+    section, a component) sets the four speeds and the scroll behaviour for everything inside it;
+    the nearest one wins. Each box below plays the four speeds, fast to slow, with its level.
+    The loader is not part of the levels: it keeps turning.</p>
+  <p class="readout" id="level-readout"></p>
+  <div class="controls">
+    <button type="button" class="btn" id="play-levels">Play</button>
+    <label>Page level, <code>data-motion</code> on <code>&lt;html&gt;</code>:
+      <select id="ctl-page-level">
+        <option value="">unset</option>
+        <option value="none">none</option>
+        <option value="snappy">snappy</option>
+        <option value="smooth">smooth</option>
+      </select></label>
+  </div>
+  <div class="levels" id="levels"></div>
+  <p>Components built on web-components-core also take <code>motion="…"</code>, and
+    <code>window.components.motion</code> sets the level page-wide
+    (core's demo: <a href="http://localhost:15000/examples-motion.html">examples-motion</a>, when its dev server runs).</p>
+  <div class="code-block"><pre><code>&lt;html data-motion="snappy"&gt;            &lt;!-- the whole app --&gt;
+&lt;section data-motion="none"&gt;…&lt;/section&gt; &lt;!-- one region --&gt;</code></pre></div>
+</section>
+
 <script type="module">
   const root = document.documentElement;
   const $ = (id) => document.getElementById(id);
@@ -151,6 +187,27 @@ row.scrollIntoView({ block: 'nearest', behavior });</code></pre></div>
     renderReadouts();
   });
 
+  /* -------------------------------------------------------------- MO04 */
+  const miniLanes = () => `<div class="level-lanes">${SPEEDS.map((s) =>
+    `<div class="track"><span class="dot" style="--lane-duration: var(--base-duration-${s})"></span></div>`).join('')}</div>`;
+  const box = (label, level, inner = miniLanes()) =>
+    `<div class="level"${level ? ` data-motion="${level}"` : ''}><span>${label}</span><span class="level-readout"></span>${inner}</div>`;
+  $('levels').innerHTML = [
+    box('no <code>data-motion</code> (follows the page)', null),
+    box('<code>none</code>', 'none'),
+    box('<code>snappy</code>', 'snappy'),
+    box('<code>smooth</code>', 'smooth'),
+    box('<code>smooth</code>, with <code>none</code> inside', 'smooth',
+      `${miniLanes()}${box('<code>none</code> (the nearest wins)', 'none')}`),
+  ].join('');
+  $('play-levels').addEventListener('click', () => play($('levels')));
+  $('ctl-page-level').addEventListener('change', () => {
+    const level = $('ctl-page-level').value;
+    if (level) root.dataset.motion = level;
+    else delete root.dataset.motion;
+    renderReadouts();
+  });
+
   /* ---------------------------------------------------------- readouts */
   // The contract's own value of a token, outside the reduced-motion @media block.
   const declared = (token) => {
@@ -188,6 +245,13 @@ row.scrollIntoView({ block: 'nearest', behavior });</code></pre></div>
     }).join(' · ');
     const easingsOn = !reduced || $('ctl-anyway').checked;
     $('easings').style.setProperty('--demo-easing-duration', easingsOn ? '1s' : '0s');
+    $('level-readout').innerHTML = `prefers-reduced-motion: <b>${reduced ? 'reduce' : 'no-preference'}</b>` +
+      (reduced ? ' — the OS setting beats every level, so each box reads 0s (the switch at the top does not change that)' : '');
+    $('levels').querySelectorAll('.level').forEach((el) => {
+      const lanes = el.querySelector(':scope > .level-lanes');
+      el.querySelector(':scope > .level-readout').innerHTML =
+        `normal <b>${value('--base-duration-normal', lanes)}</b> · scroll <b>${value('--base-scroll-behavior', lanes)}</b>`;
+    });
     $('scroll-readout').innerHTML = `--base-scroll-behavior on the list: <b>${value('--base-scroll-behavior', $('scroller'))}</b>`;
   }
   matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', renderReadouts);

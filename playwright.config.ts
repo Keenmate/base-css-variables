@@ -41,9 +41,9 @@ export default defineConfig({
 
   projects: [
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
-    // The loader is a mask image + animation: checked in all three engines.
-    { name: 'firefox', testMatch: /loader\.spec\.ts/, use: { ...devices['Desktop Firefox'] } },
-    { name: 'webkit', testMatch: /loader\.spec\.ts/, use: { ...devices['Desktop Safari'] } },
+    // The loader (a mask image + animation) and the motion levels: checked in all three engines.
+    { name: 'firefox', testMatch: /(loader|motion)\.spec\.ts/, use: { ...devices['Desktop Firefox'] } },
+    { name: 'webkit', testMatch: /(loader|motion)\.spec\.ts/, use: { ...devices['Desktop Safari'] } },
   ],
 
   webServer: {

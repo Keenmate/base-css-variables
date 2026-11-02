@@ -3,7 +3,23 @@
 All notable changes to `@keenmate/base-css-variables` are documented here. Format based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [2.0.0-rc08] — 2026-10-31
+## [2.0.0-rc08] — 2026-11-02 [PUBLISHED]
+
+### Added
+
+- **Motion levels — `data-motion="none | snappy | smooth"`** on any element (`<html>`, a section,
+  a component) sets the four `--base-duration-*` speeds and `--base-scroll-behavior` for everything
+  inside it; the nearest one wins. `none` = `0s` and instant scrolling (the shortcut for motion
+  off — CSS `0s` still works), `snappy` = 0.05 / 0.08 / 0.12 / 0.15s, `smooth` = 0.15 / 0.25 /
+  0.35 / 0.45s. The same presets ship in web-components-core (`motion` attribute,
+  `window.components.motion`), whose test compares them with this file. The loader is not part of
+  the levels. README → Motion level; examples MO04.
+
+### Changed
+
+- **Reduced motion beats every motion level** — the `prefers-reduced-motion: reduce` block now
+  sets `:root, [data-motion]` and comes after the levels, so the OS setting wins even inside
+  `data-motion="smooth"`.
 
 ### Fixed
 

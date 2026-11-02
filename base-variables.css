@@ -205,7 +205,8 @@
   /* ======================================================================
    * MOTION — durations + easings. Components use only these four speeds
    * (short = snappy) and these easings. Motion off: --base-duration-*: 0s
-   * (page-wide) or the component's own --<prefix>-transition-*: 0s.
+   * (page-wide) or the component's own --<prefix>-transition-*: 0s; the
+   * shortcut is data-motion="none" (motion levels, below :root).
    * prefers-reduced-motion sets the durations to 0s (block below :root).
    * ==================================================================== */
   --base-duration-fast: 0.1s;
@@ -338,10 +339,43 @@
   --base-palette-9: #334155;  /* Dark slate */
 }
 
+/* ===========================================================================
+ * MOTION LEVEL — data-motion="none | snappy | smooth" on any element (<html>,
+ * a section, a component) sets the four speeds and the scroll behaviour for
+ * everything inside it; the nearest one wins. Components also take a `motion`
+ * attribute (web-components-core), which writes the same data-motion onto the
+ * element. Unset / "auto" = :root's speeds above. prefers-reduced-motion
+ * (below) always wins. The loader is not part of the levels.
+ * Values are mirrored in web-components-core MOTION_PRESETS — keep in sync.
+ * ======================================================================== */
+[data-motion="none"] {
+  --base-duration-fast: 0s;
+  --base-duration-normal: 0s;
+  --base-duration-medium: 0s;
+  --base-duration-slow: 0s;
+  --base-scroll-behavior: auto;
+}
+[data-motion="snappy"] {
+  --base-duration-fast: 0.05s;
+  --base-duration-normal: 0.08s;
+  --base-duration-medium: 0.12s;
+  --base-duration-slow: 0.15s;
+  --base-scroll-behavior: smooth;
+}
+[data-motion="smooth"] {
+  --base-duration-fast: 0.15s;
+  --base-duration-normal: 0.25s;
+  --base-duration-medium: 0.35s;
+  --base-duration-slow: 0.45s;
+  --base-scroll-behavior: smooth;
+}
+
 /* Reduced motion: no transitions / animations from the contract's durations;
- * the loader slows instead of stopping. */
+ * the loader slows instead of stopping. On every data-motion element too, and
+ * after the levels (same specificity), so the OS setting beats even "smooth". */
 @media (prefers-reduced-motion: reduce) {
-  :root {
+  :root,
+  [data-motion] {
     --base-duration-fast: 0s;
     --base-duration-normal: 0s;
     --base-duration-medium: 0s;

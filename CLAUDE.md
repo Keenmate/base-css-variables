@@ -100,10 +100,15 @@ traces this end-to-end for the primary color — read it before touching token s
 - **Loader:** one loader for the app and every component — `--base-loader-icon / -rotate /
   -duration / -size`, drawn as a mask + rotate animation (README → Loader). Its duration is the
   one exception to the four speeds and slows (never stops) under reduced motion. `e2e/loader.spec.ts`
-  runs in Chromium, Firefox and WebKit (the only spec in the firefox / webkit projects).
+  runs in Chromium, Firefox and WebKit, as does `e2e/motion.spec.ts` (the only two specs in the firefox / webkit projects).
 - **Motion:** components use only the four `--base-duration-*` speeds and the `--base-ease-*`
-  easings (no one-off durations; snappy over animated). Motion off is CSS only (`0s`), never an
-  attribute; `prefers-reduced-motion` sets the durations to `0s` in its own `@media` block.
+  easings (no one-off durations; snappy over animated). Motion off: the durations at `0s` in CSS,
+  or the shortcut `data-motion="none"`. Motion levels `[data-motion="none|snappy|smooth"]` (one
+  rule per level, selector alone at the start of its line) set the four speeds and
+  `--base-scroll-behavior`; web-components-core ships the same values (`MOTION_PRESETS`) and its
+  `motion.test.ts` compares them with this file — change both together. `prefers-reduced-motion`
+  zeroes the durations on `:root, [data-motion]` in its own `@media` block, which must come after
+  the levels so the OS beats even `smooth`. The loader is not part of the levels.
 - **Unitless multipliers:** font sizes, radii, input heights, and the spacing scale are stored as
   bare numbers, combined by consumers as `calc(var(--base-…) * var(--base-rem))` (`--base-rem: 1rem`).
   Keep new sizing tokens unitless to match.
