@@ -12,17 +12,21 @@ that **cascade from these `--base-*` values**. Define the base layer once and ev
 component picks up a consistent, coordinated theme. Override a single `--base-*`
 variable and the change propagates everywhere.
 
+## What's New in 2.0.0
+
+- **Release — 2.0.0 is final** — the same contract as rc08, now installed by default. Upgrading from 1.x is breaking: overrides that use 1.x names are silently ignored, see *Upgrading from 1.x* below and `renames.json`.
+- **Contract — a few inputs, everything else derived** — a theme sets the surfaces, `--base-text-color-1`, the role colors and the palette; hover / active steps, tints, text levels and text on fills (`--base-on-<role>-text-color`, black or white by APCA) are calculated, and recalculate inside `[data-theme]` / `.base-scope`.
+- **Names — renamed without aliases** — `--base-accent-color` → `--base-primary-color`, names end in their type (`--base-input-text-color`), `--base-color-N` → `--base-palette-N`, item state `highlighted` → `selected`.
+- **Roles — the same seven tokens for every role** — `-color`, `-color-hover`, `-color-active`, `-bg-subtle`, `-bg-subtle-hover`, `-text-color`, `--base-on-<role>-text-color`; one `--base-disabled-opacity`. Default primary is blue-500 `#3b82f6`.
+- **New tokens — loader, drop target, tree indent, scroll behavior, breakpoints** — `--base-loader-*`, `--base-drop-target-*`, `--base-tree-indent`, `--base-scroll-behavior`, `--base-breakpoint-mobile` / `-tablet`.
+- **Motion — four speeds and `data-motion` levels** — `--base-duration-*` + `--base-ease-*`, `none | snappy | smooth`; the OS reduced-motion setting wins over every level.
+- **Tooling — `base-contract-check` and `testing/parity.mjs`** — components check their `--base-*` reads, sets and fallbacks at build time and compare their colors with and without the contract in e2e.
+
 ## What's New in 2.0.0-rc08
 
 - **Motion — levels with `data-motion="none | snappy | smooth"`** — on any element (`<html>`, a section, a component) a level sets the four `--base-duration-*` speeds and `--base-scroll-behavior` for everything inside it, and the nearest one wins. `none` is `0s` with instant scrolling, a shortcut for turning motion off (setting the durations to `0s` in CSS still works). `snappy` is 0.05 / 0.08 / 0.12 / 0.15s and `smooth` is 0.15 / 0.25 / 0.35 / 0.45s. Components built on web-components-core get the same levels through their `motion` attribute and `window.components.motion`. The loader isn't affected.
 - **Motion — the OS reduced-motion setting beats every level** — `prefers-reduced-motion: reduce` now also zeroes the speeds on every `[data-motion]` element, so it wins even inside `smooth`.
 - **Tooling — `base-contract-check` ignores `setProperty` names built at runtime** — ``setProperty(`--base-icon-${key}`, …)`` was reported as setting the unknown token `--base-icon-`.
-
-## What's New in 2.0.0-rc07
-
-- **Breakpoints — `--base-breakpoint-mobile` / `--base-breakpoint-tablet`** — `768px` and `1024px`, the widths where layouts switch. pure-css's JS config (`mobileBreakpoint` / `tabletBreakpoint`) and web-components-core (`env.breakpoint`) already read them, so the app shell and every component switch at the same width. They're read from JS, because `@media` can't read `var()`; pure-css compiles the same widths from `$mobile-breakpoint` / `$tablet-breakpoint`.
-- **Tooling — `base-contract-check` catches setting a name the contract doesn't have** — `--base-accent-color: #10b981` in CSS, in a `style` attribute or via `style.setProperty(…)` has done nothing since 2.0.0, and nothing said so. The check now flags it and names the replacement.
-- **Tooling — `base-contract-check` scans `.html` and `.md`** — example pages, scaffold templates and docs snippets get checked like the source (HTML comments are ignored). Build and test output (`dist-examples`, `test-results`, `playwright-report`) is skipped like `dist`.
 
 ## Install
 
@@ -56,7 +60,7 @@ syntax (`oklch(from …)`) — Chrome / Edge 119+, Safari 16.4+, Firefox 128+.
 2.0 renamed and removed tokens **without aliases**: an override that still uses a 1.x name
 (`--base-accent-color`, `--base-color-3`, `--base-success-bg`, …) is silently ignored and the
 default shows instead. Rename overrides with the table in the
-[CHANGELOG](./CHANGELOG.md) (2.0.0 → *Rename table*), and upgrade the components together with
+[CHANGELOG](./CHANGELOG.md) (2.0.0-rc01 → *Rename table*), and upgrade the components together with
 this package — each one reads the 2.0 names from its matching release.
 
 ## How it works

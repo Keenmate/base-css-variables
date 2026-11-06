@@ -3,6 +3,25 @@
 All notable changes to `@keenmate/base-css-variables` are documented here. Format based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.0.0] — 2026-11-06 [PUBLISHED]
+
+### Changed
+
+- **2.0.0 is final — the same contract as 2.0.0-rc08, now on `latest`.** No token or check changes
+  since rc08. The full list is in the rc01–rc08 sections below; the main changes from 1.x:
+  - **BREAKING: a derived contract** — a few hand-set inputs in `:root`, everything else calculated
+    (`color-mix()`, OKLCH relative colors, APCA text on fills) on `:root, [data-theme], .base-scope`,
+    so a re-themed scope recalculates.
+  - **BREAKING: renames without aliases** — `accent` → `primary`, names state their type (`-color` /
+    `-bg` / `-border` …), `--base-color-N` → `--base-palette-N`, item state `highlighted` →
+    `selected`, removed role `-bg` / `-text-light` / `-border` copies. See rc01 → *Rename table*
+    and `renames.json`.
+  - **Every role has the same seven tokens**, plus `--base-disabled-opacity`; default primary is
+    blue-500 `#3b82f6`.
+  - **New tokens:** loader, drop target, tree indent, scroll behavior, breakpoints, input focus halo.
+  - **Motion:** four speeds + easings, `data-motion="none | snappy | smooth"`, reduced motion wins.
+  - **Tooling:** `base-contract-check` (C1–C3) and `testing/parity.mjs` for components.
+
 ## [2.0.0-rc08] — 2026-11-02 [PUBLISHED]
 
 ### Added
