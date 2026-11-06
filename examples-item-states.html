@@ -49,7 +49,7 @@
 
   /* =====================================================================
    * REFERENCE CONSUMER — the item-state contract implemented exactly the
-   * way a component should read it. Keep this in step with README → "Item
+   * way a component should read it. Keep this in step with docs/variables.md → "Item
    * states"; the e2e suite asserts these rules against the tokens.
    * =================================================================== */
   .ref-list {
@@ -84,7 +84,7 @@
   }
   .ref-item--focused:not(.ref-item--selected) { background: var(--base-focused-bg); }
 
-  /* Checkbox — README "Checkbox render method": box, border and radius all via
+  /* Checkbox — docs/examples.md "Checkbox render method": box, border and radius all via
      calc, border-box, glyph masked over the full box, no transform. The checked
      state lives on the checkbox only — no row treatment. */
   .ref-checkbox {
@@ -166,7 +166,7 @@
 <div class="grid" style="--grid-gap: calc(var(--base-space-lg) * var(--base-rem))">
   <section class="card">
     <h2>IS03 · Reference list</h2>
-    <p class="muted">Plain HTML reading the tokens as the README specifies. Click, Ctrl+click, Shift+click;
+    <p class="muted">Plain HTML reading the tokens as docs/variables.md specifies. Click, Ctrl+click, Shift+click;
       ↑/↓ (Shift extends, Ctrl moves focus only), Home/End, Ctrl+Space toggles selection, Space checks.</p>
     <ul class="ref-list" id="ref-list" role="listbox" aria-multiselectable="true" tabindex="0" aria-label="Reference list"></ul>
     <div class="state" id="ref-state">
