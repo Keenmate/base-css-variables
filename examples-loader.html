@@ -4,7 +4,7 @@
 <link rel="stylesheet" href="/base-variables.css">
 <style>
   .row { display: flex; flex-wrap: wrap; gap: 12px; }
-  .demo-card { min-width: 210px; }
+  .row > .demo-card { min-width: 210px; }
   .demo-card .line { display: flex; gap: 8px; align-items: center; margin: 6px 0; }
   .readout { font: 12px var(--base-font-family-mono); color: var(--base-text-color-2); }
 
@@ -21,7 +21,7 @@
   @keyframes demo-loader-spin { to { transform: rotate(var(--base-loader-rotate)); } }
 
   .primary { color: var(--base-primary-color); }
-  .muted { color: var(--base-text-color-3); }
+  .demo-loader.muted { color: var(--base-text-color-3); }
   .danger { color: var(--base-danger-color); }
 </style>
 

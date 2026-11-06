@@ -7,10 +7,10 @@
 <style id="derived-css"></style>
 <style>
   /* ---------- controls ---------- */
-  .controls { display: grid; grid-template-columns: 260px 1fr; gap: 6px 18px; align-items: start; margin-bottom: 0;
+  .derive-controls { display: grid; grid-template-columns: 260px 1fr; gap: 6px 18px; align-items: start; margin-bottom: 0;
     background: var(--base-main-bg); border: 1px solid var(--base-border-color); border-radius: 8px; padding: 12px 14px; }
-  .controls fieldset { border: 0; padding: 0; margin: 0; }
-  .controls legend { font-weight: 600; font-size: 12px; text-transform: uppercase; color: var(--base-text-color-3); margin-bottom: 4px; }
+  .derive-controls fieldset { border: 0; padding: 0; margin: 0; }
+  .derive-controls legend { font-weight: 600; font-size: 12px; text-transform: uppercase; color: var(--base-text-color-3); margin-bottom: 4px; }
   .ctl { display: flex; align-items: center; gap: 6px; font-size: 12.5px; margin: 3px 0; }
   .ctl > span:first-child { flex: 0 0 120px; }
   .ctl input[type=range] { flex: 1; }
@@ -39,11 +39,12 @@
   .theme-pick select { font: inherit; padding: 3px 6px; }
   .mock.na > * { display: none !important; }
   .mock.na::before { content: 'This theme has no mode like this.'; display: block; padding: 40px 10px; text-align: center; color: var(--base-text-color-3); background: var(--base-main-bg); }
-  .grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+  .panel-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
   .panel-head { font-weight: 600; font-size: 13px; margin-bottom: 4px; display: flex; justify-content: space-between; }
   .panel-head small { font-weight: 400; color: var(--base-text-color-3); }
 
   /* Everything inside .mock is painted ONLY from --base-* tokens (the data — not page chrome). */
+  /* kmwc-fixed-colors — a neutral frame, the same in both modes, around the theme mock */
   .mock {
     --r: calc(var(--base-border-radius-sm) * var(--base-rem));
     background: var(--base-page-bg); color: var(--base-text-color-1);
@@ -100,6 +101,7 @@
   th { background: var(--base-elevated-bg); position: sticky; top: 0; z-index: 1; }
   td.f { font: 11px var(--base-font-family-mono); color: var(--base-text-color-2); max-width: 360px; }
   .sw { display: inline-flex; align-items: center; gap: 5px; font: 11px var(--base-font-family-mono); }
+  /* kmwc-fixed-colors — the transparency checkerboard behind a swatch */
   .sw i { width: 34px; height: 16px; border-radius: 3px; border: 1px solid #9ca3af; display: inline-block;
     background-image: linear-gradient(45deg, #ddd 25%, transparent 25%, transparent 75%, #ddd 75%),
                       linear-gradient(45deg, #ddd 25%, transparent 25%, transparent 75%, #ddd 75%);
@@ -133,7 +135,7 @@
       </select></label>
     <span class="legend" id="theme-note">Current = the contract (base-variables.css), itself derived now — pick "corporate" to compare with the hand-set Corporate values.</span>
   </div>
-  <div class="controls" id="controls"></div>
+  <div class="derive-controls" id="controls"></div>
   <div class="buttons">
     <button id="btn-reset" type="button">Reset</button>
     <button id="btn-copy" type="button">Copy derived CSS</button>
@@ -143,7 +145,7 @@
 
 <div class="card">
   <h2>DE02 · Current vs derived — light and dark</h2>
-  <div class="grid" id="panels"></div>
+  <div class="panel-grid" id="panels"></div>
 </div>
 
 <div class="card">
@@ -487,7 +489,7 @@ function renderTable() {
         const same = Object.entries(surf).filter(([t, h]) => t !== tok && h === hex(rgb) && !alias(t, tok)).map(([t]) => t.replace('--base-', ''));
         if (same.length) extra = `<span class="dup">same as ${same.join(', ')}</span>`;
       }
-      return `<td><span class="sw"><i><b style="background:${raw[3] < 1 ? `rgba(${raw.join(',')})` : hex(rgb)}"></b></i>${hex(rgb)}</span> ${extra}</td>`;
+      return `<td><span class="sw"><i><b data-kmwc-fixed-colors style="background:${raw[3] < 1 ? `rgba(${raw.join(',')})` : hex(rgb)}"></b></i>${hex(rgb)}</span> ${extra}</td>`;
     });
     tr.innerHTML = `<td><code>${tok.replace('--base-', '')}</code></td><td class="f">${f[tok] ? f[tok].replace(/var\(--base-([\w-]+)\)/g, '$1').replaceAll('color-mix(in srgb, ', 'mix(') : '<i>input</i>'}</td>${cells.join('')}`;
     body.append(tr);

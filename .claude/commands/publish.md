@@ -1,5 +1,5 @@
 ---
-description: Prepare @keenmate/base-css-variables for npm publish — bump version, finalize CHANGELOG/README, verify, commit
+description: Prepare @keenmate/base-css-variables for npm publish — bump version, finalize CHANGELOG/README, check the contract, test, commit
 argument-hint: rc|release|patch|minor|major
 ---
 
@@ -7,9 +7,9 @@ argument-hint: rc|release|patch|minor|major
 
 You are preparing this package for `npm publish`. **Do not run `npm publish`** — the user logs in and publishes manually.
 
-This command follows the canonical `/publish` structure shared across KeenMate component packages (see `@keenmate/pure-css`'s `/publish`). Sections marked **[canonical]** are byte-identical across every package's `/publish`; sections marked **[per-repo]** are customized for this repo's layout.
-
-**What makes this repo different from pure-css:** there is **no build step**. `base-variables.css` is authored by hand and IS the published artifact — no SCSS, no compile, no `dist/`, no tests. The release gate here is (a) the CSS being well-formed and (b) the `--base-*` token list staying in sync with `@keenmate/pure-css`'s `$base-*` mirror.
+This command follows the canonical `/publish` structure defined in the BlissFramework component guidelines at
+`web-components/publish-command.md`. Sections marked **[canonical]** are byte-identical across every
+component's `/publish`; sections marked **[per-repo]** are customized for this repo's layout, build, and tests.
 
 ## Argument [canonical]
 
@@ -17,7 +17,7 @@ The release type: **$ARGUMENTS**
 
 Must be one of:
 
-- `rc` — ship the WIP rc as-is. The topmost CHANGELOG heading (e.g. `## [1.1.0-rc01] — 2026-09-10`) gets ` [PUBLISHED]` appended.
+- `rc` — ship the WIP rc as-is. The topmost CHANGELOG heading (e.g. `## [1.10.0-rc02] - 2026-06-18`) gets ` [PUBLISHED]` appended.
 - `release` — promote a WIP rc to a final release. `X.Y.Z-rcN` → `X.Y.Z`. CHANGELOG heading is renamed to match the new version.
 - `patch` — SemVer patch bump. Drops any `-rc` suffix.
 - `minor` — SemVer minor bump. Drops `-rc`. Resets patch.
@@ -27,33 +27,32 @@ If missing or invalid, stop and ask the user which one to use (don't guess).
 
 ## Repo layout [per-repo]
 
-Single-file, zero-build package, everything at root:
+Single-package repo, everything at root. **There is no build step** — `base-variables.css` is authored by hand
+and IS the published artifact (no SCSS, no compile, no `dist/`):
 
-- **`./package.json`** — `version` field is the source of truth. Has no `scripts` (nothing to build). `files` ships `base-variables.css`, `README.md`, `CHANGELOG.md`, `LICENSE` (npm always adds `package.json`).
-- **`./base-variables.css`** — the canonical `--base-*` contract and the **only** shipped code artifact. Authored directly; there is nothing to compile.
-- **`./CHANGELOG.md`** — at the root. Topmost `## [X.Y.Z] — YYYY-MM-DD` heading **without** the `[PUBLISHED]` marker is the WIP section. Date separator is an **em-dash** (` — `, U+2014).
-- **`./README.md`** — at the root. Carries `## What's New in X.Y.Z` sections near the top (one per release, the **two most recent** retained), **no `v` prefix**. Also carries the hand-maintained "Variable reference" tables that must match the tokens in `base-variables.css`.
-- **`./Makefile`** — wraps `npm pack` / `npm publish` (`make publish` / `make publish-rc`). No `build`/`clean` targets — there's nothing to build.
-
-There is **no `dist/`, no `src/`, and no test suite.**
+- **`./package.json`** — `version` field is the source of truth. `kmwc.library: false` — the devkit Vite preset serves and builds only the examples site.
+- **`./base-variables.css`** — the canonical `--base-*` contract, the main shipped artifact.
+- **`./bin/check-contract.mjs`** (`base-contract-check`), **`./renames.json`**, **`./testing/parity.mjs`** — the tooling components use against the contract; shipped.
+- **`./CHANGELOG.md`** — at the root. Topmost `## [X.Y.Z] - YYYY-MM-DD` heading **without** the `[PUBLISHED]` marker is the WIP section.
+- **`./README.md`** — at the root. Carries `## What's New in vX.Y.Z` sections near the top (one per release, the **two most recent** retained).
+- **`./docs/`** — `usage.md`, `theming.md`, `variables.md` (the hand-maintained variable reference — must match the tokens in `base-variables.css`), `examples.md`, `accessibility.md`; shipped. The other `docs/*.md` files are working notes and are not shipped.
+- **`./examples-*.html`, `./e2e/`, `./test/`** — the examples site, the Playwright suite and the `base-contract-check` unit tests. Never shipped.
 
 ## CHANGELOG convention in this repo [canonical]
 
-There is **no `## [Unreleased]` section**. The WIP section is the topmost `## [X.Y.Z] — YYYY-MM-DD` heading without a `[PUBLISHED]` tag. Already-released sections carry `[PUBLISHED]` at the end of their heading:
+There is **no `## [Unreleased]` section**. The WIP section is the topmost `## [X.Y.Z] - YYYY-MM-DD` heading without a `[PUBLISHED]` tag. Already-released sections carry `[PUBLISHED]` at the end of their heading:
 
 ```
-## [1.1.0] — 2026-09-15                       ← WIP, the one you're shipping
+## [1.10.0-rc02] - 2026-06-18                  ← WIP, the one you're shipping
 ### Added
 - ...
 
-## [1.0.0] — 2026-09-10 [PUBLISHED]
+## [1.9.0] - 2026-06-09 [PUBLISHED]
 ### Added
 - ...
 ```
 
-Publishing the WIP section means **appending ` [PUBLISHED]`** to its heading — exact format: `## [X.Y.Z] — YYYY-MM-DD [PUBLISHED]` (em-dash date separator). The next development cycle creates a fresh `## [next-version] — <date>` heading on its first CHANGELOG edit.
-
-**The `1.0.0` section may not carry `[PUBLISHED]` yet** if the package hasn't been published under this convention. Don't retro-add the tag to older sections — only finalize the section you're shipping.
+Publishing the WIP section means **appending ` [PUBLISHED]`** to its heading — exact format: `## [X.Y.Z] - YYYY-MM-DD [PUBLISHED]`. The next development cycle creates a fresh `## [next-version] - <date>` heading on its first CHANGELOG edit.
 
 ## Resolve versions [canonical]
 
@@ -74,20 +73,22 @@ If `WIP_VERSION` ≠ `NEW_VERSION` (e.g. the WIP is `X.Y.Z-rcN` but the user ask
 
 ## Steps (in order)
 
-### 1. Sanity checks [per-repo]
+### 1. Sanity checks [canonical]
 
-- Run `git status`. If there are uncommitted changes that aren't `CHANGELOG.md`, `README.md`, `package.json`, or `base-variables.css`, list them and ask the user before continuing. (Typical case: a token change in `base-variables.css` belonging in this release that hasn't been committed yet — confirm it's intended for this version before bumping.) The `.claude/` directory is intentionally untracked — that's fine.
+- Run `git status`. The repo intentionally keeps `.claude/`, `test-results/`, `playwright-report/` and `dist-examples/` untracked — those are fine. If there are **other** uncommitted changes that aren't `CHANGELOG.md`, `README.md`, or `package.json`, list them and ask the user before continuing. (Typical case: substantive source changes belonging in this release that haven't been committed yet — confirm they're intended for this version before bumping.)
 - **Verify the new version isn't already on npm.** Run `npm view @keenmate/base-css-variables@<NEW_VERSION> version 2>/dev/null` — if it returns the version string, that version is already published and **stop**: bumping over it would fail at publish time and pollute the commit.
-- **Verify the registry hasn't drifted past you.** Run `npm view @keenmate/base-css-variables version` to fetch the latest published version on the `latest` tag; if it's higher than `NEW_VERSION`, warn the user and ask before continuing. (If the package has never been published, this returns nothing — that's fine for a first release.)
-- Confirm the WIP CHANGELOG section has at least one bullet of substantive content under `### Added`, `### Changed`, `### Removed`, or `### Fixed`. If empty, stop — there's nothing meaningful to release.
-- Confirm `./README.md` has a `## What's New in WIP_VERSION` section (no `v` prefix). If it's missing, draft one from the CHANGELOG and present it to the user for approval before continuing:
-  - Read the WIP CHANGELOG section, distill it to 3–8 scannable bullets covering the Added/Changed themes (paraphrase — the CHANGELOG is exhaustive; What's New is the highlight reel). Pure internal tidy-ups don't need coverage.
-  - **Format** (mirror the existing `## What's New in 1.0.0` section — that's the canonical shape for this repo):
-    - **Heading:** `## What's New in NEW_VERSION` — no `v` prefix, no backticks, no date.
-    - **Each bullet:** `- **<area> — <one-line headline>** — <engineer-level prose>`. Bold-wrapped lead phrase, then a true em-dash (` — `, U+2014 with surrounding spaces), then prose explaining *what changed*, *why*, and *which concrete tokens are affected* (name them inline, e.g. `--base-accent-color`, `--base-main-bg`). Plain hyphens or en-dashes fail the canonical check.
-    - **No `### ` sub-headings** inside a What's New section — it's a flat bullet list.
+- **Verify the registry hasn't drifted past you.** Run `npm view @keenmate/base-css-variables version` to fetch the latest published version on the `latest` tag; if it's higher than `NEW_VERSION` (e.g. someone shipped from another machine, or there's a registry-vs-local mismatch from before the [PUBLISHED] convention landed), warn the user and ask before continuing.
+- Confirm the WIP CHANGELOG section has at least one bullet of substantive content under `### Added`, `### Changed`, `### Removed`, `### Fixed`, or `### Internal`. If empty, stop — there's nothing meaningful to release.
+- Confirm `./README.md` has a `## What's New in vWIP_VERSION` section. If it's missing, draft one from the CHANGELOG and present it to the user for approval before continuing:
+  - Read the WIP CHANGELOG section, distill it to 5–8 scannable bullets covering the Added/Changed themes (paraphrase, don't copy CHANGELOG bullets verbatim — those are exhaustive; What's New is the highlight reel). Pure internal refactors and Fixed-only entries don't need coverage, though headline bug fixes worth advertising are worth a bullet.
+  - **Follow the canonical "What's New" format** defined in the BlissFramework component guidelines (`web-components/readme-structure.md` → "`## What's New in vX.Y.Z` — canonical format"). Auto-check **C-RS-16** in `readme-structure.checks.sh` enforces it. Concretely:
+    - **Heading:** `## What's New in vNEW_VERSION` — lowercase `v`, no backticks around the version, no date.
+    - **Each bullet:** `- **<area or component> — <one-line headline>** — <engineer-level prose, 3–8 sentences>`. Bold-wrapped lead phrase, then a true em-dash (` — `, U+2014 with surrounding spaces), then a prose body explaining *what changed*, *why* (regression history / motivation), *what surface is affected* (concrete component / prop / file names listed inline), and *the mechanism* (the technique used). Plain hyphens or en-dashes fail the check.
+    - **No `### ` sub-headings** inside a What's New section — no `### Added` / `### Fixed` lifted from the CHANGELOG. It's a flat bullet list.
+    - **Reference implementation:** the `## What's New in v1.3.3` / `v1.3.2` sections at the top of `svelte-fluentui/README.md` are the canonical shape — mirror that voice and structure.
   - Show the user the proposed draft as plain markdown in your reply. Ask whether to (a) insert as-is, (b) edit, or (c) abort so they can write it themselves.
-  - Only proceed past step 1 once the user approves. On approval, insert the section directly above the current top `## What's New in X.Y.Z` heading in `./README.md`, then continue. Do not silently insert — the writing voice is the user's call.
+  - Only proceed past step 1 once the user approves the draft (or supplies their own). On approval, insert the section directly above the current top `## What's New in vX.Y.Z` heading in `./README.md`, then continue.
+  - Do not silently insert the draft without confirmation — release highlights are a writing call and the user owns the voice.
 
 ### 2. Bump version (if needed) [canonical]
 
@@ -99,9 +100,9 @@ For `rc` arg this is normally a no-op — version was bumped earlier in the deve
 
 In `./CHANGELOG.md`:
 
-- If `WIP_VERSION` ≠ `NEW_VERSION` (e.g. promoting `X.Y.Z-rcN` → `X.Y.Z`), rename the WIP heading from `## [WIP_VERSION] — <date>` to `## [NEW_VERSION] — <today>` (today's date from system context).
-- If `WIP_VERSION` == `NEW_VERSION`, leave the bracketed version alone but update the date to today **if** the existing date is stale (more than a few days old).
-- In either case, **append ` [PUBLISHED]`** to the heading so it reads exactly: `## [NEW_VERSION] — YYYY-MM-DD [PUBLISHED]` (keep the em-dash date separator).
+- If `WIP_VERSION` ≠ `NEW_VERSION` (e.g. promoting `X.Y.Z-rcN` → `X.Y.Z`), rename the WIP heading from `## [WIP_VERSION] - <date>` to `## [NEW_VERSION] - <today>` (today's date from system context).
+- If `WIP_VERSION` == `NEW_VERSION`, leave the bracketed version alone but update the date to today **if** the existing date is stale (more than a few days old). The WIP date is usually whatever day the section was opened; refresh it so the changelog reflects the actual ship date.
+- In either case, **append ` [PUBLISHED]`** to the heading so it reads exactly: `## [NEW_VERSION] - YYYY-MM-DD [PUBLISHED]`.
 - Leave all bullet content untouched.
 - **Do not** create an empty new WIP section — the next dev cycle's first CHANGELOG edit will create one.
 
@@ -109,50 +110,58 @@ In `./CHANGELOG.md`:
 
 In `./README.md`:
 
-- If the existing `## What's New in WIP_VERSION` section's version differs from `NEW_VERSION`, rename its heading to `## What's New in NEW_VERSION` (no `v` prefix). No content rewrites.
-- Then count the `## What's New in X.Y.Z` headings. If there are more than **two**, delete the oldest ones so only the **two most recent** remain.
+- If the existing `## What's New in vWIP_VERSION` section's version differs from `NEW_VERSION` (e.g. promoting `X.Y.Z-rcN` → `X.Y.Z`), rename its heading to `## What's New in vNEW_VERSION`. (No content rewrites — the text was already curated for this release.)
+- Then count the `## What's New in vX.Y.Z` headings. If there are more than **two**, delete the oldest ones so only the **two most recent** remain (the just-finalized one plus the one before it).
 
-For `rc` arg this is normally a no-op on the heading itself.
+For `rc` arg this is normally a no-op on the heading itself — only trims if someone left an extra-old section behind.
 
-### 5. Validate README reflects the release [per-repo]
+### 5. Validate README reflects the release [canonical]
 
-Two checks, both because README is hand-maintained documentation of the contract:
+Read both the finalized CHANGELOG section and the matching `What's New in vNEW_VERSION` section. Every **Added** or **Changed** bullet in the CHANGELOG that represents a user-facing feature or behavior change should have a corresponding hit in the What's New section (paraphrased, not verbatim). Pure internal refactors and `Fixed`-only entries don't need coverage, though headline bug fixes worth advertising (e.g. "X used to silently fail; now works") are worth a bullet.
 
-- **What's New coverage.** Read the finalized CHANGELOG section and the matching `What's New in NEW_VERSION` section. Every **Added** or **Changed** bullet that represents a user-facing token/behavior change should have a corresponding (paraphrased) hit in What's New. If a significant entry is missing, add a bullet. Keep What's New to ≤ ~8 scannable bullets.
-- **Variable-reference tables match the CSS.** If this release **added, removed, or renamed** any `--base-*` token in `base-variables.css`, confirm the "Variable reference" tables in `README.md` were updated to match. If a token changed and the table didn't, stop and fix the table (or ask the user) — a published contract whose docs lie about its tokens is a real defect here.
+If you find a significant CHANGELOG entry that isn't reflected in What's New, add a bullet for it. If the section ends up with more than ~8 bullets after this pass, condense — What's New should be scannable, not exhaustive.
 
 ### 6. Validate CHANGELOG entries match recent work [canonical]
 
-Find the previous `[PUBLISHED]` tag in CHANGELOG (the version just before NEW_VERSION) and locate the commit that bumped to it. Run `git log --oneline <previous-publish-commit>..HEAD` to list commits since. (If nothing has published under the `[PUBLISHED]` convention yet, use the previous CHANGELOG section's bump commit, or the repo root, as the boundary.)
+Find the previous `[PUBLISHED]` tag in CHANGELOG (the version just before NEW_VERSION) and locate the commit that bumped to it — usually a commit whose subject starts with `v<previous-version>` or `- v<previous-version>`. Run `git log --oneline <previous-publish-commit>..HEAD` to list commits since.
 
-Also check `git status` for any uncommitted work outside the files you're editing in this command.
+Also check `git diff` (or `git status`) for any uncommitted source/test work outside the files you're editing in this command.
 
-For every substantive commit or uncommitted change, verify the WIP CHANGELOG section mentions it. If something significant is missing, **stop and ask the user** — don't invent entries. Pure doc/example tweaks and typo fixes don't need entries.
+For every substantive commit or uncommitted change, verify the WIP CHANGELOG section mentions it. If something significant is missing, **stop and ask the user** before finalizing — don't invent entries on their behalf. Pure example/doc tweaks and trivial typo fixes don't need entries.
 
-### 7. Tests [per-repo]
+### 7. Run tests [per-repo]
 
-**This repo has no test suite** — it's a static CSS file with no runtime. There is nothing to run. Proceed.
+Run, in order — every one must pass:
 
-### 8. Validate the artifact + contract sync [per-repo]
+1. `npm test` — the `base-contract-check` unit tests (`test:check`) and the Playwright e2e suite (`test:e2e`: Chromium, plus Firefox and WebKit for the loader and motion specs). The component specs skip themselves when a sibling build (`../web-treeview/dist`, `../web-multiselect/dist`) is missing — run `make build` first so they actually run, and say in the report if any were skipped.
+2. `npx kmwc doctor` — 0 errors: devkit checks, package contents and the rulebook suites.
 
-There is no build. Instead, gate the release on the CSS itself and its sync with pure-css:
+If anything fails, **stop and report**. Do not proceed to build/commit. The user fixes the regression (or decides to fixme the spec) before the publish flow can continue.
 
-- **CSS well-formedness.** Confirm `base-variables.css` still has a `:root { … }` block, defines `--base-*` custom properties, and has balanced braces (no truncation / stray edit). A quick read of the head and the `:root` close is enough — this file is the artifact, so a broken file ships broken.
-- **`--base-*` ↔ pure-css `$base-*` sync (the defining check).** `@keenmate/pure-css` mirrors this token list into SCSS at `../pure-css/src/scss/variables/_base.scss` (and related `variables/` partials). If this release **added, removed, or renamed** a `--base-*` token, the mirror there must gain/lose/rename the matching `$base-*`. If the sibling repo is checked out next to this one, diff the token *names* (not values — pure-css owns its own defaults) and report any drift. If it's not available locally, **explicitly flag in the report** that the pure-css mirror still needs the same change — this is the easiest thing to forget and the whole point of the "one contract" design.
+If Playwright complains that a browser isn't installed, suggest `npm run test:e2e:install` and stop.
 
-If either check fails, stop and report.
+### 8. Build the package [per-repo]
+
+There is nothing to build — `base-variables.css` is the artifact. This step gates the release on the contract instead:
+
+- **CSS well-formedness.** `base-variables.css` still has its `:root, [data-theme], .base-scope` blocks, defines `--base-*` custom properties, and has balanced braces (no truncation / stray edit). A broken file ships broken.
+- **Variable reference matches the CSS.** If this release **added, removed, or renamed** any `--base-*` token, `docs/variables.md` (and `renames.json` for a rename) was updated to match. If not, stop and fix it (or ask the user) — a published contract whose docs lie about its tokens is a real defect here.
+- **`--base-*` ↔ pure-css `$base-*` sync.** `@keenmate/pure-css` mirrors this token list into SCSS (`../pure-css/src/scss/variables/`). If this release added, removed, or renamed a `--base-*` token, the mirror there must gain / lose / rename the matching `$base-*`. If the sibling repo is checked out next to this one, diff the token *names* (not values — pure-css owns its defaults) and report any drift; if it isn't, **say in the report** that the pure-css mirror still needs the same change.
+
+If any check fails, stop and report.
 
 ### 9. Verify the package contents [per-repo]
 
 Run `npm pack --dry-run` (or `make verify`) and confirm the file list is exactly:
 
 - `base-variables.css`
-- `README.md`
-- `CHANGELOG.md`
-- `LICENSE`
-- `package.json`
+- `bin/check-contract.mjs`
+- `renames.json`
+- `testing/parity.mjs`
+- `docs/usage.md`, `docs/theming.md`, `docs/variables.md`, `docs/examples.md`, `docs/accessibility.md`
+- `README.md`, `CHANGELOG.md`, `LICENSE`, `package.json`
 
-If anything is missing or anything private leaked in (e.g. `Makefile`, `.claude/`, `node_modules/`), stop and report — the `files` field in `package.json` controls this and needs fixing before publish.
+If anything user-facing is missing or anything private leaked in (e.g. `examples-*.html`, `e2e/`, `test/`, the `docs/` working notes, `Makefile`, `.claude/`, `node_modules/`), stop and report — the `files` field in `package.json` controls this and the leak needs fixing before publish.
 
 ### 10. Commit [canonical]
 
@@ -161,18 +170,19 @@ Stage:
 - `./CHANGELOG.md`
 - `./README.md`
 - `./package.json`
-- `./base-variables.css` — **only if** this release actually changed it (a token add/remove/edit). A docs-only or version-only release won't touch it.
+
+There is no `dist/` to leave out — nothing is built.
 
 Commit message format:
 
 ```
 vNEW_VERSION - <one-line summary of the headline change>
 
-<grouped bullets paraphrased from the CHANGELOG section — same groups the
-CHANGELOG used: Added, Changed, Fixed, etc. Keep bullets terse; full prose
-lives in the CHANGELOG.>
+<grouped bullets paraphrased from the CHANGELOG section — split into the same
+groups the CHANGELOG used: Added, Fixed, Changed, Internal, etc. Keep bullets
+terse; full prose lives in the CHANGELOG.>
 
-Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
 ```
 
 ### 11. Report [canonical]
@@ -181,36 +191,37 @@ Report back with:
 
 - The new version number
 - The commit SHA
-- Whether the pure-css `$base-*` mirror needs a matching change (from step 8) — call it out prominently if the sibling repo wasn't available to diff.
 - The exact commands to publish. **Pick the right one for the arg type:**
   - For `rc` (publishing a pre-release):
     ```
     npm login          # if not already logged in
-    make publish-rc    # npm publish --tag rc
+    npm publish --tag rc
     ```
-    The `--tag rc` is critical — without it npm assigns the `latest` dist-tag, making the pre-release the default install for everyone. With `--tag rc` (what `make publish-rc` does) the `latest` tag stays put and consumers opt in via `@rc` or by pinning the exact version.
+    The `--tag rc` is critical — without it npm assigns the `latest` dist-tag, which would make the pre-release the default install for everyone running `npm install @keenmate/base-css-variables`. With `--tag rc`, the `latest` tag stays put and consumers opt in via `@rc` or pinning the exact version.
   - For `release` / `patch` / `minor` / `major` (publishing a stable release):
     ```
     npm login          # if not already logged in
-    make publish       # npm publish as latest
+    npm publish
     ```
-    No `--tag` needed — it lands as `latest`.
-- A reminder that the CHANGELOG `[PUBLISHED]` tag is now in place — if `npm publish` fails, the user should revert both the tag (CHANGELOG heading) and the version bump (`package.json`) before retrying, since the registry refuses to re-publish the same version.
+    Or `make publish`. No `--tag` needed — it correctly lands as `latest`.
+- A reminder that the CHANGELOG `[PUBLISHED]` tag is now in place — if `npm publish` fails, the user should revert both the tag (CHANGELOG heading) and the version bump (`package.json`) before retrying, since the registry will refuse to re-publish the same version.
 
 ## Things not to do [canonical]
 
-- **Do not run `npm publish`.** The user publishes manually after `npm login` (via `make publish-rc` / `make publish`).
+- **Do not run `npm publish`.** The user publishes manually after `npm login`.
 - **Do not push to git remote.** The commit stays local until the user pushes.
 - **Do not create an empty `[Unreleased]` or new WIP heading** in CHANGELOG after finalizing — the next dev cycle's first edit creates the next heading.
-- **Do not retro-fix older CHANGELOG sections** that are missing the `[PUBLISHED]` tag — only finalize the section you're shipping.
-- **Do not silently insert a drafted What's New section** — present it and wait for approval.
-- **Do not keep more than two `## What's New in X.Y.Z` sections** in the README.
+- **Do not retro-fix older CHANGELOG sections** that are missing the `[PUBLISHED]` tag or carry legacy markers — only finalize the section you're shipping.
+- **Do not silently insert a drafted What's New section.** If you draft one in Step 1 because it's missing, you must present it and wait for explicit approval (or edits) before inserting — the writing voice is the user's call, even when you're handing them a starting point.
+- **Do not keep more than two `## What's New in vX.Y.Z` sections in the README.** Step 4 trims older ones; if you see three or more after Step 4, you missed one.
+- **Do not skip the build step** — without it `dist/` is stale and the publish would ship outdated artifacts (or fail entirely if `dist/` was wiped by `make clean`).
+- **Do not skip the test gate** if the repo has one — the gate is what catches regressions before they ship.
 - **Do not invent CHANGELOG entries** to cover commits you find; ask the user if something's missing.
 - **Do not bump if there's nothing meaningful in the WIP section** — stop and explain.
 
 ### Repo-specific don'ts
 
-- **Do not add a `v` prefix to `## What's New` headings** — this repo's convention is `## What's New in X.Y.Z` without the `v`.
-- **Do not use a hyphen as the CHANGELOG date separator** — this repo uses an em-dash (` — `) in `## [X.Y.Z] — YYYY-MM-DD` headings.
-- **Do not add, rename, or remove a `--base-*` token without (a) updating the README reference tables and (b) flagging the matching change needed in pure-css's `$base-*` mirror.** The two token lists are a contract; drifting them apart is the one mistake this package exists to prevent.
-- **Do not look for a build/`dist/` step** — there is none. `base-variables.css` is the artifact.
+- **"The build step" here is step 8's contract check** — there is no `dist/`; don't skip step 8 because of that.
+- **Stage `./base-variables.css`, `./renames.json` or `./docs/` only if this release changed them** — a version-only release doesn't touch them.
+- **Do not add, rename, or remove a `--base-*` token without (a) updating `docs/variables.md` (and `renames.json` for a rename) and (b) flagging the matching change needed in pure-css's `$base-*` mirror.** The two token lists are a contract; drifting them apart is the one mistake this package exists to prevent.
+- **Do not stage `test-results/`, `playwright-report/` or `dist-examples/`** — they're test and build artifacts.

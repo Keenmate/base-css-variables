@@ -8,11 +8,11 @@
   /* The theme / mode selects set --page-bg / --page-text and color-scheme on <body>
      (inline, from the script); the cards are the surfaces that show them. */
   body { --page-bg: var(--base-main-bg); --page-text: var(--base-text-color-1); }
-  .card { background: var(--page-bg); color: var(--page-text); font-size: 14px; }
-  .card h2, .card p, .card th { color: inherit; }
-  .card p.lead { max-width: 1150px; opacity: .85; }
+  .card.on-theme { background: var(--page-bg); color: var(--page-text); font-size: 14px; }
+  .card.on-theme h2, .card.on-theme p, .card.on-theme th { color: inherit; }
+  .card.on-theme p.lead { max-width: 1150px; opacity: .85; }
 
-  .controls { display: flex; flex-wrap: wrap; gap: 8px 22px; align-items: center; padding: 10px 12px; margin-bottom: 14px;
+  .controls.theme-bar { display: flex; flex-wrap: wrap; gap: 8px 22px; align-items: center; padding: 10px 12px; margin-bottom: 14px;
     border: 1px solid color-mix(in srgb, var(--page-text) 25%, transparent); border-radius: 8px; font-size: 13px;
     position: sticky; top: 0; z-index: 1; background: var(--page-bg); }
   .controls label { display: inline-flex; gap: 6px; align-items: center; }
@@ -82,7 +82,7 @@
   <span style="text-decoration:underline dotted">dotted</span> = below APCA Lc 60.
 </div>
 
-<div class="controls">
+<div class="controls theme-bar">
   <label>Theme <select id="theme"></select></label>
   <label>Mode <select id="mode"><option value="light">light</option><option value="dark">dark</option></select></label>
   <label>Pick text by <select id="pick"><option value="apca">APCA (the contract)</option><option value="wcag">WCAG 2</option></select></label>
@@ -91,7 +91,7 @@
   <label>Custom fill <input id="custom" type="color" value="#3b82f6"></label>
 </div>
 
-<div class="card">
+<div class="card on-theme">
 <h2>FS01 · WCAG 2 pick vs APCA pick (resting fill)</h2>
 <p class="lead">The same fill twice: text picked by WCAG 2, then by APCA. Where they differ, compare the two
   buttons by eye. <span class="summary" id="cmp-summary"></span></p>
@@ -101,7 +101,7 @@
 </table>
 </div>
 
-<div class="card">
+<div class="card on-theme">
 <h2>FS02 · Hover and pressed — today vs option 1 vs option 2</h2>
 <p class="lead">Text picked by the model chosen above (<b id="pick-name"></b>). Hover and press the live buttons;
   the strip freezes rest / hover / pressed. <span class="summary" id="summary"></span></p>
@@ -118,7 +118,7 @@
 </table>
 </div>
 
-<div class="card">
+<div class="card on-theme">
 <h2>FS03 · The agreed model — contract colours, button states in each component</h2>
 <p class="lead">The contract supplies only the role colours (<code>--base-&lt;role&gt;-color</code> and
   <code>--base-on-&lt;role&gt;-text-color</code>, picked by APCA). Each button component has its own state

@@ -1,11 +1,8 @@
-import { readFileSync } from 'node:fs';
-import { defineConfig, devices } from '@playwright/test';
-
-const { dev: devPort } = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8')).kmwc.ports;
-const DEV_URL = `http://127.0.0.1:${devPort}`;
+import { getKmwcConfig } from '@keenmate/web-components-devkit';
+import { definePlaywrightConfig, devices } from '@keenmate/web-components-devkit/playwright';
 
 /**
- * Playwright config for the base-css-variables e2e suite.
+ * Playwright config for the base-css-variables e2e suite (devkit preset).
  *
  * The package itself has no build — this suite only locks the --base-* contract
  * against regressions by driving the examples pages (root examples-*.html), served
@@ -21,35 +18,17 @@ const DEV_URL = `http://127.0.0.1:${devPort}`;
  *   npm run test:e2e:headed    # watch the browser
  *   npm run dev                # just serve the examples
  */
-export default defineConfig({
-  testDir: './e2e',
-  timeout: 30_000,
-  expect: { timeout: 5_000 },
+// IPv4, like vite.config.ts: Vite's "localhost" can bind ::1 only, and Firefox then
+// sometimes gets connection refused.
+const DEV_URL = `http://127.0.0.1:${getKmwcConfig().ports.dev}`;
 
-  fullyParallel: true,
-  forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
-
-  reporter: process.env.CI ? 'github' : 'list',
-
-  use: {
-    baseURL: DEV_URL,
-    trace: 'on-first-retry',
-    screenshot: 'only-on-failure',
-  },
-
+export default definePlaywrightConfig({
+  use: { baseURL: DEV_URL },
   projects: [
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
     // The loader (a mask image + animation) and the motion levels: checked in all three engines.
     { name: 'firefox', testMatch: /(loader|motion)\.spec\.ts/, use: { ...devices['Desktop Firefox'] } },
     { name: 'webkit', testMatch: /(loader|motion)\.spec\.ts/, use: { ...devices['Desktop Safari'] } },
   ],
-
-  webServer: {
-    command: 'npm run dev',
-    url: `${DEV_URL}/examples-item-states.html`,
-    reuseExistingServer: !process.env.CI,
-    timeout: 30_000,
-  },
+  webServer: { url: `${DEV_URL}/examples-item-states.html`, timeout: 30_000 },
 });

@@ -32,6 +32,11 @@
     "bin/check-contract.mjs",
     "renames.json",
     "testing/parity.mjs",
+    "docs/usage.md",
+    "docs/theming.md",
+    "docs/variables.md",
+    "docs/examples.md",
+    "docs/accessibility.md",
     "README.md",
     "CHANGELOG.md",
     "LICENSE"
@@ -46,10 +51,13 @@
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:install": "playwright install chromium firefox webkit",
     "clean": "node -e \"for (const p of ['dist','dist-examples']) require('fs').rmSync(p,{recursive:true,force:true})\"",
-    "test:e2e:ui": "playwright test --ui"
+    "test:e2e:ui": "playwright test --ui",
+    "clean:dist": "node -e \"for (const p of ['dist']) require('fs').rmSync(p,{recursive:true,force:true})\"",
+    "doctor": "kmwc doctor",
+    "check:pages": "kmwc check-pages"
   },
   "devDependencies": {
-    "@keenmate/web-components-devkit": "^1.0.0-rc02",
+    "@keenmate/web-components-devkit": "^1.0.0-rc10",
     "@playwright/test": "^1.64.1",
     "vite": "^7.3.7"
   },
@@ -76,7 +84,9 @@
         "Makefile",
         "CLAUDE.md"
       ]
-    }
+    },
+    "library": false,
+    "cssVariables": false
   },
   "allowScripts": {
     "esbuild@0.28.2": true

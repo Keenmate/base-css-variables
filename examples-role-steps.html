@@ -10,7 +10,7 @@
     --d-text-light: 0.22; --d-text-dark: 0.12; --d-hover: 0.08; --d-active: 0.16;
   }
 
-  .controls { display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: center; padding: 10px 12px; margin-bottom: 14px;
+  .controls.theme-bar { display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: center; padding: 10px 12px; margin-bottom: 14px;
     border: 1px solid var(--base-border-color); border-radius: 8px; font-size: 13px;
     position: sticky; top: 0; z-index: 10; background: var(--base-main-bg); color: var(--base-text-color-1); }
   .controls label { display: inline-flex; gap: 6px; align-items: center; }
@@ -19,7 +19,7 @@
   .controls button { font: inherit; font-size: 12px; padding: 2px 8px; border: 1px solid var(--base-border-color); border-radius: 4px; background: var(--base-main-bg); color: inherit; cursor: pointer; }
   .controls .swatch { display: inline-block; width: 12px; height: 12px; border-radius: 2px; vertical-align: -1px; margin-right: 4px; }
 
-  .grid { display: grid; grid-template-columns: repeat(3, minmax(360px, 1fr)); gap: 14px; align-items: start; }
+  .grid.columns-3 { display: grid; grid-template-columns: repeat(3, minmax(360px, 1fr)); gap: 14px; align-items: start; }
   .col { border-radius: 10px; padding: 12px 14px 16px; background: var(--base-main-bg); color: var(--base-text-color-1);
     border: 1px solid var(--base-border-color); }
   /* Column titles are h3 (not h2), so they don't become chapters of the kit's chapter nav. */
@@ -76,7 +76,7 @@
 
 <div class="card">
   <h2>RS01 · sRGB mix vs OKLCH</h2>
-  <div class="controls">
+  <div class="controls theme-bar">
     <label>Primary <input type="color" id="primary" value="#3b82f6"></label>
     <span id="presets"></span>
     <label>Text Δ light <input type="range" id="dtl" min="0.05" max="0.4" step="0.01" value="0.22"><output id="dtl-o"></output></label>
@@ -85,7 +85,7 @@
     <label>Active Δ <input type="range" id="da" min="0.04" max="0.3" step="0.01" value="0.16"><output id="da-o"></output></label>
   </div>
 
-  <div class="grid" id="grid"></div>
+  <div class="grid columns-3" id="grid"></div>
 </div>
 
 <script type="module">

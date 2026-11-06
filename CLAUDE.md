@@ -10,9 +10,12 @@ components (web-multiselect `--ms-*`, web-daterangepicker `--drp-*`, web-grid `-
 web-treeview, …) and by `@keenmate/pure-css` / `@keenmate/pure-admin-core`.
 
 There is no build, lint, or bundle step. Editing the CSS *is* the work; publishing is
-`npm publish`. The package ships `base-variables.css` + `README.md` + `CHANGELOG.md`
-+ `LICENSE`, plus the component check `bin/check-contract.mjs` + `renames.json` (see the `files`
-field) — the examples site and tests below are repo-only.
+`npm publish` (prepared by `/publish`). The package ships `base-variables.css` + `README.md` +
+`CHANGELOG.md` + `LICENSE` + the five reference docs (`docs/usage.md`, `theming.md`, `variables.md`,
+`examples.md`, `accessibility.md`), plus the component check `bin/check-contract.mjs` + `renames.json` +
+`testing/parity.mjs` (see the `files` field) — the examples site, tests and the other `docs/*.md`
+working notes are repo-only. The README is a slim landing page (rulebook readme-structure, ≤ 400
+lines); reference content goes in `docs/`.
 
 **Component check (shipped):** `bin/check-contract.mjs` (`npx base-contract-check src`) is run by
 components (devDependency) in their build: C1 unknown `--base-*` reads or sets, C2 input fallbacks ≠
@@ -62,7 +65,7 @@ downstream derives from it and must not define a parallel source of truth:
   (e.g. `--ms-accent-color: var(--base-primary-color, #3b82f6)`).
 
 Because every downstream token is `var(--base-*, …)`, overriding **one** `--base-*` at runtime
-re-themes pure-admin *and* the web components together. The README's "layer pipeline" section
+re-themes pure-admin *and* the web components together. `docs/theming.md` → "The layer pipeline"
 traces this end-to-end for the primary color — read it before touching token structure.
 
 **Consequences for any edit:**
@@ -71,7 +74,7 @@ traces this end-to-end for the primary color — read it before touching token s
 - Naming is intentionally **not 1:1** with component variables (`--ms-primary-bg` reads
   `--base-hover-bg`; `--drp-primary-bg` reads `--base-main-bg`). Don't "fix" a name to match a consumer.
 - When you add/change/remove a `--base-*` token, update the **Variable reference tables in
-  README.md** to match — they are hand-maintained documentation, not generated.
+  `docs/variables.md`** to match — they are hand-maintained documentation, not generated.
 
 ## Token conventions (follow the existing patterns)
 
@@ -92,13 +95,13 @@ traces this end-to-end for the primary color — read it before touching token s
   one component's design choices (button state fill / text / border, variants) — they stay in the
   component (`--pa-btn-*`, `--drp-button-apply-*`) and default to the contract. Promote a
   component token into the contract (as a derived default) when a second consumer draws the same
-  thing. Don't add per-state button tokens here. README "What belongs in the contract".
+  thing. Don't add per-state button tokens here. `docs/theming.md` → "What belongs in the contract".
 - **Light/dark** is done with CSS `light-dark()`, driven by `color-scheme`. `:root` sets
   `color-scheme: light dark` (auto/OS). `[data-theme="light"|"dark"]` blocks force a mode on a
   subtree. Mode-invariant tokens (icons, spacing/shadow/motion/z-index scales, typography
   multipliers, brand palette slots) are plain single values, not `light-dark()`.
 - **Loader:** one loader for the app and every component — `--base-loader-icon / -rotate /
-  -duration / -size`, drawn as a mask + rotate animation (README → Loader). Its duration is the
+  -duration / -size`, drawn as a mask + rotate animation (`docs/variables.md` → Loader). Its duration is the
   one exception to the four speeds and slows (never stops) under reduced motion. `e2e/loader.spec.ts`
   runs in Chromium, Firefox and WebKit, as does `e2e/motion.spec.ts` (the only two specs in the firefox / webkit projects).
 - **Motion:** components use only the four `--base-duration-*` speeds and the `--base-ease-*`

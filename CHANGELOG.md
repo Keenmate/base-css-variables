@@ -3,7 +3,38 @@
 All notable changes to `@keenmate/base-css-variables` are documented here. Format based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [2.0.0] — 2026-11-06 [PUBLISHED]
+## [2.0.1] - 2026-11-06
+
+### Changed
+
+- **The README is a landing page; the reference moved to `docs/`.** The contract itself is
+  unchanged. `docs/usage.md` covers loading the stylesheet, how the tokens are organised, and
+  `base-contract-check` / the parity test. `docs/theming.md` covers overrides, inputs vs derived
+  tokens, `.base-scope` and the layer pipeline. `docs/variables.md` is the full `--base-*` reference.
+  `docs/examples.md` covers the examples site and the checkbox render method, and
+  `docs/accessibility.md` covers contrast, focus and motion. All five ship in the package. The
+  What's New headings take the `v` (`## What's New in v2.0.0`).
+
+### Internal
+
+- **Devkit 1.0.0-rc10.**
+  - `playwright.config.ts` is on the devkit preset; it keeps the `127.0.0.1` host and the
+    Firefox / WebKit projects.
+  - `kmwc.library: false`, because the package has nothing to build; Vite serves and builds only
+    the examples site.
+  - The standard `doctor`, `check:pages` and `clean:dist` scripts are added.
+- **Example pages no longer restyle the kit's classes.**
+  - Page-only layouts get their own class: `.derive-controls`, `.panel-grid`, and the modifiers
+    `.card.on-theme`, `.controls.theme-bar` and `.grid.columns-3`.
+  - The `.controls` gap tweaks and the duplicate `.muted` / `.mono` rules are gone.
+  - The derived page's neutral mock frame and swatch checkerboard are marked as fixed colours.
+- **`/publish` follows the canonical BlissFramework shape.**
+  - The CHANGELOG headings use ` - ` as the date separator.
+  - The release gates are `npm test` and `kmwc doctor`, plus the contract and pure-css mirror
+    check.
+  - The shipped file list now includes the tooling and `docs/`.
+
+## [2.0.0] - 2026-11-06 [PUBLISHED]
 
 ### Changed
 
@@ -22,7 +53,7 @@ All notable changes to `@keenmate/base-css-variables` are documented here. Forma
   - **Motion:** four speeds + easings, `data-motion="none | snappy | smooth"`, reduced motion wins.
   - **Tooling:** `base-contract-check` (C1–C3) and `testing/parity.mjs` for components.
 
-## [2.0.0-rc08] — 2026-11-02 [PUBLISHED]
+## [2.0.0-rc08] - 2026-11-02 [PUBLISHED]
 
 ### Added
 
@@ -46,7 +77,7 @@ All notable changes to `@keenmate/base-css-variables` are documented here. Forma
   was read as setting the unknown token `--base-icon-` (C1). A name is checked only when the string
   ends right after it.
 
-## [2.0.0-rc07] — 2026-10-30 [PUBLISHED]
+## [2.0.0-rc07] - 2026-10-30 [PUBLISHED]
 
 ### Added
 
@@ -66,7 +97,7 @@ All notable changes to `@keenmate/base-css-variables` are documented here. Forma
   still `src`; pass the extra folders to include them. Build and test output (`dist-examples`,
   `test-results`, `playwright-report`) is skipped like `dist`.
 
-## [2.0.0-rc06] — 2026-10-29 [PUBLISHED]
+## [2.0.0-rc06] - 2026-10-29 [PUBLISHED]
 
 ### Added
 
@@ -104,7 +135,7 @@ All notable changes to `@keenmate/base-css-variables` are documented here. Forma
   `--<prefix>-transition-*: 0s`. Components use only the four speeds and the `--base-ease-*`
   easings (README → Motion).
 
-## [2.0.0-rc05] — 2026-10-27 [PUBLISHED]
+## [2.0.0-rc05] - 2026-10-27 [PUBLISHED]
 
 ### Added
 
@@ -137,7 +168,7 @@ All notable changes to `@keenmate/base-css-variables` are documented here. Forma
 - **The check compared numbers as text:** `cubic-bezier(0.4, 0.0, 0.2, 1)` and `(0.4, 0, …)` were
   reported as different. Numbers now compare by value.
 
-## [2.0.0-rc04] — 2026-10-25 [PUBLISHED]
+## [2.0.0-rc04] - 2026-10-25 [PUBLISHED]
 
 ### Added
 
@@ -155,7 +186,7 @@ All notable changes to `@keenmate/base-css-variables` are documented here. Forma
   and version (shipped; read by the check).
 - Unit tests for the check (`npm run test:check`, `node:test`; part of `npm test`).
 
-## [2.0.0-rc03] — 2026-10-20 [PUBLISHED]
+## [2.0.0-rc03] - 2026-10-20 [PUBLISHED]
 
 ### Changed — breaking
 
@@ -217,7 +248,7 @@ All notable changes to `@keenmate/base-css-variables` are documented here. Forma
 - Hover / active fills keep the resting fill's text colour, so a fill near the tie point can read
   weaker while hovered or pressed (see `demo/fill-states.html`).
 
-## [2.0.0-rc02] — 2026-10-16 [PUBLISHED]
+## [2.0.0-rc02] - 2026-10-16 [PUBLISHED]
 
 ### Added
 
@@ -237,7 +268,7 @@ All notable changes to `@keenmate/base-css-variables` are documented here. Forma
   (about 2–3.4:1 across the pure-admin themes), and `--base-checkbox-border-color` follows it. `--base-border-color` stays the quiet divider.
   Visible change: every form's field outlines get darker.
 
-## [2.0.0-rc01] — 2026-10-15 [PUBLISHED]
+## [2.0.0-rc01] - 2026-10-15 [PUBLISHED]
 
 A breaking cleanup of the color contract: one name per concept, names that state their
 type, one tint per role, and derived tokens that follow their source at runtime. No aliases —
@@ -327,7 +358,7 @@ and its consumers.
   always defined, so it never applied; nothing read the text color. The tooltip has its own
   `--base-tooltip-bg` / `--base-tooltip-text-color` pair.
 
-## [1.0.7] — 2026-10-14 [PUBLISHED]
+## [1.0.7] - 2026-10-14 [PUBLISHED]
 
 ### Added
 
@@ -369,7 +400,7 @@ and its consumers.
   component using the native input. Adopters (svelte-treeview, web-multiselect)
   updated to scale border-width + radius via `calc` and to pin `border-box`.
 
-## [1.0.6] — 2026-10-03 [PUBLISHED]
+## [1.0.6] - 2026-10-03 [PUBLISHED]
 
 ### Added
 
@@ -385,7 +416,7 @@ and its consumers.
   reference snippet and the per-situation method table. `pure-css` to mirror it as
   `$base-checkbox-scale`.
 
-## [1.0.5] — 2026-09-20 [PUBLISHED]
+## [1.0.5] - 2026-09-20 [PUBLISHED]
 
 ### Added
 
@@ -398,7 +429,7 @@ and its consumers.
   same mask box. `pure-css` mirrors it as `$base-icon-check-size` and re-emits it
   (parity green).
 
-## [1.0.4] — 2026-09-18 [PUBLISHED]
+## [1.0.4] - 2026-09-18 [PUBLISHED]
 
 ### Added
 
@@ -418,7 +449,7 @@ and its consumers.
   back to inline glyphs until these landed). `pure-css` mirrors all three as
   `$base-icon-*` and re-emits them (parity green).
 
-## [1.0.3] — 2026-09-16 [PUBLISHED]
+## [1.0.3] - 2026-09-16 [PUBLISHED]
 
 ### Added
 
@@ -437,7 +468,7 @@ and its consumers.
   consumed by pure-admin's `--pa-icon-info` / `-success` / `-warning` / `-danger`.
   `pure-css` mirrors all four as `$base-icon-*` and re-emits them (parity green).
 
-## [1.0.2] — 2026-09-15 [PUBLISHED]
+## [1.0.2] - 2026-09-15 [PUBLISHED]
 
 ### Added
 
@@ -451,7 +482,7 @@ and its consumers.
   `@keenmate/pure-admin` migrated off Font Awesome; `pure-css` mirrors all four as
   `$base-icon-*` and re-emits them (parity guard green).
 
-## [1.0.1] — 2026-09-12 [PUBLISHED]
+## [1.0.1] - 2026-09-12 [PUBLISHED]
 
 ### Added
 
@@ -462,7 +493,7 @@ and its consumers.
   so one can be retargeted without moving the other. `@keenmate/pure-css` already mirrors all
   three as `$base-icon-*`.
 
-## [1.0.0] — 2026-09-10
+## [1.0.0] - 2026-09-10
 
 The **canonical `--base-*` contract** release. `base-variables.css` is LAYER 0 — the single
 source of truth every Keenmate consumer derives from. `@keenmate/pure-css` mirrors this exact
