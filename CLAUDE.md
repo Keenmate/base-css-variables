@@ -17,6 +17,12 @@ There is no build, lint, or bundle step. Editing the CSS *is* the work; publishi
 working notes are repo-only. The README is a slim landing page (rulebook readme-structure, ≤ 400
 lines); reference content goes in `docs/`.
 
+**CHANGELOG / What's New format (rulebook canonical, since the devkit rc10 conversion):** headings are
+`## [X.Y.Z] - YYYY-MM-DD` (plain ` - `, not an em-dash); the topmost heading without ` [PUBLISHED]`
+is the WIP section — add to it, or create the next version's heading on the first edit after a
+release. README keeps the two newest `## What's New in vX.Y.Z` sections (with the `v`). `/publish`
+owns the release steps.
+
 **Component check (shipped):** `bin/check-contract.mjs` (`npx base-contract-check src`) is run by
 components (devDependency) in their build: C1 unknown `--base-*` reads or sets, C2 input fallbacks ≠
 contract default, C3 derived fallbacks that are literals instead of formulas. It parses
