@@ -17,7 +17,7 @@ All notable changes to `@keenmate/base-css-variables` are documented here. Forma
 
 ### Internal
 
-- **Devkit 1.0.0-rc10.**
+- **Devkit 1.0.0-rc11.** Every example page now ends with the devkit footer, as the index did.
   - `playwright.config.ts` is on the devkit preset; it keeps the `127.0.0.1` host and the
     Firefox / WebKit projects.
   - `kmwc.library: false`, because the package has nothing to build; Vite serves and builds only
