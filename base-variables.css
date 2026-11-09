@@ -260,6 +260,14 @@
   --base-breakpoint-tablet: 1024px;
 
   /* ======================================================================
+   * DROPDOWN OFFSET — the gap between a field (its bordered box) and the
+   * panel it opens: dropdowns, calendar popovers, the anchored popovers of
+   * every component. Read by JS (getComputedStyle → parseFloat) and handed to
+   * web-components-core's positioning as `offset`. px, not a rem multiplier.
+   * ==================================================================== */
+  --base-dropdown-offset: 4px;
+
+  /* ======================================================================
    * ICONS — mask-friendly SVG glyphs (Lucide defaults), rendered via
    * `mask: var(--base-icon-*); background: currentColor`. Mode-invariant.
    * Two disclosure models: chevron ROTATES one glyph (points right, rotate 90°

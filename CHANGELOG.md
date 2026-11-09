@@ -3,7 +3,16 @@
 All notable changes to `@keenmate/base-css-variables` are documented here. Format based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [2.0.1] - 2026-11-06
+## [2.0.1] - 2026-11-09 [PUBLISHED]
+
+### Added
+
+- **`--base-dropdown-offset` (`4px`) — the gap between a field and the panel it opens.**
+  Dropdowns, calendar popovers and other anchored popovers read it in JS
+  (`getComputedStyle` → `parseFloat`) and pass it to web-components-core's positioning as `offset`.
+  Before this, each component hard-coded its own gap: multiselect used 4px and daterangepicker used 8px.
+  Plain `px`, like the breakpoints. Tooltips keep their own spacing. pure-css mirrors the token as
+  `$base-dropdown-offset`.
 
 ### Changed
 

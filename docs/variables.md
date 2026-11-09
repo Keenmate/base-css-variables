@@ -297,6 +297,17 @@ change both together. Plain `px`, not rem multipliers.
 | `--base-breakpoint-mobile` | Mobile below this width (`768px`) |
 | `--base-breakpoint-tablet` | Tablet below this width (`1024px`) |
 
+## Dropdown offset
+The gap between a field and the panel it opens (dropdown, calendar popover, any anchored popover),
+measured from the field's bordered box. Read in JS
+(`parseFloat(getComputedStyle(host).getPropertyValue('--base-dropdown-offset'))`) and passed to
+web-components-core's positioning as `offset`, so every component opens its panel at the same
+distance. Plain `px`, not a rem multiplier. Tooltips keep their own spacing.
+
+| Variable | Purpose |
+|----------|---------|
+| `--base-dropdown-offset` | Field → panel gap (`4px`) |
+
 ## Icons
 Inline `data:image/svg+xml` Lucide glyphs, rendered by consumers via
 `mask: var(--base-icon-*); background: currentColor`. Mode-invariant — override any

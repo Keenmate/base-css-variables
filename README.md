@@ -16,6 +16,11 @@ that **cascade from these `--base-*` values**. Define the base layer once and ev
 component picks up a consistent, coordinated theme. Override a single `--base-*`
 variable and the change propagates everywhere.
 
+## What's New in v2.0.1
+
+- **Token — `--base-dropdown-offset` sets the gap between a field and its panel** — a new `4px` token for the distance between a field's bordered box and the panel it opens: dropdowns, calendar popovers and other anchored popovers. Until now each component hard-coded its own gap: web-multiselect used 4px and the web-daterangepicker calendar used 8px, so the same form had two different gaps. Components read the token in JS (`getComputedStyle` → `parseFloat`) and pass it to web-components-core's positioning as `offset`, so one override moves every panel together. It's plain `px` like the breakpoints, not a rem multiplier. Tooltips keep their own spacing. pure-css mirrors it as `$base-dropdown-offset`.
+- **Docs — the README is a landing page and the reference lives in `docs/`** — the contract is unchanged; only where things are documented moved. `docs/usage.md` covers loading the stylesheet, how the tokens are organised, and `base-contract-check` / the parity test. `docs/theming.md` covers overrides, inputs vs derived tokens, `.base-scope` and the layer pipeline. `docs/variables.md` is the full `--base-*` reference, and `docs/examples.md` and `docs/accessibility.md` cover the examples site and contrast / focus / motion. All five ship in the npm package, so they're readable from `node_modules` too.
+
 ## What's New in v2.0.0
 
 - **Release — 2.0.0 is final** — the same contract as rc08, now installed by default. Upgrading from 1.x is breaking: overrides that use 1.x names are silently ignored, see [Upgrading from 1.x](#upgrading-from-1x) below and `renames.json`.
@@ -25,12 +30,6 @@ variable and the change propagates everywhere.
 - **New tokens — loader, drop target, tree indent, scroll behavior, breakpoints** — `--base-loader-*`, `--base-drop-target-*`, `--base-tree-indent`, `--base-scroll-behavior`, `--base-breakpoint-mobile` / `-tablet`.
 - **Motion — four speeds and `data-motion` levels** — `--base-duration-*` + `--base-ease-*`, `none | snappy | smooth`; the OS reduced-motion setting wins over every level.
 - **Tooling — `base-contract-check` and `testing/parity.mjs`** — components check their `--base-*` reads, sets and fallbacks at build time and compare their colors with and without the contract in e2e.
-
-## What's New in v2.0.0-rc08
-
-- **Motion — levels with `data-motion="none | snappy | smooth"`** — on any element (`<html>`, a section, a component) a level sets the four `--base-duration-*` speeds and `--base-scroll-behavior` for everything inside it, and the nearest one wins. `none` is `0s` with instant scrolling, a shortcut for turning motion off (setting the durations to `0s` in CSS still works). `snappy` is 0.05 / 0.08 / 0.12 / 0.15s and `smooth` is 0.15 / 0.25 / 0.35 / 0.45s. Components built on web-components-core get the same levels through their `motion` attribute and `window.components.motion`. The loader isn't affected.
-- **Motion — the OS reduced-motion setting beats every level** — `prefers-reduced-motion: reduce` now also zeroes the speeds on every `[data-motion]` element, so it wins even inside `smooth`.
-- **Tooling — `base-contract-check` ignores `setProperty` names built at runtime** — ``setProperty(`--base-icon-${key}`, …)`` was reported as setting the unknown token `--base-icon-`.
 
 ## Demos & docs
 
