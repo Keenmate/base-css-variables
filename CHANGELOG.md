@@ -3,6 +3,14 @@
 All notable changes to `@keenmate/base-css-variables` are documented here. Format based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.0.2] - 2026-11-09
+
+### Internal
+
+- **Examples: SZ04 · Dropdown offset** on the Sizing page. A dropdown and a calendar panel are
+  placed the way a component does it, reading `--base-dropdown-offset` in JS. A slider and
+  presets (0 / 4 / 8px) set the token on the demo only, and a marker shows the gap.
+
 ## [2.0.1] - 2026-11-09 [PUBLISHED]
 
 ### Added

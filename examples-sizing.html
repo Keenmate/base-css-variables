@@ -1,5 +1,5 @@
 <meta name="kmwc:title" content="Sizing">
-<meta name="kmwc:subtitle" content="Unitless scales × --base-rem: one knob for density; the font, spacing, radius and height scales; breakpoints">
+<meta name="kmwc:subtitle" content="Unitless scales × --base-rem: one knob for density; the font, spacing, radius and height scales; breakpoints; dropdown offset">
 <meta name="kmwc:entry" content="none">
 <link rel="stylesheet" href="/base-variables.css">
 <link rel="stylesheet" href="/examples-mock.css">
@@ -28,6 +28,30 @@
   .bp-track i { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--base-text-color-3); }
   .bp-track i::after { content: attr(data-label); position: absolute; top: 100%; translate: -50% 4px; white-space: nowrap; font-size: 11px; font-style: normal; color: var(--base-text-color-3); }
   .bp-track .now { width: 3px; background: var(--base-primary-color); }
+
+  .offset-demo { display: flex; flex-wrap: wrap; gap: 32px; align-items: start; min-height: 230px; padding: 4px 0 0 52px; }
+  .offset-field { position: relative; width: 220px; }
+  .offset-field > label { display: block; margin-bottom: 4px; font-size: 12px; color: var(--base-text-color-2); }
+  .offset-input {
+    box-sizing: border-box; display: flex; align-items: center; width: 100%;
+    height: calc(var(--base-input-size-md-height) * var(--base-rem));
+    padding: 0 calc(var(--base-space-sm) * var(--base-rem));
+    color: var(--base-input-text-color); background: var(--base-input-bg);
+    border: var(--base-input-border-focus); border-radius: calc(var(--base-border-radius-sm) * var(--base-rem));
+  }
+  .offset-panel {
+    position: absolute; left: 0; width: 100%; box-sizing: border-box;
+    padding: calc(var(--base-space-xs) * var(--base-rem));
+    background: var(--base-dropdown-bg); border: var(--base-dropdown-border);
+    border-radius: calc(var(--base-border-radius-sm) * var(--base-rem)); box-shadow: var(--base-dropdown-box-shadow);
+    font-size: 13px; z-index: 1;
+  }
+  .offset-panel div { padding: 4px 8px; border-radius: 3px; }
+  .offset-panel .sel { background: var(--base-selected-bg); color: var(--base-selected-text-color); }
+  .offset-cal { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; }
+  .offset-cal div { padding: 3px 0; }
+  .offset-gap { position: absolute; right: 100%; margin-right: 4px; width: 8px; box-sizing: border-box; border: 1px solid var(--base-danger-color); border-right: 0; font: 11px var(--base-font-family-mono); color: var(--base-danger-text-color); }
+  .offset-gap span { position: absolute; right: 100%; top: 50%; translate: -4px -50%; white-space: nowrap; }
 </style>
 
 <div class="note info">
@@ -87,6 +111,36 @@ const mobile = parseFloat(css.getPropertyValue('--base-breakpoint-mobile'));  //
 const isMobile = matchMedia(`(max-width: ${mobile - 0.02}px)`).matches;</code></pre></div>
 </section>
 
+<section class="card">
+  <h2>SZ04 · Dropdown offset</h2>
+  <p><code>--base-dropdown-offset</code> is the gap between a field's bordered box and the panel it
+    opens: a dropdown, a calendar, any anchored popover. Components read it from JavaScript and pass
+    it to web-components-core's positioning as <code>offset</code>, so every panel opens at the same
+    distance. Before 2.0.1 each component hard-coded its own (multiselect 4px, daterangepicker 8px).
+    Plain <code>px</code>, like the breakpoints. The slider sets it on the panels below only.</p>
+  <div class="controls">
+    <label><code>--base-dropdown-offset</code>
+      <input type="range" id="ctl-offset" min="0" max="16" step="1" value="4"> <output id="out-offset">4px</output></label>
+    <button type="button" class="btn" data-offset="0">Flush (0)</button>
+    <button type="button" class="btn" data-offset="4">Default (4px)</button>
+    <button type="button" class="btn" data-offset="8">Roomy (8px)</button>
+  </div>
+  <div class="offset-demo" id="offset-demo">
+    <div class="offset-field">
+      <label>Fruit (dropdown)</label>
+      <div class="offset-input">Banana</div>
+      <div class="offset-panel"><div>Apple</div><div class="sel">Banana</div><div>Cherry</div><div>Date</div></div>
+    </div>
+    <div class="offset-field">
+      <label>Due date (calendar)</label>
+      <div class="offset-input">2026-11-09</div>
+      <div class="offset-panel offset-cal" id="offset-cal"></div>
+    </div>
+  </div>
+  <div class="code-block"><pre><code>const offset = parseFloat(getComputedStyle(host).getPropertyValue('--base-dropdown-offset')) || 4;
+anchor(panel, field, { placement: 'bottom-start', offset });</code></pre></div>
+</section>
+
 <script type="module">
   import { mockApp, loadComponent } from '/examples-mock.js';
 
@@ -141,6 +195,33 @@ const isMobile = matchMedia(`(max-width: ${mobile - 0.02}px)`).matches;</code></
   }
   addEventListener('resize', renderBreakpoints);
   renderBreakpoints();
+
+  /* -------------------------------------------------------------- SZ04 */
+  $('offset-cal').innerHTML = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'].map((d) => `<div>${d}</div>`).join('') +
+    Array.from({ length: 21 }, (_, i) => `<div${i + 3 === 9 ? ' class="sel"' : ''}>${i + 3}</div>`).join('');
+  // Positioned the way a component does it: read the token in JS, place the panel below the field.
+  function placePanels() {
+    document.querySelectorAll('.offset-field').forEach((field) => {
+      const input = field.querySelector('.offset-input');
+      const offset = parseFloat(getComputedStyle(field).getPropertyValue('--base-dropdown-offset')) || 0;
+      const top = input.offsetTop + input.offsetHeight;
+      field.querySelector('.offset-panel').style.top = `${top + offset}px`;
+      let gap = field.querySelector('.offset-gap');
+      if (!gap) { gap = document.createElement('i'); gap.className = 'offset-gap'; gap.innerHTML = '<span></span>'; field.append(gap); }
+      if (field !== field.parentElement.firstElementChild) gap.hidden = true;
+      Object.assign(gap.style, { top: `${top}px`, height: `${offset}px` });
+      gap.firstChild.textContent = `${offset}px`;
+    });
+  }
+  function applyOffset(px) {
+    $('ctl-offset').value = px;
+    $('out-offset').textContent = `${px}px`;
+    $('offset-demo').style.setProperty('--base-dropdown-offset', `${px}px`);
+    placePanels();
+  }
+  $('ctl-offset').addEventListener('input', () => applyOffset(Number($('ctl-offset').value)));
+  document.querySelectorAll('[data-offset]').forEach((b) => b.addEventListener('click', () => applyOffset(Number(b.dataset.offset))));
+  applyOffset(parseFloat(num('--base-dropdown-offset')));
 
   const msOk = await loadComponent('web-multiselect');
   window.__demo = { ready: true, components: { multiselect: msOk } };
