@@ -268,6 +268,15 @@
   --base-dropdown-offset: 4px;
 
   /* ======================================================================
+   * TOUCH TARGET — the minimum width / height of a tappable control (option
+   * row, close / Done button, icon-only button) on touch / coarse-pointer
+   * devices: the phone presentation of every component. 44px = Apple HIG and
+   * WCAG 2.5.5 target size. Components use `min-height` / `min-width:
+   * var(--base-touch-target-min, 44px)`. px, not a rem multiplier.
+   * ==================================================================== */
+  --base-touch-target-min: 44px;
+
+  /* ======================================================================
    * ICONS — mask-friendly SVG glyphs (Lucide defaults), rendered via
    * `mask: var(--base-icon-*); background: currentColor`. Mode-invariant.
    * Two disclosure models: chevron ROTATES one glyph (points right, rotate 90°

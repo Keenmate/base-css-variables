@@ -308,6 +308,18 @@ distance. Plain `px`, not a rem multiplier. Tooltips keep their own spacing.
 |----------|---------|
 | `--base-dropdown-offset` | Field → panel gap (`4px`) |
 
+## Touch target
+The minimum width / height of a tappable control on touch / coarse-pointer devices: option rows,
+the close / Done button, icon-only buttons in a component's phone presentation. `44px` is the
+Apple HIG minimum and the WCAG 2.5.5 target size. Components set it as a floor inside their phone /
+`(pointer: coarse)` rules (`min-height: var(--base-touch-target-min, 44px)`, plus `min-width` for
+icon-only controls), so one override changes every component's tap size. Plain `px`, not a rem
+multiplier. Desktop rows keep the height scale.
+
+| Variable | Purpose |
+|----------|---------|
+| `--base-touch-target-min` | Minimum tappable size on touch (`44px`) |
+
 ## Icons
 Inline `data:image/svg+xml` Lucide glyphs, rendered by consumers via
 `mask: var(--base-icon-*); background: currentColor`. Mode-invariant — override any

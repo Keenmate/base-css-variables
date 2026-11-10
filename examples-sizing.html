@@ -1,5 +1,5 @@
 <meta name="kmwc:title" content="Sizing">
-<meta name="kmwc:subtitle" content="Unitless scales × --base-rem: one knob for density; the font, spacing, radius and height scales; breakpoints; dropdown offset">
+<meta name="kmwc:subtitle" content="Unitless scales × --base-rem: one knob for density; the font, spacing, radius and height scales; breakpoints; dropdown offset; touch target">
 <meta name="kmwc:entry" content="none">
 <link rel="stylesheet" href="/base-variables.css">
 <link rel="stylesheet" href="/examples-mock.css">
@@ -52,6 +52,26 @@
   .offset-cal div { padding: 3px 0; }
   .offset-gap { position: absolute; right: 100%; margin-right: 4px; width: 8px; box-sizing: border-box; border: 1px solid var(--base-danger-color); border-right: 0; font: 11px var(--base-font-family-mono); color: var(--base-danger-text-color); }
   .offset-gap span { position: absolute; right: 100%; top: 50%; translate: -4px -50%; white-space: nowrap; }
+
+  .touch-demo { display: flex; flex-wrap: wrap; gap: 32px; align-items: start; }
+  .touch-sheet {
+    box-sizing: border-box; width: 260px; font-size: 14px;
+    background: var(--base-dropdown-bg); border: var(--base-dropdown-border);
+    border-radius: calc(var(--base-border-radius-md) * var(--base-rem)); box-shadow: var(--base-dropdown-box-shadow);
+  }
+  .touch-sheet > header { display: flex; align-items: center; justify-content: space-between; padding-left: 12px; border-bottom: var(--base-dropdown-border); font-weight: 600; }
+  .touch-sheet > .caption { padding: 6px 12px 0; font-size: 12px; color: var(--base-text-color-3); }
+  .touch-row { box-sizing: border-box; display: flex; align-items: center; padding: 0 12px; border-top: 1px dashed var(--base-border-color); }
+  .touch-row:first-of-type { border-top: 0; }
+  .touch-row.sel { background: var(--base-selected-bg); color: var(--base-selected-text-color); }
+  .touch-sheet.dense .touch-row { min-height: calc(var(--base-input-size-sm-height) * var(--base-rem)); }
+  .touch-sheet.touch .touch-row { min-height: var(--base-touch-target-min, 44px); }
+  .touch-close {
+    box-sizing: border-box; display: grid; place-items: center; padding: 0;
+    min-width: var(--base-touch-target-min, 44px); min-height: var(--base-touch-target-min, 44px);
+    color: inherit; background: none; border: 0; border-left: 1px dashed var(--base-border-color); font-size: 18px; cursor: pointer;
+  }
+  .touch-size { font: 11px var(--base-font-family-mono); color: var(--base-text-color-3); margin-left: auto; }
 </style>
 
 <div class="note info">
@@ -141,6 +161,42 @@ const isMobile = matchMedia(`(max-width: ${mobile - 0.02}px)`).matches;</code></
 anchor(panel, field, { placement: 'bottom-start', offset });</code></pre></div>
 </section>
 
+<section class="card">
+  <h2>SZ05 · Touch target</h2>
+  <p><code>--base-touch-target-min</code> is the smallest a tappable control may be on a touch /
+    coarse-pointer device: option rows, the close / Done button, icon-only buttons in a component's
+    phone presentation. <code>44px</code> is the Apple HIG minimum and the WCAG 2.5.5 target size.
+    Components use it as a floor, <code>min-height</code> (plus <code>min-width</code> for icon-only
+    controls), inside their phone rules; desktop rows keep the height scale. Plain <code>px</code>,
+    like the breakpoints. The slider sets it on the sheets below only.</p>
+  <div class="controls">
+    <label><code>--base-touch-target-min</code>
+      <input type="range" id="ctl-touch" min="24" max="64" step="1" value="44"> <output id="out-touch">44px</output></label>
+    <button type="button" class="btn" data-touch="44">Default (44px)</button>
+    <button type="button" class="btn" data-touch="48">Material (48px)</button>
+  </div>
+  <div class="touch-demo" id="touch-demo">
+    <div class="touch-sheet dense">
+      <header>Fruit · desktop</header>
+      <div class="caption">Field height scale (sm)</div>
+      <div class="touch-row">Apple<span class="touch-size"></span></div>
+      <div class="touch-row sel">Banana<span class="touch-size"></span></div>
+      <div class="touch-row">Cherry<span class="touch-size"></span></div>
+    </div>
+    <div class="touch-sheet touch">
+      <header>Fruit · phone<button type="button" class="touch-close" aria-label="Close">&times;</button></header>
+      <div class="caption">min-height: var(--base-touch-target-min)</div>
+      <div class="touch-row">Apple<span class="touch-size"></span></div>
+      <div class="touch-row sel">Banana<span class="touch-size"></span></div>
+      <div class="touch-row">Cherry<span class="touch-size"></span></div>
+    </div>
+  </div>
+  <div class="code-block"><pre><code>@media (max-width: 767.98px), (pointer: coarse) {
+  .option { min-height: var(--base-touch-target-min, 44px); }
+  .close  { min-width: var(--base-touch-target-min, 44px); min-height: var(--base-touch-target-min, 44px); }
+}</code></pre></div>
+</section>
+
 <script type="module">
   import { mockApp, loadComponent } from '/examples-mock.js';
 
@@ -222,6 +278,19 @@ anchor(panel, field, { placement: 'bottom-start', offset });</code></pre></div>
   $('ctl-offset').addEventListener('input', () => applyOffset(Number($('ctl-offset').value)));
   document.querySelectorAll('[data-offset]').forEach((b) => b.addEventListener('click', () => applyOffset(Number(b.dataset.offset))));
   applyOffset(parseFloat(num('--base-dropdown-offset')));
+
+  /* -------------------------------------------------------------- SZ05 */
+  function applyTouch(px) {
+    $('ctl-touch').value = px;
+    $('out-touch').textContent = `${px}px`;
+    $('touch-demo').style.setProperty('--base-touch-target-min', `${px}px`);
+    document.querySelectorAll('#touch-demo .touch-row').forEach((r) => {
+      r.querySelector('.touch-size').textContent = `${Math.round(r.getBoundingClientRect().height)}px`;
+    });
+  }
+  $('ctl-touch').addEventListener('input', () => applyTouch(Number($('ctl-touch').value)));
+  document.querySelectorAll('[data-touch]').forEach((b) => b.addEventListener('click', () => applyTouch(Number(b.dataset.touch))));
+  applyTouch(parseFloat(num('--base-touch-target-min')));
 
   const msOk = await loadComponent('web-multiselect');
   window.__demo = { ready: true, components: { multiselect: msOk } };

@@ -3,9 +3,21 @@
 All notable changes to `@keenmate/base-css-variables` are documented here. Format based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [2.0.2] - 2026-11-09
+## [2.0.2] - 2026-11-10
+
+### Added
+
+- **`--base-touch-target-min` (`44px`) — the minimum tappable size on touch devices.** Option rows,
+  the close / Done button and icon-only buttons in a component's phone / coarse-pointer presentation
+  use it as a floor (`min-height` / `min-width: var(--base-touch-target-min, 44px)`), so one override
+  changes every component's tap size. 44px is the Apple HIG minimum and the WCAG 2.5.5 target size;
+  the rulebook check C-RO-7 expects components to read this token. Plain `px`, like the breakpoints.
 
 ### Internal
+
+- **Examples: SZ05 · Touch target** on the Sizing page. A dense desktop list next to a phone sheet
+  whose rows and close button are sized by `--base-touch-target-min`. A slider and presets
+  (44 / 48px) set the token on the demo only, and each row shows its measured height.
 
 - **Examples: SZ04 · Dropdown offset** on the Sizing page. A dropdown and a calendar panel are
   placed the way a component does it, reading `--base-dropdown-offset` in JS. A slider and
