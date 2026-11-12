@@ -13,8 +13,8 @@ There is no build, lint, or bundle step. Editing the CSS *is* the work; publishi
 `npm publish` (prepared by `/publish`). The package ships `base-variables.css` + `README.md` +
 `CHANGELOG.md` + `LICENSE` + the five reference docs (`docs/usage.md`, `theming.md`, `variables.md`,
 `examples.md`, `accessibility.md`), plus the component check `bin/check-contract.mjs` + `renames.json` +
-`testing/parity.mjs` (see the `files` field) — the examples site, tests and the other `docs/*.md`
-working notes are repo-only. The README is a slim landing page (rulebook readme-structure, ≤ 400
+`testing/parity.mjs` (see the `files` field) — the examples site, tests and `docs/design-decisions.md`
+are repo-only. The README is a slim landing page (rulebook readme-structure, ≤ 400
 lines); reference content goes in `docs/`.
 
 **CHANGELOG / What's New format (rulebook canonical, since the devkit rc10 conversion):** headings are
@@ -31,7 +31,11 @@ to `renames.json`** (old → new, version) so the check tells components what to
 `npm run test:check` (`test/check-contract.test.mjs`, `node:test`). Its runtime twin, also
 shipped: `testing/parity.mjs` (`contractParity(page, …)`) — components call it from their own
 Playwright e2e to compare every color token standalone vs. with the contract (light / dark, plus
-an accent-override pass). Plan and rationale: `docs/plan-contract-check.md`.
+an accent-override pass).
+
+**Design decisions:** `docs/design-decisions.md` (repo-only) explains *why* the contract is built
+the way it is — the paths taken and the ones turned down — plus the mistakes found in components
+and the open questions. Read it before changing token structure; add to it when a decision is made.
 
 **Examples + e2e (repo-only, dev-time):** the examples site uses the shared
 `@keenmate/web-components-devkit` (registry library, port block 15300; config in
