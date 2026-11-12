@@ -16,20 +16,20 @@ that **cascade from these `--base-*` values**. Define the base layer once and ev
 component picks up a consistent, coordinated theme. Override a single `--base-*`
 variable and the change propagates everywhere.
 
+## What's New in v2.0.2
+
+Upgrade guide: the [2.0.2 release notes](release-notes/2.0.2.md); full list: the
+[CHANGELOG 2.0.2 section](CHANGELOG.md).
+
+- **Token — `--base-touch-target-min` sets the minimum tap size on touch** — a new `44px` token for the smallest tappable size in a component's phone / coarse-pointer view: option rows, the close / Done button and icon-only buttons. Until now each component chose its own touch sizing, so the same app could have rows of different heights. Components now use the token as a floor (`min-height` / `min-width: var(--base-touch-target-min, 44px)`), so one override changes every component's tap size. 44px is the Apple HIG minimum and the WCAG 2.5.5 target size, and rulebook check C-RO-7 expects components to read this token. It's plain `px` like the breakpoints, not a rem multiplier. pure-css mirrors it as `$base-touch-target-min`.
+- **Examples — live demos for the two new sizing tokens** — the Sizing page has two new chapters. SZ04 · Dropdown offset places a dropdown and a calendar panel the way a component does, reading `--base-dropdown-offset` in JS; a slider and presets (0 / 4 / 8px) set the token on the demo only, and a marker shows the gap. SZ05 · Touch target puts a dense desktop list next to a phone sheet whose rows and close button are sized by `--base-touch-target-min`; presets (44 / 48px) set the token, and each row shows its measured height.
+
 ## What's New in v2.0.1
 
 - **Token — `--base-dropdown-offset` sets the gap between a field and its panel** — a new `4px` token for the distance between a field's bordered box and the panel it opens: dropdowns, calendar popovers and other anchored popovers. Until now each component hard-coded its own gap: web-multiselect used 4px and the web-daterangepicker calendar used 8px, so the same form had two different gaps. Components read the token in JS (`getComputedStyle` → `parseFloat`) and pass it to web-components-core's positioning as `offset`, so one override moves every panel together. It's plain `px` like the breakpoints, not a rem multiplier. Tooltips keep their own spacing. pure-css mirrors it as `$base-dropdown-offset`.
 - **Docs — the README is a landing page and the reference lives in `docs/`** — the contract is unchanged; only where things are documented moved. `docs/usage.md` covers loading the stylesheet, how the tokens are organised, and `base-contract-check` / the parity test. `docs/theming.md` covers overrides, inputs vs derived tokens, `.base-scope` and the layer pipeline. `docs/variables.md` is the full `--base-*` reference, and `docs/examples.md` and `docs/accessibility.md` cover the examples site and contrast / focus / motion. All five ship in the npm package, so they're readable from `node_modules` too.
 
-## What's New in v2.0.0
-
-- **Release — 2.0.0 is final** — the same contract as rc08, now installed by default. Upgrading from 1.x is breaking: overrides that use 1.x names are silently ignored, see [Upgrading from 1.x](#upgrading-from-1x) below and `renames.json`.
-- **Contract — a few inputs, everything else derived** — a theme sets the surfaces, `--base-text-color-1`, the role colors and the palette; hover / active steps, tints, text levels and text on fills (`--base-on-<role>-text-color`, black or white by APCA) are calculated, and recalculate inside `[data-theme]` / `.base-scope`.
-- **Names — renamed without aliases** — `--base-accent-color` → `--base-primary-color`, names end in their type (`--base-input-text-color`), `--base-color-N` → `--base-palette-N`, item state `highlighted` → `selected`.
-- **Roles — the same seven tokens for every role** — `-color`, `-color-hover`, `-color-active`, `-bg-subtle`, `-bg-subtle-hover`, `-text-color`, `--base-on-<role>-text-color`; one `--base-disabled-opacity`. Default primary is blue-500 `#3b82f6`.
-- **New tokens — loader, drop target, tree indent, scroll behavior, breakpoints** — `--base-loader-*`, `--base-drop-target-*`, `--base-tree-indent`, `--base-scroll-behavior`, `--base-breakpoint-mobile` / `-tablet`.
-- **Motion — four speeds and `data-motion` levels** — `--base-duration-*` + `--base-ease-*`, `none | snappy | smooth`; the OS reduced-motion setting wins over every level.
-- **Tooling — `base-contract-check` and `testing/parity.mjs`** — components check their `--base-*` reads, sets and fallbacks at build time and compare their colors with and without the contract in e2e.
+Earlier releases: [CHANGELOG](CHANGELOG.md).
 
 ## Demos & docs
 

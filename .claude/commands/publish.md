@@ -36,6 +36,7 @@ and IS the published artifact (no SCSS, no compile, no `dist/`):
 - **`./CHANGELOG.md`** — at the root. Topmost `## [X.Y.Z] - YYYY-MM-DD` heading **without** the `[PUBLISHED]` marker is the WIP section.
 - **`./README.md`** — at the root. Carries `## What's New in vX.Y.Z` sections near the top (one per release, the **two most recent** retained).
 - **`./docs/`** — `usage.md`, `theming.md`, `variables.md` (the hand-maintained variable reference — must match the tokens in `base-variables.css`), `examples.md`, `accessibility.md`; shipped. The other `docs/*.md` files are working notes and are not shipped.
+- **`./release-notes/`** — one `<version>.md` upgrade guide per version that has one (`web-components/release-notes.md`); shipped. Started with 2.0.2.
 - **`./examples-*.html`, `./e2e/`, `./test/`** — the examples site, the Playwright suite and the `base-contract-check` unit tests. Never shipped.
 
 ## CHANGELOG convention in this repo [canonical]
@@ -89,6 +90,12 @@ If `WIP_VERSION` ≠ `NEW_VERSION` (e.g. the WIP is `X.Y.Z-rcN` but the user ask
   - Show the user the proposed draft as plain markdown in your reply. Ask whether to (a) insert as-is, (b) edit, or (c) abort so they can write it themselves.
   - Only proceed past step 1 once the user approves the draft (or supplies their own). On approval, insert the section directly above the current top `## What's New in vX.Y.Z` heading in `./README.md`, then continue.
   - Do not silently insert the draft without confirmation — release highlights are a writing call and the user owns the voice.
+- Confirm `./release-notes/NEW_VERSION.md` exists. Every rc, minor and major ships one, and so does a patch whose WIP CHANGELOG section has an `Added`, `Changed`, `Removed` or `Security` entry; a patch with only `Fixed` / `Internal` entries may skip it (`web-components/release-notes.md` → "Which versions get notes") — ask the user whether to write one. If it's missing and required, draft it and present it to the user for approval before continuing, exactly as for What's New:
+  - **Follow the canonical template** in the BlissFramework component guidelines (`web-components/release-notes.md` → "The template"); `release-notes.checks.sh` (C-RN-1 … C-RN-9) enforces the shape. Header (title, `**Released:**` status line, baseline paragraph, absolute CHANGELOG link) → Contents → Requirements → Upgrade checklist (`- [ ]` items grouped by audience, each linking its details) → Breaking changes → Behaviour changes → New features → New API → Visible changes without a migration → Fixes → Documentation → Internal; drop empty optional sections.
+  - **Baseline:** the last version on npm (`npm view @keenmate/base-css-variables versions`) — except for `release` (a final after rcs), whose notes are a **consolidated guide from the previous final**, written fresh, linking the rc notes. Fold in any version that never reached npm and say so.
+  - Draft from the CHANGELOG sections between the baseline and `NEW_VERSION`: every Removed / breaking Changed entry gets a Breaking-changes `###` **and** an Upgrade-checklist item.
+  - Show the draft, ask (a) insert as-is, (b) edit, or (c) abort; write the file only on approval.
+- **Release notes only when they make sense (this repo).** Notes are an upgrade guide — write them when a consumer has something to act on or notice: a new, renamed, removed or re-valued `--base-*` token, a changed formula, new tooling behaviour. A patch whose WIP section is only `Fixed` / `Internal` (example pages, docs, tests) skips the file; say so in the report, and its What's New section (if any) links the CHANGELOG instead of notes. The notes started with 2.0.2 (D-RN-3 = A); older versions have none.
 
 ### 2. Bump version (if needed) [canonical]
 
@@ -115,11 +122,15 @@ In `./README.md`:
 
 For `rc` arg this is normally a no-op on the heading itself — only trims if someone left an extra-old section behind.
 
+Each What's New section opens with its upgrade-guide line (`Upgrade guide: the [NEW_VERSION release notes](release-notes/NEW_VERSION.md); …`); add it if missing. When a section is trimmed, move its release-notes link to the front of the `Earlier releases:` line below the retained sections.
+
 ### 5. Validate README reflects the release [canonical]
 
 Read both the finalized CHANGELOG section and the matching `What's New in vNEW_VERSION` section. Every **Added** or **Changed** bullet in the CHANGELOG that represents a user-facing feature or behavior change should have a corresponding hit in the What's New section (paraphrased, not verbatim). Pure internal refactors and `Fixed`-only entries don't need coverage, though headline bug fixes worth advertising (e.g. "X used to silently fail; now works") are worth a bullet.
 
 If you find a significant CHANGELOG entry that isn't reflected in What's New, add a bullet for it. If the section ends up with more than ~8 bullets after this pass, condense — What's New should be scannable, not exhaustive.
+
+Then validate `./release-notes/NEW_VERSION.md`, when there is one, against the same CHANGELOG sections (C-RN-12): every breaking change has an Upgrade-checklist item, the Requirements table matches the `@keenmate/*` dependencies in `package.json` (C-RN-10), and `release-notes.checks.sh` passes. Fix the notes, or ask the user, before continuing.
 
 ### 6. Validate CHANGELOG entries match recent work [canonical]
 
@@ -160,6 +171,7 @@ Run `npm pack --dry-run` (or `make verify`) and confirm the file list is exactly
 - `testing/parity.mjs`
 - `docs/usage.md`, `docs/theming.md`, `docs/variables.md`, `docs/examples.md`, `docs/accessibility.md`
 - `README.md`, `CHANGELOG.md`, `LICENSE`, `package.json`
+- `release-notes/` — every `release-notes/<version>.md` (C-RN-8)
 
 If anything user-facing is missing or anything private leaked in (e.g. `examples-*.html`, `e2e/`, `test/`, the `docs/` working notes, `Makefile`, `.claude/`, `node_modules/`), stop and report — the `files` field in `package.json` controls this and the leak needs fixing before publish.
 
@@ -170,8 +182,9 @@ Stage:
 - `./CHANGELOG.md`
 - `./README.md`
 - `./package.json`
+- `./release-notes/NEW_VERSION.md` (when this version has notes)
 
-There is no `dist/` to leave out — nothing is built.
+Do **not** stage `dist/` — it's gitignored.
 
 Commit message format:
 
@@ -203,7 +216,7 @@ Report back with:
     npm login          # if not already logged in
     npm publish
     ```
-    Or `make publish`. No `--tag` needed — it correctly lands as `latest`.
+    No `--tag` needed — it correctly lands as `latest`.
 - A reminder that the CHANGELOG `[PUBLISHED]` tag is now in place — if `npm publish` fails, the user should revert both the tag (CHANGELOG heading) and the version bump (`package.json`) before retrying, since the registry will refuse to re-publish the same version.
 
 ## Things not to do [canonical]
