@@ -3,6 +3,22 @@
 All notable changes to `@keenmate/base-css-variables` are documented here. Format based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.0.3] - 2026-11-16
+
+### Added
+
+- **`--base-container-narrow` (`480px`) / `--base-container-medium` (`768px`) — the lines for a
+  component's own width.** web-components-core's responsive rules gained a `container` axis (`narrow` /
+  `medium` / `wide`, keyed by the component's width, not the window's); it reads these tokens at the
+  element, so a section can move the lines for the components inside it. Core works without them (same
+  defaults). Plain `px`, like the breakpoints.
+
+### Documentation
+
+- **Z-index scale: which tier a dialog / phone sheet uses.** A dialog, a phone full-screen sheet or a
+  drawer is the modal tier, so whatever opens inside it stacks above; a component's sub-layer is
+  `calc(<tier> + 1)`, never a bare number (rulebook C-BV-15; core `Z_INDEX`).
+
 ## [2.0.2] - 2026-11-12 [PUBLISHED]
 
 ### Added

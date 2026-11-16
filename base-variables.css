@@ -240,7 +240,12 @@
   --base-loader-size: 1.25em;
 
   /* ======================================================================
-   * Z-INDEX SCALE — generic stacking tiers for overlay coordination
+   * Z-INDEX SCALE — generic stacking tiers for overlay coordination.
+   * A dialog, a phone full-screen sheet or a drawer is the MODAL tier:
+   * whatever opens inside it (dropdown, popover, toast, tooltip) is a higher
+   * tier and stacks above it. A component's own sub-layer is
+   * calc(var(--base-z-<tier>, N) + 1) — never a bare number.
+   * web-components-core exports the same values as Z_INDEX.
    * ==================================================================== */
   --base-z-dropdown: 7500;
   --base-z-modal-backdrop: 6000;
@@ -258,6 +263,17 @@
    * ==================================================================== */
   --base-breakpoint-mobile: 768px;
   --base-breakpoint-tablet: 1024px;
+
+  /* ======================================================================
+   * CONTAINER SIZES — the lines for a component's OWN width (not the
+   * window's): below -narrow = narrow, below -medium = medium, else wide.
+   * web-components-core's responsive rules key on them (`container:
+   * { narrow: …, medium: … }`), reading the value AT the element — set them
+   * on a section to change the lines for the components inside it.
+   * px, not rem multipliers.
+   * ==================================================================== */
+  --base-container-narrow: 480px;
+  --base-container-medium: 768px;
 
   /* ======================================================================
    * DROPDOWN OFFSET — the gap between a field (its bordered box) and the

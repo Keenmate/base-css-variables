@@ -273,7 +273,10 @@ custom properties in, so the loader is four tokens, and every consumer draws it 
 | `--base-loader-size` | Width and height (`1.25em` — scales with the text it sits in) |
 
 ## Z-index scale
-Generic stacking tiers for overlay coordination.
+Generic stacking tiers for overlay coordination. A dialog, a phone full-screen sheet or a drawer is the
+**modal** tier: whatever opens inside it (dropdown, popover, toast, tooltip) is a higher tier, so it stacks
+above with no special case. A component's own sub-layer is `calc(var(--base-z-<tier>, N) + 1)`, never a bare
+number like `9999`. web-components-core exports the same values as `Z_INDEX`.
 
 | Variable | Purpose |
 |----------|---------|
@@ -296,6 +299,17 @@ change both together. Plain `px`, not rem multipliers.
 |----------|---------|
 | `--base-breakpoint-mobile` | Mobile below this width (`768px`) |
 | `--base-breakpoint-tablet` | Tablet below this width (`1024px`) |
+
+## Container sizes
+The lines for a component's **own** width, not the window's: below `-narrow` is narrow, below `-medium` is
+medium, else wide. web-components-core's responsive rules key on them (`el.responsive = { container: {
+narrow: { … }, medium: { … } } }`) and read the value at the element, so setting them on a section changes
+the lines for the components inside it only. Plain `px`.
+
+| Variable | Purpose |
+|----------|---------|
+| `--base-container-narrow` | A component narrower than this is `narrow` (`480px`) |
+| `--base-container-medium` | Narrower than this (and not narrow) is `medium`, else `wide` (`768px`) |
 
 ## Dropdown offset
 The gap between a field and the panel it opens (dropdown, calendar popover, any anchored popover),
