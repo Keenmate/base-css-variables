@@ -1,5 +1,5 @@
 <meta name="kmwc:title" content="Sizing">
-<meta name="kmwc:subtitle" content="Unitless scales × --base-rem: one knob for density; the font, spacing, radius and height scales; breakpoints; dropdown offset; touch target">
+<meta name="kmwc:subtitle" content="Unitless scales × --base-rem: one knob for density; the font, spacing, radius and height scales; breakpoints; dropdown offset; touch target; container sizes">
 <meta name="kmwc:entry" content="none">
 <link rel="stylesheet" href="/base-variables.css">
 <link rel="stylesheet" href="/examples-mock.css">
@@ -72,6 +72,38 @@
     color: inherit; background: none; border: 0; border-left: 1px dashed var(--base-border-color); font-size: 18px; cursor: pointer;
   }
   .touch-size { font: 11px var(--base-font-family-mono); color: var(--base-text-color-3); margin-left: auto; }
+
+  .cq-frame {
+    box-sizing: border-box; display: grid; grid-template-columns: 300px 1fr; gap: 12px;
+    width: 100%; min-width: 420px; max-width: 100%; padding: 12px; overflow: hidden; resize: horizontal;
+    background: var(--base-page-bg); border: 1px dashed var(--base-border-color);
+    border-radius: calc(var(--base-border-radius-md) * var(--base-rem));
+  }
+  .cq-frame > div { min-width: 0; }
+  .cq-frame > div > small { display: block; margin-bottom: 4px; font-size: 12px; color: var(--base-text-color-3); }
+  .cq-search {
+    box-sizing: border-box; display: grid; gap: 8px; padding: 10px;
+    background: var(--base-main-bg); border: var(--base-border);
+    border-radius: calc(var(--base-border-radius-md) * var(--base-rem));
+  }
+  .cq-search[data-size="narrow"] { grid-template-columns: 1fr; }
+  .cq-search[data-size="medium"] { grid-template-columns: 1fr 1fr; }
+  .cq-search[data-size="wide"] { grid-template-columns: 1fr 1fr 1fr auto; align-items: end; }
+  .cq-search label { display: grid; gap: 2px; font-size: 12px; color: var(--base-text-color-2); }
+  .cq-search .f-box {
+    box-sizing: border-box; display: flex; align-items: center; min-width: 0;
+    height: calc(var(--base-input-size-sm-height) * var(--base-rem)); padding: 0 8px;
+    color: var(--base-input-text-color); background: var(--base-input-bg); border: var(--base-input-border);
+    border-radius: calc(var(--base-border-radius-sm) * var(--base-rem)); font-size: 13px;
+  }
+  .cq-search .go {
+    height: calc(var(--base-input-size-sm-height) * var(--base-rem)); padding: 0 14px; border: 0; font: inherit; font-size: 13px;
+    color: var(--base-on-primary-text-color); background: var(--base-primary-color);
+    border-radius: calc(var(--base-border-radius-sm) * var(--base-rem));
+  }
+  .cq-search[data-size="medium"] .go { grid-column: span 2; }
+  .cq-size { grid-column: 1 / -1; font: 11px var(--base-font-family-mono); color: var(--base-text-color-3); }
+  .cq-size b { color: var(--base-primary-text-color); }
 </style>
 
 <div class="note info">
@@ -197,6 +229,43 @@ anchor(panel, field, { placement: 'bottom-start', offset });</code></pre></div>
 }</code></pre></div>
 </section>
 
+<section class="card">
+  <h2>SZ06 · Container sizes</h2>
+  <p>Breakpoints (SZ03) follow the <em>window</em>. <code>--base-container-narrow</code>
+    (<code>480px</code>) and <code>--base-container-medium</code> (<code>768px</code>) follow the
+    <em>component's own width</em>: below <code>-narrow</code> it is <b>narrow</b>, below
+    <code>-medium</code> <b>medium</b>, otherwise <b>wide</b>. Use them when a component changes its
+    layout because of the room it has, not the device. A search form in a 300px sidebar should stack
+    its fields even on a desktop screen, and the same form in the main area lays them out in a row.
+    web-components-core's responsive rules key on them (<code>container: { narrow, medium }</code>).</p>
+  <p>The tokens are read <em>at the element</em>, so a section can move the lines for the components
+    inside it. <code>@container (width &lt; var(…))</code> can't read a custom property, so components
+    measure themselves (<code>ResizeObserver</code>) and read the tokens with
+    <code>getComputedStyle</code>. Plain <code>px</code>, like the breakpoints. Drag the frame's
+    bottom-right corner to resize it; the sliders set the tokens on the frame only.</p>
+  <div class="controls">
+    <label><code>--base-container-narrow</code>
+      <input type="range" id="ctl-cq-narrow" min="240" max="720" step="10" value="480"> <output id="out-cq-narrow">480px</output></label>
+    <label><code>--base-container-medium</code>
+      <input type="range" id="ctl-cq-medium" min="480" max="1200" step="10" value="768"> <output id="out-cq-medium">768px</output></label>
+    <button type="button" class="btn" data-cq="480,768">Default (480 / 768)</button>
+    <button type="button" class="btn" data-cq="240,560">Lower (240 / 560)</button>
+  </div>
+  <div class="cq-frame" id="cq-frame">
+    <div><small>Sidebar (300px)</small><div class="cq-search"></div></div>
+    <div><small>Main area</small><div class="cq-search"></div></div>
+  </div>
+  <div class="code-block"><pre><code id="cq-css"></code></pre></div>
+  <div class="code-block"><pre><code>// What a component does (web-components-core does this for you):
+new ResizeObserver(([entry]) => {
+  const css = getComputedStyle(host);
+  const narrow = parseFloat(css.getPropertyValue('--base-container-narrow')) || 480;
+  const medium = parseFloat(css.getPropertyValue('--base-container-medium')) || 768;
+  const width = entry.borderBoxSize[0].inlineSize;
+  host.dataset.size = width &lt; narrow ? 'narrow' : width &lt; medium ? 'medium' : 'wide';
+}).observe(host);</code></pre></div>
+</section>
+
 <script type="module">
   import { mockApp, loadComponent } from '/examples-mock.js';
 
@@ -291,6 +360,38 @@ anchor(panel, field, { placement: 'bottom-start', offset });</code></pre></div>
   $('ctl-touch').addEventListener('input', () => applyTouch(Number($('ctl-touch').value)));
   document.querySelectorAll('[data-touch]').forEach((b) => b.addEventListener('click', () => applyTouch(Number(b.dataset.touch))));
   applyTouch(parseFloat(num('--base-touch-target-min')));
+
+  /* -------------------------------------------------------------- SZ06 */
+  const searches = document.querySelectorAll('#cq-frame .cq-search');
+  searches.forEach((s) => {
+    s.innerHTML = '<label>From<span class="f-box">Prague</span></label><label>To<span class="f-box">Lisbon</span></label>' +
+      '<label>Date<span class="f-box">2026-12-04</span></label><button type="button" class="go">Search</button><div class="cq-size"></div>';
+  });
+  // What a component does: measure itself, read the lines at the element.
+  function sizeSearch(s, width) {
+    const css = getComputedStyle(s);
+    const narrow = parseFloat(css.getPropertyValue('--base-container-narrow')) || 480;
+    const medium = parseFloat(css.getPropertyValue('--base-container-medium')) || 768;
+    const size = width < narrow ? 'narrow' : width < medium ? 'medium' : 'wide';
+    s.dataset.size = size;
+    s.querySelector('.cq-size').innerHTML = `${Math.round(width)}px · lines ${narrow} / ${medium} → <b>${size}</b>`;
+  }
+  const cqObserver = new ResizeObserver((entries) => entries.forEach((e) => sizeSearch(e.target, e.borderBoxSize[0].inlineSize)));
+  searches.forEach((s) => cqObserver.observe(s));
+  function applyContainer(narrow, medium) {
+    $('ctl-cq-narrow').value = narrow; $('out-cq-narrow').textContent = `${narrow}px`;
+    $('ctl-cq-medium').value = medium; $('out-cq-medium').textContent = `${medium}px`;
+    $('cq-frame').style.setProperty('--base-container-narrow', `${narrow}px`);
+    $('cq-frame').style.setProperty('--base-container-medium', `${medium}px`);
+    $('cq-css').textContent = `/* the whole page */\n:root { --base-container-narrow: 480px; --base-container-medium: 768px; }\n\n` +
+      `/* only the components in this section */\n.booking { --base-container-narrow: ${narrow}px; --base-container-medium: ${medium}px; }`;
+    // A token change doesn't resize anything, so re-run the check by hand (a component re-reads on its next resize).
+    searches.forEach((s) => sizeSearch(s, s.getBoundingClientRect().width));
+  }
+  $('ctl-cq-narrow').addEventListener('input', () => applyContainer(Number($('ctl-cq-narrow').value), Number($('ctl-cq-medium').value)));
+  $('ctl-cq-medium').addEventListener('input', () => applyContainer(Number($('ctl-cq-narrow').value), Number($('ctl-cq-medium').value)));
+  document.querySelectorAll('[data-cq]').forEach((b) => b.addEventListener('click', () => applyContainer(...b.dataset.cq.split(',').map(Number))));
+  applyContainer(parseFloat(num('--base-container-narrow')), parseFloat(num('--base-container-medium')));
 
   const msOk = await loadComponent('web-multiselect');
   window.__demo = { ready: true, components: { multiselect: msOk } };

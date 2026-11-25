@@ -15,6 +15,12 @@ All notable changes to `@keenmate/base-css-variables` are documented here. Forma
 
 ### Documentation
 
+- **Examples: SZ06 · Container sizes** on the Sizing page. The same search form in a 300px sidebar
+  and in the main area, inside a resizable frame; each measures itself and reads the tokens at the
+  element, the way core does, and shows its width and size (narrow / medium / wide). Sliders and
+  presets (480 / 768, 240 / 560) set the tokens on the frame only. Explains when to use them instead of
+  the breakpoints, and why components read them in JS (`@container` can't read `var()`).
+
 - **Z-index scale: which tier a dialog / phone sheet uses.** A dialog, a phone full-screen sheet or a
   drawer is the modal tier, so whatever opens inside it stacks above; a component's sub-layer is
   `calc(<tier> + 1)`, never a bare number (rulebook C-BV-15; core `Z_INDEX`).
