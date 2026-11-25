@@ -3,7 +3,7 @@
 All notable changes to `@keenmate/base-css-variables` are documented here. Format based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [2.0.3] - 2026-11-16
+## [2.1.0] - 2026-11-26 [PUBLISHED]
 
 ### Added
 

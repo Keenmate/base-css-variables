@@ -16,6 +16,14 @@ that **cascade from these `--base-*` values**. Define the base layer once and ev
 component picks up a consistent, coordinated theme. Override a single `--base-*`
 variable and the change propagates everywhere.
 
+## What's New in v2.1.0
+
+Upgrade guide: the [2.1.0 release notes](release-notes/2.1.0.md); full list: the
+[CHANGELOG 2.1.0 section](CHANGELOG.md).
+
+- **Tokens — `--base-container-narrow` / `--base-container-medium` set where a component counts as narrow, medium or wide** — two new tokens, `480px` and `768px`, for a component's *own* width rather than the window's. web-components-core's responsive rules gained a `container` axis (`narrow` / `medium` / `wide`): below `-narrow` a component is narrow, below `-medium` it is medium, otherwise wide. Core reads the tokens at the element, so setting them on a section moves the lines for every component inside it — a sidebar can call its components narrow sooner than the main area does. Core works without them (it has the same defaults). They're plain `px` like the breakpoints, not rem multipliers. pure-css mirrors them as `$base-container-narrow` / `$base-container-medium`.
+- **Docs — which z-index tier a dialog or phone sheet uses** — the z-index scale in `docs/variables.md` now states that a dialog, a phone full-screen sheet or a drawer is the modal tier, so whatever opens inside it stacks above, and that a component's sub-layer is `calc(<tier> + 1)`, never a bare number (rulebook C-BV-15; core `Z_INDEX`).
+
 ## What's New in v2.0.2
 
 Upgrade guide: the [2.0.2 release notes](release-notes/2.0.2.md); full list: the
@@ -23,11 +31,6 @@ Upgrade guide: the [2.0.2 release notes](release-notes/2.0.2.md); full list: the
 
 - **Token — `--base-touch-target-min` sets the minimum tap size on touch** — a new `44px` token for the smallest tappable size in a component's phone / coarse-pointer view: option rows, the close / Done button and icon-only buttons. Until now each component chose its own touch sizing, so the same app could have rows of different heights. Components now use the token as a floor (`min-height` / `min-width: var(--base-touch-target-min, 44px)`), so one override changes every component's tap size. 44px is the Apple HIG minimum and the WCAG 2.5.5 target size, and rulebook check C-RO-7 expects components to read this token. It's plain `px` like the breakpoints, not a rem multiplier. pure-css mirrors it as `$base-touch-target-min`.
 - **Examples — live demos for the two new sizing tokens** — the Sizing page has two new chapters. SZ04 · Dropdown offset places a dropdown and a calendar panel the way a component does, reading `--base-dropdown-offset` in JS; a slider and presets (0 / 4 / 8px) set the token on the demo only, and a marker shows the gap. SZ05 · Touch target puts a dense desktop list next to a phone sheet whose rows and close button are sized by `--base-touch-target-min`; presets (44 / 48px) set the token, and each row shows its measured height.
-
-## What's New in v2.0.1
-
-- **Token — `--base-dropdown-offset` sets the gap between a field and its panel** — a new `4px` token for the distance between a field's bordered box and the panel it opens: dropdowns, calendar popovers and other anchored popovers. Until now each component hard-coded its own gap: web-multiselect used 4px and the web-daterangepicker calendar used 8px, so the same form had two different gaps. Components read the token in JS (`getComputedStyle` → `parseFloat`) and pass it to web-components-core's positioning as `offset`, so one override moves every panel together. It's plain `px` like the breakpoints, not a rem multiplier. Tooltips keep their own spacing. pure-css mirrors it as `$base-dropdown-offset`.
-- **Docs — the README is a landing page and the reference lives in `docs/`** — the contract is unchanged; only where things are documented moved. `docs/usage.md` covers loading the stylesheet, how the tokens are organised, and `base-contract-check` / the parity test. `docs/theming.md` covers overrides, inputs vs derived tokens, `.base-scope` and the layer pipeline. `docs/variables.md` is the full `--base-*` reference, and `docs/examples.md` and `docs/accessibility.md` cover the examples site and contrast / focus / motion. All five ship in the npm package, so they're readable from `node_modules` too.
 
 Earlier releases: [CHANGELOG](CHANGELOG.md).
 

@@ -505,6 +505,7 @@ again. Each one has a rule now, and most are caught by the check or the parity t
 | Literal fallbacks for derived tokens (`#2563eb` hover) | Correct only for the default accent | The contract formula on the component's own accent (C3) |
 | Inline `z-index: 10000` in JavaScript | Overrides the token, so the page can't restack it | Read the z-index token |
 | Inventing `--base-*` names in examples (`--base-input-background`) | Sets nothing, and tests that check it pass for the wrong reason | Only contract names (C1 also scans HTML and Markdown) |
+| A palette carried over from another project (web-components-core's `/menu`, 2026-10: Fluent UI `#0078d4`, `#2b2b2b`, black scrim), then copied into the sheet, modal and dialog | A second look without base-variables.css, never compared to the contract; in dark mode a neutral grey instead of slate. Compared side by side, the contract looked better (2026-11-25) | Fallbacks equal the contract defaults; run the check in the repo that writes the fallbacks, not only in the repos that copy them |
 
 ---
 
