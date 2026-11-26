@@ -28,6 +28,7 @@ const VENDOR_MOUNTS: Record<string, string> = {
   '/lib/pure-admin-themes/': resolve(process.env.PURE_ADMIN_THEMES_DIR || '../pure-admin-themes'),
 };
 /** Copied into the examples build (the components only; the themes repo is a whole checkout). */
+const isPageModule = (path: string): boolean => statSync(path).isDirectory() || (path.endsWith('.js') && !path.endsWith('.umd.js'));
 const BUNDLED_VENDORS = ['/lib/web-multiselect/', '/lib/web-treeview/'];
 
 const CONTENT_TYPES: Record<string, string> = {
@@ -66,7 +67,8 @@ function vendorMounts(): Plugin {
     closeBundle: () => {
       if (!outDir) return;
       for (const mount of BUNDLED_VENDORS) {
-        if (existsSync(VENDOR_MOUNTS[mount])) cpSync(VENDOR_MOUNTS[mount], join(outDir, mount), { recursive: true });
+        // Only the ES modules the pages import (+ their chunks): no source maps, UMD builds, types or CSS.
+        if (existsSync(VENDOR_MOUNTS[mount])) cpSync(VENDOR_MOUNTS[mount], join(outDir, mount), { recursive: true, filter: isPageModule });
       }
     },
   };
