@@ -57,7 +57,7 @@ PREVIEW_PORT ?= 15301
 # docker) go in .makefile.env — not committed.
 -include .makefile.env
 DOCKER_RUNNER  ?= podman
-IMAGE_NAME     ?= registry.km8.es/base-css-variables-examples:prod
+IMAGE_NAME     ?= registry.keenmate.dev/base-css-variables-examples:prod
 CONTAINER_NAME ?= base-css-variables-examples
 IMAGE_PORT     ?= 15310
 
