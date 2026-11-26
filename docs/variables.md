@@ -169,7 +169,7 @@ an input.
 | `--base-border-radius-sm / md / lg` | Corner radii (unitless multipliers) |
 | `--base-checkbox-scale` | Checkbox box scale (multiplies the box size; `1` = base). See [Checkbox render method](examples.md#checkbox-render-method) |
 | `--base-input-size-xs…xl-height` | Standard input heights (unitless multipliers) |
-| `--base-rem` | Rem base (`1rem`) the unitless multipliers combine against |
+| `--base-rem` | Unit the unitless multipliers combine against (`10px` — the multipliers are written in 10px units; set it on a region to scale what's inside) |
 
 ## Spacing scale
 Unitless multipliers, combined as `calc(var(--base-space-*) * var(--base-rem))`.

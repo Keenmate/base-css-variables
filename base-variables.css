@@ -180,8 +180,13 @@
   /* Disabled controls: one fade for every role, button, input and icon */
   --base-disabled-opacity: 0.65;
 
-  /* Rem base for the unitless multipliers above: calc(<multiplier> * var(--base-rem)) */
-  --base-rem: 1rem;
+  /* Unit for the unitless multipliers above: calc(<multiplier> * var(--base-rem)).
+   * The multipliers are written in 10px units (1.4 = 14px), so the unit is 10px —
+   * px, not rem: a rem would tie every component to the host page's root font size
+   * (1.6x too big on a 16px root). Set it on a region to scale what's inside
+   * (density); an app that wants to follow the browser font setting can set
+   * 0.625rem itself, if its root is 16px. pure-admin's root is 10px, so 1rem there. */
+  --base-rem: 10px;
 
   /* ======================================================================
    * SPACING SCALE — unitless multipliers, calc(var(--base-space-*) * var(--base-rem))

@@ -4,7 +4,6 @@
 <link rel="stylesheet" href="/base-variables.css" vite-ignore>
 <link rel="stylesheet" href="/examples-mock.css">
 <style>
-  :root { --base-rem: 10px; }
 
   output { font-family: var(--base-font-family-mono); }
   .density { display: grid; gap: 16px; grid-template-columns: minmax(320px, 1.4fr) minmax(240px, 1fr); align-items: start; }
@@ -108,8 +107,8 @@
 
 <div class="note info">
   Font sizes, spacing, radii and field heights are stored as bare numbers and multiplied by one
-  unit: <code>calc(var(--base-font-size-sm) * var(--base-rem))</code>. pure-admin sets the unit to
-  10px (its <code>html</code> font size), so <code>1.4</code> is 14px. Change <code>--base-rem</code>
+  unit: <code>calc(var(--base-font-size-sm) * var(--base-rem))</code>. The unit is <code>10px</code>, so
+  <code>1.4</code> is 14px on any page, whatever its <code>html</code> font size. Change <code>--base-rem</code>
   on any element and everything inside scales together: a compact grid, a roomy dialog.
 </div>
 

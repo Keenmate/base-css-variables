@@ -3,6 +3,24 @@
 All notable changes to `@keenmate/base-css-variables` are documented here. Format based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.2.0] - 2026-11-26
+
+### Changed
+
+- **`--base-rem` is `10px` (was `1rem`).** The size multipliers are written in 10px units (`1.4` =
+  14px), but `1rem` is 10px only on a page whose root font size is 10px, like pure-admin's. Anywhere
+  else loading the contract made every component bigger than intended: 1.6× on the browser's default
+  16px root, 1.4× on a SharePoint page with a 14px root. Components were already right *without* the
+  contract (their fallback is `10px`). **pure-admin:** no change — its root is 10px, so the sizes are
+  the same. **Other pages that load the contract:** components drop to their intended size. To follow
+  the browser's font-size setting instead, set `--base-rem: 0.625rem` yourself (on a 16px root).
+  Components: the `--base-rem` entries in `contract-check.json` are no longer needed.
+
+### Documentation
+
+- **design-decisions §11** says why the unit is px, not a rem; the open question in §16 is closed.
+- **Examples:** the pages no longer set `--base-rem: 10px` themselves (it's the default now).
+
 ## [2.1.0] - 2026-11-26 [PUBLISHED]
 
 ### Added

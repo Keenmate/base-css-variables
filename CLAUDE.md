@@ -126,7 +126,8 @@ traces this end-to-end for the primary color — read it before touching token s
   zeroes the durations on `:root, [data-motion]` in its own `@media` block, which must come after
   the levels so the OS beats even `smooth`. The loader is not part of the levels.
 - **Unitless multipliers:** font sizes, radii, input heights, and the spacing scale are stored as
-  bare numbers, combined by consumers as `calc(var(--base-…) * var(--base-rem))` (`--base-rem: 1rem`).
+  bare numbers, combined by consumers as `calc(var(--base-…) * var(--base-rem))` (`--base-rem: 10px` since 2.2.0 —
+  px on purpose, not a rem: design-decisions §11).
   Keep new sizing tokens unitless to match.
 - **Aliases** point back via `var()`: `--base-icon-clear`/`-remove` follow `--base-icon-close`.
   2.0.0 removed the `accent` ↔ `primary` pair — `primary` is the only name.

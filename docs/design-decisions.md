@@ -375,11 +375,22 @@ font-size: calc(var(--base-font-size-base) * var(--base-rem));
 screen or a large touch kiosk. A component can also scale on its own by setting its own rem
 (`--ms-rem`) without touching anything else.
 
-**The 10px assumption.** pure-admin sets `html { font-size: 10px }`, so `--base-rem: 1rem` means
-10px there and a multiplier of `1.6` is 16px. On a page with the browser's default 16px root, the
-same multipliers come out 1.6× larger. Standalone, components therefore fall back to `10px`
-rather than `1rem`, and allow this difference in their contract check. This is a known wrinkle;
-see [section 16](#16-open-questions).
+**Why `--base-rem` is `10px`, not a rem (2.2.0).** The multipliers are written in 10px units
+(`1.4` = 14px). Until 2.1 the default was `1rem`, which is 10px only where the root font size is
+10px — pure-admin's `html { font-size: 10px }`. Anywhere else the contract made every component
+bigger than intended: 1.6× on a 16px root, 1.4× on a SharePoint page with a 14px root (multiselect
+text at 19.6px next to 14px page text). A component without the contract looked right (its fallback
+was already `10px`), so loading the contract made things worse. Any rem-based value has the same
+flaw — `0.625rem` is right on a 16px root and too small on a 14px one — because it ties the
+components to a root size the host page picked for its own reasons. Only `10px` gives the intended
+size on every page.
+
+Turned down: multipliers re-based on 16px (breaks every consumer), and a rem default for following
+the browser's font-size setting. That setting is lost by default — pure-admin's px root already
+ignored it, and page zoom still works. An app that wants it sets `--base-rem: 0.625rem` itself,
+knowing its root is 16px. pure-admin is unchanged: its root is 10px, so `1rem` and `10px` are the
+same there. Components fall back to `10px`, the contract default, so their contract-check entries
+for `--base-rem` can go.
 
 **Why some tokens are plain px.** The breakpoints (`--base-breakpoint-mobile`, `-tablet`), the
 dropdown offset and the touch-target minimum are plain `px`:
@@ -513,11 +524,6 @@ again. Each one has a rule now, and most are caught by the check or the parity t
 
 These are known and deliberately left open. Each needs a decision before it changes.
 
-- **The 10px root behind `--base-rem`.** The multipliers assume `html { font-size: 10px }`, as in
-  pure-admin. On a page with a 16px root, loading the contract makes every component 1.6× larger.
-  Components work around it by falling back to `10px` and allowing the difference. Possible fixes
-  are a px-based `--base-rem` (loses scaling with the user's font size) or multipliers re-based
-  on 16px (a breaking change for every consumer). Not decided.
 - **OKLCH for the role steps.** Hover, active and role text are sRGB mixes with black or white.
   The alternative is a step in OKLCH lightness, which changes only how light the color is and
   keeps its hue and saturation. `examples-role-steps.html` (RS01) shows both on every role, with
