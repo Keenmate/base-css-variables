@@ -84,7 +84,7 @@
 
 <div class="controls theme-bar">
   <label>Theme <select id="theme"></select></label>
-  <label>Mode <select id="mode"><option value="light">light</option><option value="dark">dark</option></select></label>
+  <label>Mode <select id="mode"><option value="site">site (follows the theme switch)</option><option value="light">light</option><option value="dark">dark</option></select></label>
   <label>Pick text by <select id="pick"><option value="apca">APCA (the contract)</option><option value="wcag">WCAG 2</option></select></label>
   <label>Hover step <input id="step" type="number" min="0" max="50" value="15">%</label>
   <label>Pressed step <input id="step2" type="number" min="0" max="60" value="30">%</label>
@@ -248,8 +248,20 @@ function score(chip) {
   return { r, lc, white: t[0] > 128, fill: f };
 }
 
+// "site" follows the kit's theme switch (data-theme on <html>: light / dark / auto = the OS).
+const darkOs = matchMedia('(prefers-color-scheme: dark)');
+function modeNow() {
+  const m = $('mode').value;
+  if (m !== 'site') return m;
+  const site = document.documentElement.dataset.theme;
+  return site === 'light' || site === 'dark' ? site : darkOs.matches ? 'dark' : 'light';
+}
+const followSite = () => { if ($('mode').value === 'site') $('mode').dispatchEvent(new Event('input')); };
+new MutationObserver(followSite).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+darkOs.addEventListener('change', followSite);
+
 function apply() {
-  const theme = sel.value, mode = $('mode').value, t = theme ? THEMES[theme][mode] : null;
+  const theme = sel.value, mode = modeNow(), t = theme ? THEMES[theme][mode] : null;
   document.body.style.colorScheme = mode;
   document.body.style.setProperty('--step', $('step').value + '%');
   document.body.style.setProperty('--step2', $('step2').value + '%');
@@ -358,7 +370,7 @@ for (const role of ROLES) {
   tokRows.appendChild(tr);
 }
 function applyTok() {
-  const theme = sel.value, t = theme ? THEMES[theme][$('mode').value] : null;
+  const theme = sel.value, t = theme ? THEMES[theme][modeNow()] : null;
   const user = $('tok-css').value;
   // split the theme text: contract inputs (--base-*) go on the row (the scope that derives),
   // component tokens go on the component cells (where the component declares its defaults)
