@@ -188,7 +188,7 @@
   apply();
 
   try {
-    const multiselectUrl = '/vendor/web-multiselect/multiselect.js';
+    const multiselectUrl = '/lib/web-multiselect/multiselect.js';
     await import(/* @vite-ignore */ multiselectUrl);
   } catch (err) {
     for (const w of document.querySelectorAll('.ms-wrap')) w.querySelector('.muted').textContent = 'web-multiselect build not found — run npm run build in ../web-multiselect';

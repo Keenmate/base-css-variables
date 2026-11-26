@@ -40,7 +40,7 @@ test('derived demo loads a compiled pure-admin theme into both modes', async ({ 
   page.on('pageerror', (e) => errors.push(e.message));
   await page.goto('/examples-derived.html');
   await page.waitForFunction(() => (window as any).__derived?.ready === true);
-  const res = await page.request.get('/vendor/pure-admin-themes/nato/dist/nato.css');
+  const res = await page.request.get('/lib/pure-admin-themes/nato/dist/nato.css');
   test.skip(!res.ok(), 'pure-admin-themes build not available next to this repo');
 
   await page.selectOption('#theme', 'nato');

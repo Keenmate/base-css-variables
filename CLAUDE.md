@@ -49,13 +49,16 @@ hold the shared mock app (plain CSS reading only `--base-*`), the vendor compone
 Run `npx base-contract-check examples-*.html examples-mock.*` after editing a page;
 the devkit adds the layout, theme switch, chapter nav and copy-links. `npm run dev` serves them on
 :15300; `vite.config.ts` also mounts the *local* builds of the sibling repos
-(`../web-treeview/dist`, `../web-multiselect/dist`, `../pure-admin-themes` → `/vendor/*`) so the
-pages show real components reading this checkout's tokens. The kit chrome reads `--base-*` too, so
+(`../web-treeview/dist`, `../web-multiselect/dist`, `../pure-admin-themes` → `/lib/*`; without a sibling
+checkout the two components come from their npm devDependencies) so the
+pages show real components reading this checkout's tokens. Not `/vendor/`: the devkit's nginx.conf
+drops any path containing `vendor` (anti-probe rule). The kit chrome reads `--base-*` too, so
 a page that overrides a token re-themes its own chrome — scope demo overrides to the demo element
 when that gets in the way. The examples container image (`make image-build` / `image-run`, port 15310)
 uses the devkit's generated `Dockerfile`, `nginx.conf` and `.dockerignore` (`npx kmwc sync` — it skips
-this repo's own `Makefile` and `CLAUDE.md`, see `kmwc.sync.skippedFiles`); the image has no `/vendor/*`
-builds, so its component panels show the "build not found" notice. `npm run test:e2e` (Playwright,
+this repo's own `Makefile` and `CLAUDE.md`, see `kmwc.sync.skippedFiles`); the examples build copies the
+two components into `dist-examples/lib/` (the npm builds in the image); pure-admin-themes isn't on npm,
+so picking a pure-admin theme on examples-derived does nothing in the image. `npm run test:e2e` (Playwright,
 `e2e/`) locks the item-state contract against the reference list *and* both components, and
 the derivation contract (inputs → derived, `.base-scope`, removed names);
 component specs skip when a sibling build is missing — run `npm run build` in those repos

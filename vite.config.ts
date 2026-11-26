@@ -1,4 +1,4 @@
-import { createReadStream, existsSync, statSync } from 'node:fs';
+import { cpSync, createReadStream, existsSync, statSync } from 'node:fs';
 import { extname, join, resolve, sep } from 'node:path';
 import type { Plugin } from 'vite';
 import { defineComponentConfig } from '@keenmate/web-components-devkit/vite';
@@ -12,17 +12,23 @@ import { defineComponentConfig } from '@keenmate/web-components-devkit/vite';
  * The pages show real components reading this checkout's tokens, so the dev
  * server also serves the LOCAL builds of sibling repos (build them first):
  *
- *   /vendor/web-multiselect/*   → ../web-multiselect/dist/*   (override: WEB_MULTISELECT_DIST)
- *   /vendor/web-treeview/*      → ../web-treeview/dist/*      (override: WEB_TREEVIEW_DIST)
- *   /vendor/pure-admin-themes/* → ../pure-admin-themes/*      (override: PURE_ADMIN_THEMES_DIR)
+ *   /lib/web-multiselect/*   → ../web-multiselect/dist/*   (override: WEB_MULTISELECT_DIST)
+ *   /lib/web-treeview/*      → ../web-treeview/dist/*      (override: WEB_TREEVIEW_DIST)
+ *   /lib/pure-admin-themes/* → ../pure-admin-themes/*      (override: PURE_ADMIN_THEMES_DIR)
  *
- * A missing build only shows a notice in that component's panel.
+ * Without a sibling checkout the two components come from their npm packages
+ * (devDependencies), and the examples build copies them to <outDir>/lib/, so
+ * the container image (built without the siblings) shows them too. pure-admin-themes
+ * isn't on npm: without the sibling, its panels show a notice.
  */
+const firstDir = (...dirs: string[]): string => resolve(dirs.find((dir) => existsSync(dir)) ?? dirs[0]);
 const VENDOR_MOUNTS: Record<string, string> = {
-  '/vendor/web-multiselect/': resolve(process.env.WEB_MULTISELECT_DIST || '../web-multiselect/dist'),
-  '/vendor/web-treeview/': resolve(process.env.WEB_TREEVIEW_DIST || '../web-treeview/dist'),
-  '/vendor/pure-admin-themes/': resolve(process.env.PURE_ADMIN_THEMES_DIR || '../pure-admin-themes'),
+  '/lib/web-multiselect/': firstDir(process.env.WEB_MULTISELECT_DIST || '../web-multiselect/dist', 'node_modules/@keenmate/web-multiselect/dist'),
+  '/lib/web-treeview/': firstDir(process.env.WEB_TREEVIEW_DIST || '../web-treeview/dist', 'node_modules/@keenmate/web-treeview/dist'),
+  '/lib/pure-admin-themes/': resolve(process.env.PURE_ADMIN_THEMES_DIR || '../pure-admin-themes'),
 };
+/** Copied into the examples build (the components only; the themes repo is a whole checkout). */
+const BUNDLED_VENDORS = ['/lib/web-multiselect/', '/lib/web-treeview/'];
 
 const CONTENT_TYPES: Record<string, string> = {
   '.css': 'text/css; charset=utf-8',
@@ -51,7 +57,19 @@ function vendorMounts(): Plugin {
       createReadStream(file).pipe(response);
     });
   };
-  return { name: 'base-vendor-mounts', configureServer: serve, configurePreviewServer: serve };
+  let outDir = '';   // set for `vite build` only — the dev server calls closeBundle too
+  return {
+    name: 'base-vendor-mounts',
+    configureServer: serve,
+    configurePreviewServer: serve,
+    configResolved: (config) => { outDir = config.command === 'build' ? resolve(config.root, config.build.outDir) : ''; },
+    closeBundle: () => {
+      if (!outDir) return;
+      for (const mount of BUNDLED_VENDORS) {
+        if (existsSync(VENDOR_MOUNTS[mount])) cpSync(VENDOR_MOUNTS[mount], join(outDir, mount), { recursive: true });
+      }
+    },
+  };
 }
 
 export default defineComponentConfig({

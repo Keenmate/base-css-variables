@@ -8,7 +8,7 @@ import { definePlaywrightConfig, devices } from '@keenmate/web-components-devkit
  * against regressions by driving the examples pages (root examples-*.html), served
  * by the devkit Vite preset on the registry port (package.json#kmwc.ports.dev).
  * vite.config.ts also mounts the LOCAL builds of the sibling component repos
- * (../web-treeview/dist, ../web-multiselect/dist) under /vendor/, so the component
+ * (../web-treeview/dist, ../web-multiselect/dist) under /lib/, so the component
  * specs prove real components read these tokens; they skip themselves when a
  * sibling build is missing. Nothing here ships (see `files` in package.json).
  *

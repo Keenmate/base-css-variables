@@ -497,7 +497,7 @@ function renderTable() {
 }
 
 // ---------------------------------------------------------------------------
-// Themes — read the compiled pure-admin-themes CSS (served at /vendor/pure-admin-themes/)
+// Themes — read the compiled pure-admin-themes CSS (served at /lib/pure-admin-themes/)
 // ---------------------------------------------------------------------------
 let theme = null; // { light: {--base-*: value} | null, dark: {...} | null }
 
@@ -511,7 +511,7 @@ function blocks(css) {
   return out;
 }
 async function loadTheme(name) {
-  const css = await (await fetch(`/vendor/pure-admin-themes/${name}/dist/${name}.css`)).text();
+  const css = await (await fetch(`/lib/pure-admin-themes/${name}/dist/${name}.css`)).text();
   const bl = blocks(css);
   const root = bl.filter((b) => /(^|,\s*):root(?![\w-])/.test(b.sel)).sort((a, b) => Object.keys(b.vars).length - Object.keys(a.vars).length)[0];
   const scheme = /color-scheme:\s*dark/.test(root.body) ? 'dark' : 'light';

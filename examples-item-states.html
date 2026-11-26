@@ -370,8 +370,8 @@
   }
 
   const [treeOk, msOk] = await Promise.all([
-    load('/vendor/web-treeview/web-treeview.js', 'web-treeview', 'tree-missing'),
-    load('/vendor/web-multiselect/multiselect.js', 'web-multiselect', 'ms-missing'),
+    load('/lib/web-treeview/web-treeview.js', 'web-treeview', 'tree-missing'),
+    load('/lib/web-multiselect/multiselect.js', 'web-multiselect', 'ms-missing'),
   ]);
   if (treeOk) {
     tree.nodes = [

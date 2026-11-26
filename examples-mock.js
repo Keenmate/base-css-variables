@@ -1,7 +1,7 @@
 /**
  * Shared helpers for the example pages: the mock app (styled by
  * examples-mock.css, reading only --base-* tokens) and the vendor component
- * loader (/vendor/* is served by vite.config.ts from the sibling builds).
+ * loader (/lib/* is served by vite.config.ts: the sibling builds, else the npm packages).
  */
 
 const MOCK_HTML = `
@@ -51,8 +51,8 @@ document.addEventListener('click', (event) => {
 });
 
 const VENDOR = {
-  'web-multiselect': '/vendor/web-multiselect/multiselect.js',
-  'web-treeview': '/vendor/web-treeview/web-treeview.js',
+  'web-multiselect': '/lib/web-multiselect/multiselect.js',
+  'web-treeview': '/lib/web-treeview/web-treeview.js',
 };
 
 /**
