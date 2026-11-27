@@ -3,7 +3,7 @@
 All notable changes to `@keenmate/base-css-variables` are documented here. Format based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [2.2.0] - 2026-11-26
+## [2.2.0] - 2026-11-27 [PUBLISHED]
 
 ### Changed
 
@@ -20,6 +20,15 @@ All notable changes to `@keenmate/base-css-variables` are documented here. Forma
 
 - **design-decisions §11** says why the unit is px, not a rem; the open question in §16 is closed.
 - **Examples:** the pages no longer set `--base-rem: 10px` themselves (it's the default now).
+
+### Internal
+
+- **Examples site:** the deployed site shows real components (web-multiselect / web-treeview from
+  npm, served at `/lib/` — the devkit's nginx drops any path containing `vendor`); built pages keep
+  their own token overrides (`base-variables.css` linked `vite-ignore`, so Vite no longer moves it
+  after the page's `<style>`); the fill-states page follows the theme switch / OS mode.
+- **Makefile** follows the devkit template (`## ` help, `image-push` / `image-logs`, publish gates);
+  the examples image goes to `registry.keenmate.dev`.
 
 ## [2.1.0] - 2026-11-26 [PUBLISHED]
 
